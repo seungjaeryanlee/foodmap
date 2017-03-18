@@ -140,7 +140,7 @@ var main = function (auth) {
                     }
 
                     email = formatEmail(result); 
-                    console.log(email);
+                    //console.log(email);
 
                     // FIXME: Add to database
                 });
@@ -149,6 +149,9 @@ var main = function (auth) {
             console.log('No unread message exists');
         }
     });
+
+    // Test
+    console.log(getFood("We have burgers and cookies!"));
 };
 
 /**
@@ -182,4 +185,25 @@ function formatEmail(email) {
     var image;
 
     return {timeStamp: timeStamp, location: location, title: title, body: body};
+}
+
+/**
+ * Get all foods that match the text
+ *
+ * @param {Object} text The text to search for food
+ */
+function getFood(text) {
+    var matches = [];
+    // FIXME: Should not be called every time with the function
+    var foods = ['Pizza', 'Burger', 'Cookie'];
+    // var foods = fs.readFileSync('foods.txt').toString().split('\n');
+
+    text = text.toLowerCase();
+    for(food of foods) {
+        if(text.indexOf(food.toLowerCase()) > - 1) { // Substring search
+            matches.push(food);
+        }
+    }
+
+    return matches.toString();
 }
