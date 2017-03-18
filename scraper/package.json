@@ -1,0 +1,24 @@
+{
+  "name": "scraper",
+  "version": "1.0.0",
+  "description": "simple email scraper using Gmail API",
+  "main": "app.js",
+  "dependencies": {
+    "google-auth-library": "^0.10.0",
+    "googleapis": "^18.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Seung Jae (Ryan)",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sjlee235/foodmap.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sjlee235/foodmap/issues"
+  },
+  "homepage": "https://github.com/sjlee235/foodmap#readme"
+}
