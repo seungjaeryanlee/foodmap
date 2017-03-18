@@ -16,6 +16,11 @@ var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
         process.env.USERPROFILE) + '/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-foodmap.json';
 
+var foods = ['Pizza', 'Burger', 'Cookie', 'Mehek'];
+// var foods = fs.readFileSync('foods.txt').toString().split('\n');
+var locations = ['Fine Hall', 'Frist'];
+// var locations = fs.readFileSync('locations.txt').toString().split('\n');
+
 // Load client secrets from a local file.
 fs.readFile('client_secret.json', function processClientSecrets(err, content) {
     if (err) {
@@ -149,10 +154,8 @@ var main = function (auth) {
             console.log('No unread message exists');
         }
     });
-
-    // Test
-    console.log(getFood("We have burgers and cookies!"));
 };
+
 
 /**
  * Formats email from the API to fit the database specification.
@@ -162,10 +165,6 @@ var main = function (auth) {
 function formatEmail(email) {
     // FIXME: Exception for parseInt?
     var timeStamp = new Date(parseInt(email.internalDate));
-    // FIXME: Implement search for location
-    var location = "";
-    // FIXME: Implement search for food
-    var food = "";
     var title = email.payload.headers.find(x => x.name === "Subject").value;
     // FIXME: Test cases
     var body;
@@ -181,10 +180,14 @@ function formatEmail(email) {
     else {
         body = "";
     }
+
+    var food = getFood(title+body);
+    var location = getLocation(title+body);
     // FIXME: Get Attachment
     var image;
 
-    return {timeStamp: timeStamp, location: location, title: title, body: body};
+    console.log({timeStamp: timeStamp, location: location, title: title, body: body, food: food});
+    return {timeStamp: timeStamp, location: location, title: title, body: body, food: food};
 }
 
 /**
@@ -193,15 +196,31 @@ function formatEmail(email) {
  * @param {Object} text The text to search for food
  */
 function getFood(text) {
-    var matches = [];
-    // FIXME: Should not be called every time with the function
-    var foods = ['Pizza', 'Burger', 'Cookie'];
-    // var foods = fs.readFileSync('foods.txt').toString().split('\n');
+    var matches = [];    
 
     text = text.toLowerCase();
     for(food of foods) {
         if(text.indexOf(food.toLowerCase()) > - 1) { // Substring search
             matches.push(food);
+        }
+    }
+
+    return matches.toString();
+}
+
+/**
+ * Get all locations that match the text
+ *
+ * @param {Object} text The text to search for locations
+ */
+function getLocation(text) {
+    // FIXME: There should only be one location per email
+    var matches = [];    
+
+    text = text.toLowerCase();
+    for(location of locations) {
+        if(text.indexOf(location.toLowerCase()) > - 1) { // Substring search
+            matches.push(location);
         }
     }
 
