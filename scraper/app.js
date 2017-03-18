@@ -120,7 +120,7 @@ var main = function (auth) {
             for(var i = 0; i < res.messages.length; i++) {
                 var messageId = res.messages[i].id;
 
-                // Temporarily disabled for testing
+                // FIXME: Temporarily disabled for testing
                 // Mark email as read by deleting UNREAD label
                 // google.gmail('v1').users.messages.modify({
                 //     userId: 'me',
@@ -133,7 +133,12 @@ var main = function (auth) {
                     userId: 'me',
                     id: messageId,
                 }, function(err, result) {
-                    console.log(result.payload);
+                    // FIXME: Check it is from Free Food Listserv
+
+                    email = formatEmail(result); 
+                    console.log(email);
+
+                    // FIXME: Add to database
                 });
             }
         } else {
@@ -141,3 +146,36 @@ var main = function (auth) {
         }
     });
 };
+
+/**
+ * Formats email from the API to fit the database specification.
+ *
+ * @param {Object} email The email to reformat.
+ */
+function formatEmail(email) {
+    // FIXME: Exception for parseInt?
+    var timeStamp = new Date(parseInt(email.internalDate));
+    // FIXME: Implement search for location
+    var location = "";
+    // FIXME: Implement search for food
+    var food = "";
+    var title = email.payload.headers.find(x => x.name === "Subject").value;
+    // FIXME: Test cases
+    var body;
+    if(email.payload.parts[0].body.size != 0) {
+        rawBody = email.payload.parts[0].body.data;
+        body = Buffer.from(rawBody, 'base64').toString("ascii");
+    }
+    else if(typeof email.payload.parts[0].parts !== 'undefined' 
+         && email.payload.parts[0].parts[0].body.size !=0) {
+        rawBody = email.payload.parts[0].parts[0].body.data;
+        body = Buffer.from(rawBody, 'base64').toString("ascii");
+    }
+    else {
+        body = "";
+    }
+    // FIXME: Get Attachment
+    var image;
+
+    return {timeStamp: timeStamp, location: location, title: title, body: body};
+}
