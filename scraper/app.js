@@ -207,7 +207,7 @@ function getFood(text) {
         }
     }
 
-    return matches.toString();
+    return matches;
 }
 
 /**
@@ -226,5 +226,5 @@ function getLocation(text) {
         }
     }
 
-    return matches.toString();
+    return matches;
 }

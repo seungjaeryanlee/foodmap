@@ -11,9 +11,10 @@
     "mocha": "^3.2.0"
   },
   "scripts": {
+    "start": "node app.js",
     "test": "mocha"
   },
-  "author": "Seung Jae (Ryan)",
+  "author": "Seung Jae (Ryan) Lee",
   "license": "ISC",
   "repository": {
     "type": "git",
