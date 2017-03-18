@@ -133,7 +133,11 @@ var main = function (auth) {
                     userId: 'me',
                     id: messageId,
                 }, function(err, result) {
-                    // FIXME: Check it is from Free Food Listserv
+                    // FIXME: Substring search for freefood email?
+                    if(typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
+                    || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
+                        return;
+                    }
 
                     email = formatEmail(result); 
                     console.log(email);
