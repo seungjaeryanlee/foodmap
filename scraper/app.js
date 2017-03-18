@@ -16,6 +16,11 @@ var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
         process.env.USERPROFILE) + '/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-foodmap.json';
 
+// For testing in Mocha
+module.exports.formatEmail = formatEmail;
+module.exports.getFood = getFood;
+module.exports.getLocation = getLocation;
+
 var foods = ['Pizza', 'Burger', 'Cookie', 'Mehek'];
 // var foods = fs.readFileSync('foods.txt').toString().split('\n');
 var locations = ['Fine Hall', 'Frist'];
@@ -155,7 +160,6 @@ var main = function (auth) {
         }
     });
 };
-
 
 /**
  * Formats email from the API to fit the database specification.
