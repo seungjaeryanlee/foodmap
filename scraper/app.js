@@ -21,10 +21,8 @@ module.exports.formatEmail = formatEmail;
 module.exports.getFood = getFood;
 module.exports.getLocation = getLocation;
 
-var foods = ['Pizza', 'Burger', 'Cookie', 'Mehek'];
-// var foods = fs.readFileSync('foods.txt').toString().split('\n');
-var locations = ['Fine Hall', 'Frist'];
-// var locations = fs.readFileSync('locations.txt').toString().split('\n');
+var foods = fs.readFileSync('./data/foods.txt').toString().split('\n');
+var locations = fs.readFileSync('./data/locations.txt').toString().split('\n');
 
 // Load client secrets from a local file.
 fs.readFile('client_secret.json', function processClientSecrets(err, content) {
