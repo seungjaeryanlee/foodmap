@@ -119,3 +119,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Base directory where files/images in the database are actually stored.
+# The database itself only holds the path to these files/images.
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
