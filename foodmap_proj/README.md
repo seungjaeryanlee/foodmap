@@ -9,7 +9,7 @@ pip install Django==1.10.6
 ```
 Also, since the database itself is not committed with the code, there is some extra configuration required to set up the database. This is handled in the Python script `setup_database.py`. Just run that to initialize the database:
 ```
-python setup-database.py
+python setup_database.py
 ```
 (See the script itself for a full description of what it does.)
 
