@@ -16,12 +16,17 @@ class IndexViewTests(TestCase):
     Tests for the index (landing) page.
     '''
 
-    def test_index_page_loads_hello_world(self):
+    def test_index_page_loads_database_contents(self):
         '''
-        Tests that the index page loads with content "Hello, world!"
+        Tests that the index page loads with database contents.
         '''
         response = self.client.get(reverse('foodmap_app:index'))
-        self.assertEqual(response.content, 'Hello, world!')
+        locations = Location.objects.all()
+        for location in locations:
+            self.assertContains(response.content, str(location))
+        offerings = Offering.objects.all()
+        for offering in offerings:
+            self.assertContains(response.content, str(offering))
 
 #-------------------------------------------------------------------------------
 
