@@ -1,0 +1,11 @@
+#!/bin/bash
+#
+# setup
+# Author: Michael Friedman
+#
+# Sets up your environment with the necessary dependencies to work on this
+# project, and initializes the database.
+
+pip install Django==1.10.6
+pip install Pillow==4.0.0
+python setup_database.py -p

@@ -6,6 +6,9 @@
 # You can also rerun it each time the models for the database are updated as a
 # shortcut for makemigrations + migrate. Optionally takes the -p argument to
 # auto-populate with some dummy data.
+#
+# NOTE: Assumes this script is located in the setup_scripts directory. All paths
+# used in the script depend on that.
 #-------------------------------------------------------------------------------
 
 # Check usage
