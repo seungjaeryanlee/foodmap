@@ -9,6 +9,8 @@ var fs = require('fs');
 var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
+const util = require('util');
+// var sqlite3 = require('sqlite3').verbose();
 
 // read/write access except delete for gmail, and read/write access to calendar
 var SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
@@ -21,8 +23,10 @@ module.exports.formatEmail = formatEmail;
 module.exports.getFood = getFood;
 module.exports.getLocation = getLocation;
 
+// Data files
 var foods = fs.readFileSync('./data/foods.txt').toString().split('\n');
 var locations = fs.readFileSync('./data/locations.txt').toString().split('\n');
+// var db = new sqlite3.Database('./emails.db');
 
 // Load client secrets from a local file.
 fs.readFile('client_secret.json', function processClientSecrets(err, content) {
@@ -147,10 +151,11 @@ var main = function (auth) {
                         return;
                     }
 
-                    email = formatEmail(result); 
-                    //console.log(email);
-
-                    // FIXME: Add to database
+                    entry = formatEmail(result); 
+                    console.log(entry);
+                    
+                    // Add to database
+                    insertToDB(entry);
                 });
             }
         } else {
@@ -170,7 +175,10 @@ function formatEmail(email) {
     var title = email.payload.headers.find(x => x.name === "Subject").value;
     // FIXME: Test cases
     var body;
-    if(email.payload.parts[0].body.size != 0) {
+    if(typeof email.payload.parts === 'undefined') {
+        body = "";
+    }
+    else if(email.payload.parts[0].body.size != 0) {
         rawBody = email.payload.parts[0].body.data;
         body = Buffer.from(rawBody, 'base64').toString("ascii");
     }
@@ -227,4 +235,22 @@ function getLocation(text) {
     }
 
     return matches;
+}
+
+/**
+ * Insert given entry to the SQLite database
+ *
+ * @param {Object} entry The entry to be inserted to the database
+ */
+function insertToDB(entry) {
+
+    //Perform INSERT operation.
+    // db.run("INSERT INTO ...");
+    var str = util.format('%s %s %s %s\n', entry.timeStamp, entry.title, entry.food, entry.location);
+
+    // FIXME: vs. appendFileSync?
+    fs.appendFile('database.txt', str, function(err) {
+        if(err) { console.log(err); }
+        console.log('Inserted to database');
+    })
 }

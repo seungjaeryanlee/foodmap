@@ -41,4 +41,5 @@ describe('getFood()', function() {
         })
     })
     describe('biggest substring', function(){});
+    describe('fuzzy matching', function(){});
 });
