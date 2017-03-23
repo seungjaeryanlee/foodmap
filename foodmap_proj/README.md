@@ -15,6 +15,7 @@ This project uses Python 2.7, with the following dependencies:
 
 - Django 1.10.6 (the as-of-now latest version): web framework
 - Pillow 4.0.0 (the as-of-now latest version): required for the database to be able to store images
+- Selenium 3.3.1 (the as-of-now latest version): required for browser automation to obtain latitude/longitude coordinates of locations
 
 Also, since the database itself is not committed with the code, there is some extra configuration required to set up the database. This is handled by the Python script `setup_database.py`. It also has other uses aside from the initial environment setup -- see the script itself for a full description of what it does.
 
