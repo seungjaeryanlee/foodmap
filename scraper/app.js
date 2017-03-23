@@ -208,7 +208,8 @@ function formatEmail(email) {
 function getFood(text) {
     var matches = [];    
 
-    text = text.toLowerCase();
+    // FIXME: Better list of punctuations
+    text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
     for(food of foods) {
         if(text.indexOf(food.toLowerCase()) > - 1) { // Substring search
             matches.push(food);
@@ -227,7 +228,8 @@ function getLocation(text) {
     // FIXME: There should only be one location per email
     var matches = [];    
 
-    text = text.toLowerCase();
+    // FIXME: Better list of punctuations
+    text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
     for(location of locations) {
         if(text.indexOf(location.toLowerCase()) > - 1) { // Substring search
             matches.push(location);
