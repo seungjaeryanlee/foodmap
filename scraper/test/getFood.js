@@ -40,6 +40,14 @@ describe('getFood()', function() {
             assert.deepEqual(app.getFood("Get excited for TiRaMiSu!"), ["tiramisu"]);
         })
     })
+    describe('punctuation deletion', function() {
+        it('getFood(\"Time for P.I.Z.Z.A\") should equal [\"pizza\"]', function() {
+            assert.deepEqual(app.getFood("Time for P.I.Z.Z.A"), ["pizza"]);
+        })
+        it('getFood(\"Food from Olive\'s\") should equal [\"olives\"]', function() {
+            assert.deepEqual(app.getFood("Food from Olive\'s"), ["olives"]);
+        })
+    })
     describe('biggest substring', function(){});
     describe('fuzzy matching', function(){});
 });

@@ -23,11 +23,19 @@ describe('getLocation()', function() {
         it('getLocation(\"EQuad has food\") should equal [\"equad\"]', function() {
             assert.deepEqual(app.getLocation("EQuad has food"), ["equad"]);
         })
-        it('getFood(\"FRIST HAS FOOD\") should equal [\"frist\"]', function() {
+        it('getLocation(\"FRIST HAS FOOD\") should equal [\"frist\"]', function() {
             assert.deepEqual(app.getLocation("FRIST HAS FOOD"), ["frist"]);
         })
         it('getLocation(\"Pizza at CoLoNiAl\") should equal [\"colonial\"]', function() {
             assert.deepEqual(app.getLocation("Pizza at CoLoNiAl"), ["colonial"]);
+        })
+    })
+    describe('punctuation deletion', function() {
+        it('getLocation(\"Come to F,r,i,s,t\") should equal [\"frist\"]', function() {
+            assert.deepEqual(app.getLocation("Come to F,r,i,s,t"), ["frist"]);
+        })
+        it('getLocation(\"Edward\'s\") should equal [\"edwards\"]', function() {
+            assert.deepEqual(app.getLocation("Edward\'s"), ["edwards"]);
         })
     })
     describe('biggest substring', function(){});
