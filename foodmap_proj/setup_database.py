@@ -47,7 +47,7 @@ def populate_locations_table(): # TODO: Update this method according to TODOs af
 
     # Get lat/lng coordinates for each location from m.princeton.edu's map
     # for i in range (0, 897 + 1):
-    for i in range(0, 20): # TODO: replace this line with the one above it after testing
+    for i in range(0, 5): # TODO: replace this line with the one above it after testing
         driver.get('http://m.princeton.edu/map/detail?feed=91eda3cbe8&group=princeton&featureindex=' + str(i) + '&category=91eda3cbe8%3AALL&_b=%5B%7B%22t%22%3A%22Map%22%2C%22lt%22%3A%22Map%22%2C%22p%22%3A%22index%22%2C%22a%22%3A%22%22%7D%5D#')
 
         # Skip this page if the location is not one that we want
@@ -70,7 +70,7 @@ def populate_locations_table(): # TODO: Update this method according to TODOs af
         lng = float(lng_str[:7])
 
         # TODO: Insert entry into table
-        print '%s\t|\t%s\t|\t%s' % (location, str(lat), str(lng))
+        print >> sys.stderr, '%s\t|\t%s\t|\t%s' % (location, str(lat), str(lng))
 
     driver.quit()
 
