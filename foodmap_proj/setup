@@ -6,7 +6,28 @@
 # Sets up your environment with the necessary dependencies to work on this
 # project, and initializes the database.
 
-pip install Django==1.10.6
-pip install Pillow==4.0.0
-pip install selenium==3.3.1
-python setup_database.py -p
+# Validate usage
+usage="usage: sudo ./setup [ubuntu|mac]"
+user=$SUDO_USER
+if [ -z $user ]; then
+  echo $usage
+  exit
+elif [ $# -ne 1 ]; then
+  echo $usage
+  exit
+elif ! [ "$1" == "ubuntu" ] || [ "$1" == "mac" ]; then
+  echo $usage
+  exit
+fi
+os="$1"
+
+# Download dependencies
+sudo -u $user pip install Django==1.10.6
+sudo -u $user pip install Pillow==4.0.0
+sudo -u $user pip install selenium==3.3.1
+if [ "$os" == "ubuntu" ]; then
+  apt-get install -y phantomjs # run as root
+elif [ "$os" == "mac" ]; then
+  sudo -u $user brew install phantomjs
+fi
+sudo -u $user python setup_database.py -p sample
