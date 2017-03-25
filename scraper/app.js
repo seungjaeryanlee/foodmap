@@ -172,7 +172,8 @@ var main = function (auth) {
  * @param {Object} mimeMessage The MIME message to reformat.
  */
 function formatEmail(mimeMessage) {
-    var timeStamp = getTimestampFromMime(mimeMessage);
+    var timestamp = getTimestampFromMime(mimeMessage);
+    console.log(timestamp);
     var title = getTitleFromMime(mimeMessage);
     var body = getBodyFromMime(mimeMessage);
     var image = getImageFromMime(mimeMessage);
@@ -180,7 +181,7 @@ function formatEmail(mimeMessage) {
     var food = getFood(title+body);
     var location = getLocation(title+body);
 
-    return {timeStamp: timeStamp, location: location, title: title, body: body, food: food};
+    return {timestamp: timestamp, location: location, title: title, body: body, food: food};
 }
 
 /**
@@ -190,7 +191,7 @@ function formatEmail(mimeMessage) {
  */
 function getTimestampFromMime(mimeMessage) {
     // FIXME: Exception for parseInt?
-    return new Date(parseInt(mimeMessage.internalDate));
+    return new Date(parseInt(mimeMessage.internalDate)).toISOString().replace('T', ' ').split('.')[0];
 }
 
 /**
@@ -287,7 +288,7 @@ function insertToDB(entry) {
 
     //Perform INSERT operation.
     // db.run("INSERT INTO ...");
-    var str = util.format('%s %s %s %s\n', entry.timeStamp, entry.title, entry.food, entry.location);
+    var str = util.format('%s %s %s %s\n', entry.timestamp, entry.title, entry.food, entry.location);
 
     // FIXME: vs. appendFileSync?
     fs.appendFile('database.txt', str, function(err) {
