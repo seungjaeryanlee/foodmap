@@ -159,7 +159,8 @@ var main = function (auth) {
                         if(err) { console.log(err); }
                     })
 
-                    entry = formatEmail(result);
+                    entry = formatEmail(result, messageId);
+                    console.log(entry);
 
                     // FIXME: Check whether to add or delete
 
@@ -178,11 +179,11 @@ var main = function (auth) {
  *
  * @param {Object} mimeMessage The MIME message to reformat.
  */
-function formatEmail(mimeMessage) {
+function formatEmail(mimeMessage, messageId) {
     var timestamp = getTimestampFromMime(mimeMessage);
     var title = getTitleFromMime(mimeMessage);
     var body = getBodyFromMime(mimeMessage);
-    var image = getImageFromMime(mimeMessage);
+    var image = getImageFromMime(mimeMessage, messageId);
 
     var food = getFood(title+body);
     var location = getLocation(title+body);
@@ -278,17 +279,45 @@ function getBodyFromMime(mimeMessage) {
 }
 
 /**
- * Get image from a given MIME Message
+ * Get image from a given MIME Message if there is an image, returns undefined if not.
  *
  * @param {Object} mimeMessage The MIME message to parse.
  */
-function getImageFromMime(mimeMessage) {
+function getImageFromMime(mimeMessage, messageId) {
     var imageName;
     var imageData;
     
-    
+    // FIXME: Other content types?
+    // Content-Type: multipart/mixed
+    if(mimeMessage.payload.mimeType === 'multipart/mixed') {
+        if(typeof mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/") === 'undefined') {
+            return undefined;
+        }
+        else {
+            imageName = mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/").filename;
+            var attachmentId = mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/").body.attachmentId;
+            
+            // FIXME: Check size?
+            // Get Attachment
+            google.gmail('v1').users.messages.attachments.get({
+                userId: 'me',
+                id: attachmentId,
+                messageId: messageId
+            }, function(err, result) {
+                var encodedImage = result.data;
+                imageData = Buffer.from(encodedImage, 'base64');
 
-    return {name: imageName, data: imageData};
+                // Create file
+                // FIXME: Should use different file name in case of conflict!
+                fs.writeFile(imageName, imageData, function(err) {});
+            });
+
+            return {name: imageName, data: imageData};
+        }
+    }
+    else {
+        return undefined;
+    }
 }
 
 /**
