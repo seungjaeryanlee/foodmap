@@ -150,14 +150,17 @@ var main = function (auth) {
                     id: messageId,
                 }, function(err, result) {
                     // FIXME: Substring search for freefood email?
-                    if(typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
-                    || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
-                        return;
-                    }
+                    // if(typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
+                    // || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
+                    //     return;
+                    // }
 
-                    entry = formatEmail(result); 
-                    console.log(entry);
-                    
+                    fs.appendFile('temp.json', JSON.stringify(result, null, 4), function(err) {
+                        if(err) { console.log(err); }
+                    })
+
+                    entry = formatEmail(result);
+
                     // FIXME: Check whether to add or delete
 
                     // Add to database
@@ -184,7 +187,7 @@ function formatEmail(mimeMessage) {
     var food = getFood(title+body);
     var location = getLocation(title+body);
 
-    return {timestamp: timestamp, location: location, title: title, body: body, food: food};
+    return {timestamp: timestamp, location: location, title: title, body: body, food: food, image: image};
 }
 
 /**
@@ -212,22 +215,65 @@ function getTitleFromMime(mimeMessage) {
  * @param {Object} mimeMessage The MIME message to parse.
  */
 function getBodyFromMime(mimeMessage) {
+    // Following this documentation:
+    // https://msdn.microsoft.com/en-us/library/gg672007(v=exchg.80).aspx
+    // except for multipart/mixed
     var body;
-    if(typeof mimeMessage.payload.parts === 'undefined') {
-        body = "";
-    }
-    else if(mimeMessage.payload.parts[0].body.size != 0) {
-        rawBody = mimeMessage.payload.parts[0].body.data;
+
+    // Content-Type: text/plain
+    if(mimeMessage.payload.mimeType === 'text/plain') {
+        rawBody = mimeMessage.payload.body.data;
         body = Buffer.from(rawBody, 'base64').toString("ascii");
     }
-    else if(typeof mimeMessage.payload.parts[0].parts !== 'undefined' 
-         && mimeMessage.payload.parts[0].parts[0].body.size !=0) {
-        rawBody = mimeMessage.payload.parts[0].parts[0].body.data;
-        body = Buffer.from(rawBody, 'base64').toString("ascii");
+
+    // Content-Type: multipart/alternative
+    else if(mimeMessage.payload.mimeType === 'multipart/alternative') {
+        if(typeof mimeMessage.payload.parts.find(x => x.mimeType === "text/plain") === 'undefined') {
+            body = "";
+        }
+        else {
+            rawBody = mimeMessage.payload.parts.find(x => x.mimeType === "text/plain").body.data;
+            body = Buffer.from(rawBody, 'base64').toString("ascii");
+        }
     }
+
+    // Content-Type: multipart/related
+    else if(mimeMessage.payload.mimeType === 'multipart/related') {
+        if(typeof mimeMessage.payload.parts.find(x => x.mimeType === "multipart/alternative") === 'undefined') {
+            body = "";
+        }
+        else {
+            if(typeof mimeMessage.payload.parts.find(x => x.mimeType === "multipart/alternative").parts.find(x => x.mimeType === "text/plain") === 'undefined') {
+                body = "";
+            }
+            else {
+                rawBody = mimeMessage.payload.parts.find(x => x.mimeType === "multipart/alternative").parts.find(x => x.mimeType === "text/plain").body.data;
+                body = Buffer.from(rawBody, 'base64').toString("ascii");
+            }
+        }
+    }
+
+    // Content-Type: multipart/mixed
+    else if(mimeMessage.payload.mimeType === 'multipart/mixed') {
+        if(typeof mimeMessage.payload.parts.find(x => x.mimeType === "multipart/alternative") === 'undefined') {
+            body = "";
+        }
+        else {
+            if(typeof mimeMessage.payload.parts.find(x => x.mimeType === "multipart/alternative").parts.find(x => x.mimeType === "text/plain") === 'undefined') {
+                body = "";
+            }
+            else {
+                rawBody = mimeMessage.payload.parts.find(x => x.mimeType === "multipart/alternative").parts.find(x => x.mimeType === "text/plain").body.data;
+                body = Buffer.from(rawBody, 'base64').toString("ascii");
+            }
+        }
+    }
+
     else {
+        console.log("getBodyFromMime() unexpected case");
         body = "";
     }
+
     return body;
 }
 
@@ -237,10 +283,12 @@ function getBodyFromMime(mimeMessage) {
  * @param {Object} mimeMessage The MIME message to parse.
  */
 function getImageFromMime(mimeMessage) {
-    var image;
-    // FIXME: Get Attachment
+    var imageName;
+    var imageData;
+    
+    
 
-    return image;
+    return {name: imageName, data: imageData};
 }
 
 /**
@@ -291,7 +339,7 @@ function insertToDB(entry) {
 
     //Perform INSERT operation.
     // db.run("INSERT INTO ...");
-    var str = util.format('%s %s %s %s\n', entry.timestamp, entry.title, entry.food, entry.location);
+    var str = util.format('%s  %s  %s  %s\n', entry.timestamp, entry.title, entry.food, entry.location);
 
     // FIXME: vs. appendFileSync?
     fs.appendFile('database.txt', str, function(err) {
