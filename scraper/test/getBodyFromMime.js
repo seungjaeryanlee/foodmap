@@ -3,7 +3,7 @@ var app = require('../app.js');
 
 describe('getBodyFromMime()', function() {
     describe('Content-Type: text/plain', function() {
-        it('getBodyFromMime() should return \"\" if the email has no body', function() {
+        it('getBodyFromMime() should return \"\\n\" if the email has only newline', function() {
             var message = 
             {
                 "id": "15b05adc690148ae",
@@ -67,7 +67,7 @@ describe('getBodyFromMime()', function() {
                 "sizeEstimate": 400
             };
             var body = app.getBodyFromMime(message).replace(/\r\n/g, "\n");;
-            assert.equal(body, "");
+            assert.equal(body, "\n");
         })
         it('getBodyFromMime() should return the body if the email has a body', function() {
             var message = 
@@ -137,7 +137,7 @@ describe('getBodyFromMime()', function() {
         })
     })
     describe('Content-Type: multipart/mixed', function() {
-        it('getBodyFromMime() should return \"\" if the email has no body', function() {
+        it('getBodyFromMime() should return \"\\n\" if the email has only newline', function() {
             var message = 
             {
                 "id": "15b05c7b400d8e31",
@@ -415,7 +415,7 @@ describe('getBodyFromMime()', function() {
         })
     })
     describe('Content-Type: multipart/alternative', function() {
-        it('getBodyFromMime() should return \"\" if the email has no body', function() {
+        it('getBodyFromMime() should return \"\\n\" if the email has only newline', function() {
             var message = 
             {
                 "id": "15b05b77c9d54e43",
@@ -610,7 +610,7 @@ describe('getBodyFromMime()', function() {
     })
     describe('Content-Type: multipart/related', function() {
         // FIXME: Check if this is possible or not
-        // it('getBodyFromMime() should return \"\" if the email has no body', function() {
+        // it('getBodyFromMime() should return \"\\n\" if the email has only newline', function() {
         //     var message = {};
         //     var body = app.getBodyFromMime(message).replace(/\r\n/g, "\n");
         //     assert.equal(body, "");
