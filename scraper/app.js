@@ -20,6 +20,10 @@ var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-foodmap.json';
 
 // For testing in Mocha
 module.exports.formatEmail = formatEmail;
+module.exports.getTimestampFromMime = getTimestampFromMime;
+module.exports.getTitleFromMime = getTitleFromMime;
+module.exports.getBodyFromMime = getBodyFromMime;
+module.exports.getImageFromMime = getImageFromMime;
 module.exports.getFood = getFood;
 module.exports.getLocation = getLocation;
 
@@ -173,7 +177,6 @@ var main = function (auth) {
  */
 function formatEmail(mimeMessage) {
     var timestamp = getTimestampFromMime(mimeMessage);
-    console.log(timestamp);
     var title = getTitleFromMime(mimeMessage);
     var body = getBodyFromMime(mimeMessage);
     var image = getImageFromMime(mimeMessage);
