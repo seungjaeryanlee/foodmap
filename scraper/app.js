@@ -154,6 +154,8 @@ var main = function (auth) {
                     entry = formatEmail(result); 
                     console.log(entry);
                     
+                    // FIXME: Check whether to add or delete
+
                     // Add to database
                     insertToDB(entry);
                 });
@@ -165,43 +167,80 @@ var main = function (auth) {
 };
 
 /**
- * Formats email from the API to fit the database specification.
+ * Formats a MIME message from the API to fit the database specification.
  *
- * @param {Object} email The email to reformat.
+ * @param {Object} mimeMessage The MIME message to reformat.
  */
-function formatEmail(email) {
+function formatEmail(mimeMessage) {
+    var timeStamp = getTimestampFromMime(mimeMessage);
+    var title = getTitleFromMime(mimeMessage);
+    var body = getBodyFromMime(mimeMessage);
+    var image = getImageFromMime(mimeMessage);
+
+    var food = getFood(title+body);
+    var location = getLocation(title+body);
+
+    return {timeStamp: timeStamp, location: location, title: title, body: body, food: food};
+}
+
+/**
+ * Get timestamp from a given MIME Message
+ *
+ * @param {Object} mimeMessage The MIME message to parse.
+ */
+function getTimestampFromMime(mimeMessage) {
     // FIXME: Exception for parseInt?
-    var timeStamp = new Date(parseInt(email.internalDate));
-    var title = email.payload.headers.find(x => x.name === "Subject").value;
-    // FIXME: Test cases
+    return new Date(parseInt(mimeMessage.internalDate));
+}
+
+/**
+ * Get title (subject) from a given MIME Message
+ *
+ * @param {Object} mimeMessage The MIME message to parse.
+ */
+function getTitleFromMime(mimeMessage) {
+    return mimeMessage.payload.headers.find(x => x.name === "Subject").value;
+}
+
+/**
+ * Get body from a given MIME Message
+ *
+ * @param {Object} mimeMessage The MIME message to parse.
+ */
+function getBodyFromMime(mimeMessage) {
     var body;
-    if(typeof email.payload.parts === 'undefined') {
+    if(typeof mimeMessage.payload.parts === 'undefined') {
         body = "";
     }
-    else if(email.payload.parts[0].body.size != 0) {
-        rawBody = email.payload.parts[0].body.data;
+    else if(mimeMessage.payload.parts[0].body.size != 0) {
+        rawBody = mimeMessage.payload.parts[0].body.data;
         body = Buffer.from(rawBody, 'base64').toString("ascii");
     }
-    else if(typeof email.payload.parts[0].parts !== 'undefined' 
-         && email.payload.parts[0].parts[0].body.size !=0) {
-        rawBody = email.payload.parts[0].parts[0].body.data;
+    else if(typeof mimeMessage.payload.parts[0].parts !== 'undefined' 
+         && mimeMessage.payload.parts[0].parts[0].body.size !=0) {
+        rawBody = mimeMessage.payload.parts[0].parts[0].body.data;
         body = Buffer.from(rawBody, 'base64').toString("ascii");
     }
     else {
         body = "";
     }
-
-    var food = getFood(title+body);
-    var location = getLocation(title+body);
-    // FIXME: Get Attachment
-    var image;
-
-    console.log({timeStamp: timeStamp, location: location, title: title, body: body, food: food});
-    return {timeStamp: timeStamp, location: location, title: title, body: body, food: food};
+    return body;
 }
 
 /**
- * Get all foods that match the text
+ * Get image from a given MIME Message
+ *
+ * @param {Object} mimeMessage The MIME message to parse.
+ */
+function getImageFromMime(mimeMessage) {
+    var image;
+    // FIXME: Get Attachment
+
+    return image;
+}
+
+/**
+ * Get all foods that are in the text
  *
  * @param {Object} text The text to search for food
  */
@@ -220,7 +259,7 @@ function getFood(text) {
 }
 
 /**
- * Get all locations that match the text
+ * Get all locations that are in the text
  *
  * @param {Object} text The text to search for locations
  */
