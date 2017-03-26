@@ -25,3 +25,6 @@ if ! diff -q __exp_out __test_out > /dev/null 2> /dev/null; then
 else
   printf "SUCCESS!\n"
 fi
+
+# Clean up
+rm __exp_out __test_out
