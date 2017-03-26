@@ -9,7 +9,7 @@ var fs = require('fs');
 var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
-const util = require('util');
+var util = require('util');
 var sqlite3 = require('sqlite3').verbose();
 
 // read/write access except delete for gmail, and read/write access to calendar
@@ -30,7 +30,7 @@ module.exports.getLocation = getLocation;
 // Data files
 var foods = fs.readFileSync('./data/foods.txt').toString().split('\n');
 var locations = fs.readFileSync('./data/locations.txt').toString().split('\n');
-var db = new sqlite3.Database('./data/emails.db');
+var db = new sqlite3.Database('./data/db.sqlite3');
 
 // Load client secrets from a local file.
 fs.readFile('client_secret.json', function processClientSecrets(err, content) {
@@ -151,20 +151,17 @@ var main = function (auth) {
                     id: messageId,
                 }, function(err, result) {
                     // FIXME: Substring search for freefood email?
-                    // if(typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
-                    // || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
-                    //     return;
-                    // }
+                    if(typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
+                    || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
+                        return;
+                    }
 
                     fs.appendFile('debug.json', JSON.stringify(result, null, 4), function(err) {
                         if(err) { console.log(err); }
                     })
 
                     entry = formatEmail(result, messageId);
-                    // console.log(entry);
-                    console.log(entry.title);
-                    console.log(entry.food);
-                    console.log(entry.location);
+                    console.log(entry);
 
                     // FIXME: Check whether to add or delete
 
@@ -373,7 +370,7 @@ function insertToDB(entry) {
         db.run("CREATE TABLE if not exists foodmap_app_offering (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TEXT, location_id TEXT, title TEXT, description TEXT, image TEXT)");
         if(typeof entry.image === 'undefined') {
             var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description) VALUES (?, ?, ?, ?)");
-            stmt.run(entry.timestamp, entry.location, entry.food, entry.body);
+            stmt.run(entry.timestamp, entry.location.toString(), entry.food.toString(), entry.body);
             stmt.finalize();    
         }
         else {
@@ -382,9 +379,4 @@ function insertToDB(entry) {
             stmt.finalize();
         }
     });
-    // var str = util.format('%s  %s  %s  %s\n', entry.timestamp, entry.title, entry.food, entry.location);
-    // fs.appendFile('database.txt', str, function(err) {
-    //     if(err) { console.log(err); }
-    //     console.log('Inserted to database');
-    // })
 }
