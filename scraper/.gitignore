@@ -60,3 +60,4 @@ typings/
 # Custom
 client_secret.json
 database.txt
+debug.json

@@ -10,7 +10,7 @@ var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
 const util = require('util');
-// var sqlite3 = require('sqlite3').verbose();
+var sqlite3 = require('sqlite3').verbose();
 
 // read/write access except delete for gmail, and read/write access to calendar
 var SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
@@ -30,7 +30,7 @@ module.exports.getLocation = getLocation;
 // Data files
 var foods = fs.readFileSync('./data/foods.txt').toString().split('\n');
 var locations = fs.readFileSync('./data/locations.txt').toString().split('\n');
-// var db = new sqlite3.Database('./emails.db');
+var db = new sqlite3.Database('./data/emails.db');
 
 // Load client secrets from a local file.
 fs.readFile('client_secret.json', function processClientSecrets(err, content) {
@@ -123,6 +123,7 @@ function storeToken(token) {
  * @param {Object} auth Authorization credentials for Google APIs.
  */
 var main = function (auth) {
+
     // set auth as a global default
     google.options({auth: auth});
     
@@ -155,12 +156,15 @@ var main = function (auth) {
                     //     return;
                     // }
 
-                    fs.appendFile('temp.json', JSON.stringify(result, null, 4), function(err) {
+                    fs.appendFile('debug.json', JSON.stringify(result, null, 4), function(err) {
                         if(err) { console.log(err); }
                     })
 
                     entry = formatEmail(result, messageId);
-                    console.log(entry);
+                    // console.log(entry);
+                    console.log(entry.title);
+                    console.log(entry.food);
+                    console.log(entry.location);
 
                     // FIXME: Check whether to add or delete
 
@@ -365,14 +369,22 @@ function getLocation(text) {
  * @param {Object} entry The entry to be inserted to the database
  */
 function insertToDB(entry) {
-
-    //Perform INSERT operation.
-    // db.run("INSERT INTO ...");
-    var str = util.format('%s  %s  %s  %s\n', entry.timestamp, entry.title, entry.food, entry.location);
-
-    // FIXME: vs. appendFileSync?
-    fs.appendFile('database.txt', str, function(err) {
-        if(err) { console.log(err); }
-        console.log('Inserted to database');
-    })
+    db.serialize(function() {
+        db.run("CREATE TABLE if not exists foodmap_app_offering (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TEXT, location_id TEXT, title TEXT, description TEXT, image TEXT)");
+        if(typeof entry.image === 'undefined') {
+            var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description) VALUES (?, ?, ?, ?)");
+            stmt.run(entry.timestamp, entry.location, entry.food, entry.body);
+            stmt.finalize();    
+        }
+        else {
+            var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, image) VALUES (?, ?, ?, ?, ?)");
+            stmt.run(entry.timestamp, entry.location.toString(), entry.food.toString(), entry.body, entry.image.name);
+            stmt.finalize();
+        }
+    });
+    // var str = util.format('%s  %s  %s  %s\n', entry.timestamp, entry.title, entry.food, entry.location);
+    // fs.appendFile('database.txt', str, function(err) {
+    //     if(err) { console.log(err); }
+    //     console.log('Inserted to database');
+    // })
 }
