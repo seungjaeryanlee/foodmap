@@ -151,10 +151,11 @@ var main = function (auth) {
                     id: messageId,
                 }, function(err, result) {
                     // FIXME: Substring search for freefood email?
-                    if(typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
-                    || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
-                        return;
-                    }
+                    // FIXME: Also check "From"
+                    // if(typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
+                    // || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
+                    //     return;
+                    // }
 
                     fs.appendFile('debug.json', JSON.stringify(result, null, 4), function(err) {
                         if(err) { console.log(err); }
@@ -163,10 +164,13 @@ var main = function (auth) {
                     entry = formatEmail(result, messageId);
                     console.log(entry);
 
-                    // FIXME: Check whether to add or delete
-
-                    // Add to database
-                    insertToDB(entry);
+                    // Check whether to add or delete
+                    if(isDeletionRequest(entry)) {
+                        deleteFromDB(entry);
+                    }
+                    else {
+                        insertToDB(entry);
+                    }
                 });
             }
         } else {
@@ -379,4 +383,34 @@ function insertToDB(entry) {
             stmt.finalize();
         }
     });
+}
+
+/**
+ * Delete given entry from the SQLite database
+ *
+ * @param {Object} entry The entry to be deleted from the database
+ */
+function deleteFromDB(entry) {
+    // FIXME: If there is an entry with the given ThreadID, Delete
+
+
+    // If not, assume false positive and insert to DB
+    insertToDB(entry);
+}
+
+/**
+ * Check if the entry is a delete request
+ *
+ * @param {Object} entry The entry to be inspected
+ */
+function isDeletionRequest(entry) {
+    // FIXME: all lowercase and no punctuation
+    var sampleRequests = ["all gone"];
+    for(req of sampleRequests) {
+        // FIXME: Can title be changed in the reply?
+        if(entry.title.indexOf(req) > -1 || entry.body.indexOf(req) > -1) {
+            return true;
+        }
+    }
+    return false;
 }
