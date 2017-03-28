@@ -18,6 +18,10 @@ var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
         process.env.USERPROFILE) + '/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-foodmap.json';
 
+// Constants
+const DELETE = 0;
+const INSERT = 1;
+
 // For testing in Mocha
 module.exports.formatEmail = formatEmail;
 module.exports.getTimestampFromMime = getTimestampFromMime;
@@ -27,15 +31,14 @@ module.exports.getImageFromMime = getImageFromMime;
 module.exports.getFood = getFood;
 module.exports.getLocation = getLocation;
 module.exports.getRequestType = getRequestType;
+module.exports.DELETE = DELETE;
+module.exports.INSERT = INSERT;
 
 // Data files
 var foods = fs.readFileSync('./data/foods.txt').toString().split('\n');
 var locations = fs.readFileSync('./data/locations.txt').toString().split('\n');
 var db = new sqlite3.Database('./data/db.sqlite3');
 
-// Constants
-const DELETE = 0;
-const INSERT = 1;
 
 // Load client secrets from a local file.
 fs.readFile('client_secret.json', function processClientSecrets(err, content) {
@@ -155,19 +158,18 @@ var main = function (auth) {
                     userId: 'me',
                     id: messageId,
                 }, function(err, result) {
-                    // FIXME: Substring search for freefood email?
-                    // FIXME: Also check "From"
-                    // if(typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
-                    // || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
-                    //     return;
-                    // }
+                    // if(result.payload.headers.find(x => x.name === "To") !== "freefood@princeton.edu")
+                    if (typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
+                    || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
+                        return;
+                    }
 
+                    // FIXME: Log for debugging
                     fs.appendFile('debug.json', JSON.stringify(result, null, 4), function(err) {
                         if(err) { console.log(err); }
                     })
 
                     entry = formatEmail(result, messageId);
-                    console.log(entry);
 
                     // INSERT or DELETE entry
                     if(getRequestType(entry.title+entry.body) == INSERT) {
@@ -378,6 +380,7 @@ function getLocation(text) {
  */
 function insertToDB(entry) {
     db.serialize(function() {
+        // FIXME: Dummy Database
         db.run("CREATE TABLE if not exists foodmap_app_offering (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TEXT, location_id TEXT, title TEXT, description TEXT, thread_id TEXT, image TEXT)");
         if(typeof entry.image === 'undefined') {
             var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, thread_id) VALUES (?, ?, ?, ?, ?)");
@@ -412,10 +415,10 @@ function deleteFromDB(entry) {
  * @param {Object} text The text to be inspected
  */
 function getRequestType(text) {
-    // FIXME: all lowercase and no punctuation
-    var sampleRequests = ["all gone"];
-    for(req of sampleRequests) {
-        // FIXME: Can title be changed in the reply?
+    // FIXME: Better list of punctuations
+    text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");    
+    var deleteRequests = ["all gone"];
+    for(req of deleteRequests) {
         if(text.indexOf(req) > -1) {
             return DELETE;
         }
