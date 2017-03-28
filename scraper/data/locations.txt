@@ -299,6 +299,7 @@ mathey dining hall
 rockefeller dining
 rockefeller dining hall
 studio 34
+studio
 whitman dining
 whitman dining hall
 wilson dining

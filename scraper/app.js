@@ -26,11 +26,16 @@ module.exports.getBodyFromMime = getBodyFromMime;
 module.exports.getImageFromMime = getImageFromMime;
 module.exports.getFood = getFood;
 module.exports.getLocation = getLocation;
+module.exports.getRequestType = getRequestType;
 
 // Data files
 var foods = fs.readFileSync('./data/foods.txt').toString().split('\n');
 var locations = fs.readFileSync('./data/locations.txt').toString().split('\n');
 var db = new sqlite3.Database('./data/db.sqlite3');
+
+// Constants
+const DELETE = 0;
+const INSERT = 1;
 
 // Load client secrets from a local file.
 fs.readFile('client_secret.json', function processClientSecrets(err, content) {
@@ -164,12 +169,12 @@ var main = function (auth) {
                     entry = formatEmail(result, messageId);
                     console.log(entry);
 
-                    // Check whether to add or delete
-                    if(isDeletionRequest(entry)) {
-                        deleteFromDB(entry);
+                    // INSERT or DELETE entry
+                    if(getRequestType(entry.title+entry.body) == INSERT) {
+                        insertToDB(entry);
                     }
                     else {
-                        insertToDB(entry);
+                        deleteFromDB(entry);
                     }
                 });
             }
@@ -188,12 +193,14 @@ function formatEmail(mimeMessage, messageId) {
     var timestamp = getTimestampFromMime(mimeMessage);
     var title = getTitleFromMime(mimeMessage);
     var body = getBodyFromMime(mimeMessage);
-    var image = getImageFromMime(mimeMessage, messageId);
-
+    var image = getImageFromMime(mimeMessage, messageId);    
     var food = getFood(title+body);
     var location = getLocation(title+body);
+    var threadId = mimeMessage.threadId;
+    // FIXME: Add test cases
+    var requestType = getRequestType(title+body); // FIXME: Maybe just body?
 
-    return {timestamp: timestamp, location: location, title: title, body: body, food: food, image: image};
+    return {timestamp: timestamp, location: location, title: title, body: body, food: food, image: image, threadId: threadId, requestType: requestType};
 }
 
 /**
@@ -371,15 +378,15 @@ function getLocation(text) {
  */
 function insertToDB(entry) {
     db.serialize(function() {
-        db.run("CREATE TABLE if not exists foodmap_app_offering (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TEXT, location_id TEXT, title TEXT, description TEXT, image TEXT)");
+        db.run("CREATE TABLE if not exists foodmap_app_offering (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TEXT, location_id TEXT, title TEXT, description TEXT, thread_id TEXT, image TEXT)");
         if(typeof entry.image === 'undefined') {
-            var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description) VALUES (?, ?, ?, ?)");
-            stmt.run(entry.timestamp, entry.location.toString(), entry.food.toString(), entry.body);
-            stmt.finalize();    
+            var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, thread_id) VALUES (?, ?, ?, ?, ?)");
+            stmt.run(entry.timestamp, entry.location.toString(), entry.food.toString(), entry.body, entry.threadId);
+            stmt.finalize();
         }
         else {
-            var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, image) VALUES (?, ?, ?, ?, ?)");
-            stmt.run(entry.timestamp, entry.location.toString(), entry.food.toString(), entry.body, entry.image.name);
+            var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, thread_id, image) VALUES (?, ?, ?, ?, ?, ?)");
+            stmt.run(entry.timestamp, entry.location.toString(), entry.food.toString(), entry.body, entry.threadId, entry.image.name);
             stmt.finalize();
         }
     });
@@ -391,26 +398,27 @@ function insertToDB(entry) {
  * @param {Object} entry The entry to be deleted from the database
  */
 function deleteFromDB(entry) {
-    // FIXME: If there is an entry with the given ThreadID, Delete
+    // If there is an entry with the given ThreadID, Delete
+    db.serialize(function() {
+        db.run("DELETE FROM foodmap_app_offering WHERE thread_id=(?)", entry.threadId);
+    });
 
-
-    // If not, assume false positive and insert to DB
-    insertToDB(entry);
+    // FIXME: False positive?
 }
 
 /**
- * Check if the entry is a delete request
+ * Check type of request
  *
- * @param {Object} entry The entry to be inspected
+ * @param {Object} text The text to be inspected
  */
-function isDeletionRequest(entry) {
+function getRequestType(text) {
     // FIXME: all lowercase and no punctuation
     var sampleRequests = ["all gone"];
     for(req of sampleRequests) {
         // FIXME: Can title be changed in the reply?
-        if(entry.title.indexOf(req) > -1 || entry.body.indexOf(req) > -1) {
-            return true;
+        if(text.indexOf(req) > -1) {
+            return DELETE;
         }
     }
-    return false;
+    return INSERT;
 }
