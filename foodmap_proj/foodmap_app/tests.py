@@ -1,7 +1,7 @@
 import datetime
 import os
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -46,7 +46,7 @@ def create_location(name, lat=0.0, lng=0.0):
     return Location(name=name, lat=lat, lng=lng)
 
 def create_offering(timestamp=timezone.now(), location=0, title='Fresh pizza!',
-    description='We have plain and vegetable pizza!', image=0):
+    description='We have plain and vegetable pizza!', image=0, thread_id='1234567890123456'):
     '''
     Helper method for tests. Returns a valid Offering, but does not place it
     in the table.
@@ -62,7 +62,7 @@ def create_offering(timestamp=timezone.now(), location=0, title='Fresh pizza!',
             content_type='image/png'
         )
     return Offering(timestamp=timestamp, location=location, title=title,
-        description=description, image=image)
+        description=description, image=image, thread_id=thread_id)
 
 
 class OfferingsTableTests(TestCase):
@@ -101,6 +101,14 @@ class OfferingsTableTests(TestCase):
         table, and checks that it fails to insert.
         '''
         offering = create_offering(location=create_location('White House'))
+        self.assertRaises(ValueError, offering.save)
+
+    def test_offerings_table_insert_with_thread_id_too_short(self):
+        '''
+        Inserts an entry with a thread_id of length less than 16 chars, and
+        checks that it fails to insert.
+        '''
+        offering = create_offering(thread_id='123456789012345')
         self.assertRaises(ValueError, offering.save)
 
     def test_offerings_table_insert_with_no_timestamp(self):
@@ -147,6 +155,19 @@ class OfferingsTableTests(TestCase):
         self.assertEqual(test_offering, offering)
         test_offering.delete()
 
+    def test_offerings_table_insert_with_no_thread_id(self):
+        '''
+        Inserts an entry with a thread_id of None into the table, and checks
+        that it SUCCESSFULLY inserts -- not every offering will originate from
+        and email, so thread IDs are allowed to be NULL.
+        '''
+        offering = create_offering(thread_id=None)
+        offering.save()
+
+        test_offering = Offering.objects.order_by('-pk')[0]
+        self.assertEqual(test_offering, offering)
+        test_offering.delete()
+
     def test_offerings_table_delete_image(self):
         '''
         Inserts an entry with an image into the table, manually deletes the
@@ -167,6 +188,24 @@ class OfferingsTableTests(TestCase):
             os.listdir(os.path.join(MEDIA_ROOT, 'offerings'))
         )
 
+    def test_offerings_table_unique_thread_id(self):
+        '''
+        Inserts two entries with the same thread_id into the table, and
+        checks that the second one fails to insert.
+        '''
+        thread_id = '1234567890123456'
+
+        location1 = create_location('Princeton University')
+        location1.save()
+        offering1 = create_offering(location=location1, thread_id=thread_id)
+        offering1.save()
+
+        location2 = create_location('Harvard University')
+        location2.save()
+        with transaction.atomic():
+            offering2 = create_offering(location=location2, thread_id=thread_id)
+            self.assertRaises(IntegrityError, offering2.save)
+        offering1.delete()
 
 
 class LocationsTableTests(TestCase):

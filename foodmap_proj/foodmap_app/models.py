@@ -9,13 +9,23 @@ from django.utils import timezone
 from foodmap_app.apps import FoodmapAppConfig
 
 # Create your models here.
+
+location_name_max_length = 50
+location_lat_lng_decimal_places = 5
+
+offering_title_max_length = 50
+offering_description_max_length = 200
+offering_thread_id_max_length = 16
+
 class Location(models.Model):
     '''
     Represents the Locations table.
     '''
-    name = models.CharField(max_length=50, unique=True)
-    lat = models.DecimalField(max_digits=5, decimal_places=3)
-    lng = models.DecimalField(max_digits=6, decimal_places=3)
+    name = models.CharField(max_length=location_name_max_length, unique=True)
+    lat = models.DecimalField(decimal_places=location_lat_lng_decimal_places,
+        max_digits=location_lat_lng_decimal_places+3) # 2 for 0-90, 1 for "-" sign
+    lng = models.DecimalField(decimal_places=location_lat_lng_decimal_places,
+        max_digits=location_lat_lng_decimal_places+4) # 3 for 0-180, 1 for "-" sign
 
     def __unicode__(self):
         return self.name
@@ -26,9 +36,10 @@ class Offering(models.Model):
     '''
     timestamp = models.DateTimeField()
     location = models.ForeignKey(Location, on_delete=models.CASCADE) # TODO: What does CASCADE mean? This is advised in the django tutorial
-    title = models.CharField(max_length=50)
-    description = models.CharField(max_length=200, blank=True, default='')
+    title = models.CharField(max_length=offering_title_max_length)
+    description = models.CharField(max_length=offering_description_max_length, blank=True, default='')
     image = models.ImageField(upload_to='offerings', null=True, blank=True)
+    thread_id = models.CharField(max_length=offering_thread_id_max_length, blank=True, null=True, unique=True)
 
     def save(self, *args, **kwargs):
         '''
@@ -37,6 +48,9 @@ class Offering(models.Model):
         '''
         if isinstance(self.timestamp, datetime.datetime) and self.timestamp > timezone.now():
             raise ValueError('\'timestamp\' attribute of the Offering is in the future')
+        if self.thread_id and len(self.thread_id) < offering_thread_id_max_length:
+            raise ValueError('\'thread_id\' attribute of the Offering is too short (not %d chars)'
+                % (offering_thread_id_max_length))
         try:
             super(Offering, self).save(*args, **kwargs)
         except Exception as e:
