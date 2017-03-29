@@ -3,10 +3,20 @@
 Simple email scraper using Gmail API
 
 ## Installation
-The app uses Node.js. It requires `googleapis` and `google-auth-library` packages to be installed to run.
+The app uses Node.js. It requires `googleapis`, `google-auth-library`, and `sqlite3` packages to be installed to run. You can install them with the following command:
 ```
-npm install
+npm install --only=prod
 ```
+
+For development, you also need `mocha` package for unit testing. Run the following command to install development package:
+```
+npm install --only=dev
+```
+For unit testing, run the following command:
+```
+npm test
+```
+All 44 tests should be passed.
 
 ## API Setup
 Because the app uses Gmail API, it is necessary to get authorization from the account to read and modify emails. Here are the steps to setup the API from [API Quickstart](https://developers.google.com/gmail/api/quickstart/nodejs):
