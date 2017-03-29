@@ -195,7 +195,7 @@ function formatEmail(mimeMessage, messageId) {
     var timestamp = getTimestampFromMime(mimeMessage);
     var title = getTitleFromMime(mimeMessage);
     var body = getBodyFromMime(mimeMessage);
-    var image = getImageFromMime(mimeMessage, messageId);    
+    var image = getImageFromMime(mimeMessage);    
     var food = getFood(title+body);
     var location = getLocation(title+body);
     var threadId = mimeMessage.threadId;
@@ -297,7 +297,7 @@ function getBodyFromMime(mimeMessage) {
  *
  * @param {Object} mimeMessage The MIME message to parse.
  */
-function getImageFromMime(mimeMessage, messageId) {
+function getImageFromMime(mimeMessage) {
     var imageName;
     var imageData;
     
@@ -316,7 +316,7 @@ function getImageFromMime(mimeMessage, messageId) {
             google.gmail('v1').users.messages.attachments.get({
                 userId: 'me',
                 id: attachmentId,
-                messageId: messageId
+                messageId: mimeMessage.id
             }, function(err, result) {
                 var encodedImage = result.data;
                 imageData = Buffer.from(encodedImage, 'base64');

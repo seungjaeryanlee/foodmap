@@ -96,7 +96,7 @@ describe('getImageFromMime()', function() {
                 },
                 "sizeEstimate": 645
             };
-            var image = app.getImageFromMime(message, "15b191f7a6d6bec4");
+            var image = app.getImageFromMime(message);
             assert.equal(image, undefined);
         })
     })
@@ -236,7 +236,7 @@ describe('getImageFromMime()', function() {
                 },
                 "sizeEstimate": 1016
             };
-            var image = app.getImageFromMime(message, "15b191d06c1bc62e");
+            var image = app.getImageFromMime(message);
             assert.equal(image, undefined);
         })
     })
@@ -376,7 +376,7 @@ describe('getImageFromMime()', function() {
                 },
                 "sizeEstimate": 3030
             };
-            var image = app.getImageFromMime(message, "15b191c1ccc3b748");
+            var image = app.getImageFromMime(message);
             assert.equal(image.name, "sample.jpg");
         })
     })
@@ -516,7 +516,7 @@ describe('getImageFromMime()', function() {
                 },
                 "sizeEstimate": 2155
             };
-            var image = app.getImageFromMime(message, "15b191c9ce99d422");
+            var image = app.getImageFromMime(message);
             assert.equal(image.name, "sample.gif");
         })
     })
@@ -656,7 +656,7 @@ describe('getImageFromMime()', function() {
                 },
                 "sizeEstimate": 1193
             };
-            var image = app.getImageFromMime(message, "15b191c98e8a2b53");
+            var image = app.getImageFromMime(message);
             assert.equal(image.name, "sample.png");
         })
     })
@@ -796,7 +796,7 @@ describe('getImageFromMime()', function() {
                 },
                 "sizeEstimate": 3034
             };
-            var image = app.getImageFromMime(message, "15b191c23b745a19");
+            var image = app.getImageFromMime(message);
             assert.equal(image.name, "sample.tif");
         })
     })
@@ -936,7 +936,7 @@ describe('getImageFromMime()', function() {
                 },
                 "sizeEstimate": 5257
             };
-            var image = app.getImageFromMime(message, "15b191c1ed85d6a1");
+            var image = app.getImageFromMime(message);
             assert.equal(image.name, "sample.bmp");
         })
     })
