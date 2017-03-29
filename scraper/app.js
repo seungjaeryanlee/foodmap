@@ -143,48 +143,77 @@ var main = function (auth) {
         // if unread message exists
         if (!err && res && res.messages && res.messages.length) {
             for(var i = 0; i < res.messages.length; i++) {
-                var messageId = res.messages[i].id;
-
-                // FIXME: Temporarily disabled for testing
-                // Mark email as read by deleting UNREAD label
-                // google.gmail('v1').users.messages.modify({
-                //     userId: 'me',
-                //     id: messageId,
-                //     resource: { removeLabelIds: ['UNREAD'] },
-                // });
-
-                // Get content of email
-                google.gmail('v1').users.messages.get({
-                    userId: 'me',
-                    id: messageId,
-                }, function(err, result) {
-                    // if(result.payload.headers.find(x => x.name === "To") !== "freefood@princeton.edu")
-                    // if (typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
-                    // || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
-                    //     return;
-                    // }
-
-                    // FIXME: Log for debugging
-                    fs.appendFile('debug.json', JSON.stringify(result, null, 4), function(err) {
-                        if(err) { console.log(err); }
-                    })
-
-                    entry = formatEmail(result, messageId);
-
-                    // INSERT or DELETE entry
-                    if(getRequestType(entry.title+entry.body) == INSERT) {
-                        insertToDB(entry);
-                    }
-                    else {
-                        deleteFromDB(entry);
-                    }
-                });
+                parseEmail(res.messages[i].id, markAsRead);
             }
         } else {
             console.log('No unread message exists');
         }
     });
 };
+
+/**
+ * Parses email and inserts or deletes an entry to/from the database
+ *
+ * @param {Object} messageId The id of a message to be parsed
+ * @param {Function} callback The markAsRead function to be called after parsing completes
+ */
+function parseEmail(messageId, callback) {
+    google.gmail('v1').users.messages.get({
+        userId: 'me',
+        id: messageId,
+    }, function(err, result) {
+
+        if(err) {
+            console.log(err);
+            return;
+        }
+        
+        // if(result.payload.headers.find(x => x.name === "To") !== "freefood@princeton.edu")
+        if (typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
+        || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
+            return;
+        }
+
+        // Log used for debugging
+        // fs.appendFile('debug.json', JSON.stringify(result, null, 4), function(err) {
+        //     if(err) { console.log(err); }
+        // })
+
+        entry = formatEmail(result, messageId);
+
+        // INSERT or DELETE entry
+        if(getRequestType(entry.title+entry.body) == INSERT) {
+            insertToDB(entry);
+            console.log("Entry inserted to database.");
+        }
+        else {
+            deleteFromDB(entry);
+            console.log("Entry deleted from database.");
+        }
+    });
+
+    // Disable for testing
+    // Timeout to prevent making too many requests at once    
+    setTimeout(callback, 500, messageId);
+}
+
+/**
+ * Marks a message with given id as read
+ *
+ * @param {Object} messageId The id of a message to be marked as read
+ */
+function markAsRead(messageId) {
+    // Mark email as read by deleting UNREAD label
+    google.gmail('v1').users.messages.modify({
+        userId: 'me',
+        id: messageId,
+        resource: { removeLabelIds: ['UNREAD'] },
+    }, function(err, result) {
+        if(err) {
+            console.log(err);
+        }
+    });
+}
 
 /**
  * Formats a MIME message from the API to fit the database specification.
@@ -199,8 +228,7 @@ function formatEmail(mimeMessage, messageId) {
     var food = getFood(title+body);
     var location = getLocation(title+body);
     var threadId = mimeMessage.threadId;
-    // FIXME: Add test cases
-    var requestType = getRequestType(title+body); // FIXME: Maybe just body?
+    var requestType = getRequestType(body);
 
     return {timestamp: timestamp, location: location, title: title, body: body, food: food, image: image, threadId: threadId, requestType: requestType};
 }
