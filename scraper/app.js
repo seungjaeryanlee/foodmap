@@ -159,10 +159,10 @@ var main = function (auth) {
                     id: messageId,
                 }, function(err, result) {
                     // if(result.payload.headers.find(x => x.name === "To") !== "freefood@princeton.edu")
-                    if (typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
-                    || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
-                        return;
-                    }
+                    // if (typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
+                    // || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
+                    //     return;
+                    // }
 
                     // FIXME: Log for debugging
                     fs.appendFile('debug.json', JSON.stringify(result, null, 4), function(err) {
