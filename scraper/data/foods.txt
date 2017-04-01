@@ -1,5 +1,8 @@
 alfredo
+almond
+almond milk
 apple
+apple juice
 asian
 bacon egg and cheese
 bagel
@@ -10,6 +13,7 @@ basil
 beans
 blt
 boba
+boba tea
 bread
 breakfast
 brie
@@ -28,6 +32,7 @@ cannoli
 cantaloupe
 caribbean
 cereal
+chao mian
 cheese
 cheeseburger
 cherries
@@ -36,6 +41,7 @@ chez alice
 chicken
 chicken wings
 chinese
+chinese food
 chip
 chipotle
 chips
@@ -52,10 +58,17 @@ corn
 crackers
 cream
 cream cheese
+crepe
+croissant
 cupcake
+d'angelo's
+d'angelo
+dangelos
+dangelo
 dessert
 diet coke
 dinner
+doba
 domino's
 dominos
 dressing
@@ -66,21 +79,30 @@ fettuccine
 fettuccini
 fetuccini
 fetucine
+fish
+fish taco
 food truck
+french fries
+fries
 fro yo
 frosting
+froyo
 frozen yogurt
 fruit
 fruit loop
+fruit punch
 fruit tray
 fruity yogurt
 goody bag
 gorgonzola
 gouda
+granola
+granola bar
 grape
 grilled cheese
 guac
 guacamole
+ham
 hamburger
 hoagie
 honey dew
@@ -92,7 +114,9 @@ ice
 ice cream
 icee
 indian
+indian food
 japanese
+japanese food
 jelly beans
 jellybeans
 jolly rancher
@@ -130,6 +154,7 @@ nina's
 nina's waffles
 ninas
 noodle
+oj
 olive oil
 olive's
 olives
@@ -153,6 +178,7 @@ plum
 pop
 popsicle
 potato
+punch
 qdoba
 quinoa
 raisin
@@ -161,7 +187,9 @@ rice krispies
 rice pilaf
 rigatoni
 ring pop
+rugelach
 salad
+salmon
 salsa
 sandwhich
 sandwich
@@ -178,16 +206,21 @@ steak
 steamed veggies
 strawberries
 strawberry
+sub
+subway
 sushi
 taco
 tea
 thai
+thai food
 thai village
 thin crust pizza
 tiger noodles
 tiramisu
 toast
 tomato
+tuna
+tuna roll
 vegetable
 veggie plate
 veggies
