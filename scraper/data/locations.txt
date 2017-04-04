@@ -1,0 +1,325 @@
+aberlind theatre
+betts auditorium
+class of 1970 theatre
+dodds auditorium
+forbes college black box
+hamilton murray theater
+mccarter theatre
+richardson auditorium
+rocky/mathey theater
+roma
+roma theater
+roma classroom
+whitman black box
+taplin auditorium
+taylor auditorium
+theatre intime
+wilson college black box
+black box
+1879
+1879 hall
+1901
+1901 hall
+laughlin
+laughlin hall
+1903
+1903 hall
+1912 pavilion
+1915
+1915 hall
+1927
+1927 hall
+clapp
+clapp hall
+1937
+1937 hall
+1938
+1938 hall
+1939
+1939 hall
+1967
+1967 hall
+1976
+1976 hall
+1981
+1981 hall
+2 dickinson street
+alexander
+alexander hall
+andlinger
+andlinger center
+architecture building
+baker
+baker hall
+baker rink
+bendheim
+bendheim center
+bendheim
+bendheim hall
+berlind theatre
+blair
+blair hall
+bloomberg
+bloomberg hall
+bobst
+bobst hall
+bogle
+bogle hall
+bowen
+bowen hall
+brown
+brown hall
+burr
+burr hall
+buyers
+buyers hall
+campbell
+campbell hall
+campus
+campus club
+cannon
+cannon club
+cap and gown
+cap and gown club
+chancellor green
+chapel
+charter
+charter club
+clio
+clio hall
+cloister inn
+colonial
+colonial club
+computer science building
+corwin
+corwin hall
+cottage
+cottage club
+cuyler
+cuyler hall
+davis building
+dickinson
+dickinson hall
+dillon gym
+dod
+dod hall
+dodge
+dodge hall
+dodge-osborn
+dodge-osborn hall
+east pyne building
+edwards
+edwards hall
+engineering quad
+equad
+eno
+eno hall
+feinberg
+feinberg hall
+fields
+fields center
+fine
+fine hall
+fisher
+fisher hall
+forbes addition
+forbes main inn
+forbes
+forrestal
+foulke
+foulke hall
+frick chemistry laboratory
+frick
+friend
+friend center
+friend
+frist campus
+frist campus center
+frist
+gauss
+gauss hall
+green
+green hall
+guyot
+guyot hall
+hamilton
+hamilton hall
+hargadon
+hargadon hall
+henry
+henry hall
+henry house
+holder
+holder hall
+icahn
+ivy
+ivy club
+jadwin
+jadwin hall
+center for jewish life
+joline
+joline hall
+jones
+jones hall
+julis romo rabinowitz building
+econ building
+fine tower
+math building
+cos building
+computer science building
+digital learning lab
+studio lab
+lauritzen
+lauritzen hall
+lewis library
+little
+little hall
+lockhart
+lockhart hall
+louis a. simpson international building
+macmillan building
+madison
+madison hall
+maeder
+maeder hall
+marx
+marx hall
+mccarter theatre
+mccormick
+mccormick hall
+mccosh
+mccosh hall
+mccosh health
+mccosh health center
+mcdonnell
+mcdonnell hall
+moffett
+lt lab
+lt laboratory
+lewis thomas
+lewis-thomas
+moffett laboratory
+moran building
+murray theater
+nassau
+nassau hall
+new graduate college
+old graduate college
+patton
+patton hall
+peretsman-scully
+peretsman-scully hall
+peyton
+peyton hall
+princeton neuroscience institute
+princeton plasma physics lab
+princeton stadium
+prospect house
+pyne
+pyne hall
+quadrangle
+quadrangle club
+robertson
+robertson hall
+sayre
+sayre hall
+scheide caldwell house
+schultz laboratory
+scully
+scully hall
+sherrerd
+sherrerd hall
+spelman
+spelman hall
+stanhope
+stanhope hall
+terrace
+terrace club
+thomas laboratory
+tiger inn
+tower
+tower club
+von neumann
+von neumann hall
+walker
+walker hall
+wallace
+wallace hall
+wendell
+wendell hall
+west college
+west lodge
+whig
+whig hall
+wilcox
+wilcox hall
+wilf
+wilf hall
+witherspoon
+witherspoon hall
+wright
+wright hall
+wu
+wu hall
+wyman house
+yoseloff
+yoseloff hall
+atrium cafe
+butler college dining
+butler college dining hall
+cafe vivian
+chancellor green cafe
+chemistry cafe
+equad cafe
+forbes dining
+forbes dining hall
+forbes pdr
+forbes private dining room
+mathey
+rocky
+wilson
+butler
+whitman
+whitman pdr
+butler pdr
+wilson pdr
+rocky pdr
+mathey pdr
+whitman private dining room
+mathey private dining room
+butler private dining room
+wilson private dining room
+rocky private dining room
+frist gallery
+late meal
+graduate college dining
+graduate college dining hall
+mathey dining
+mathey dining hall
+rockefeller dining
+rockefeller dining hall
+studio 34
+studio
+whitman dining
+whitman dining hall
+wilson dining
+wilson dining hall
+woodrow wilson school
+woody woo
+andlinger center for the humanities
+carl a. fields
+carl fields
+davis international
+davis international center
+lesbian gay bisexual transgender
+lesbian gay bisexual transgender center
+lgbt
+lgbt center
+mcgraw
+mcgraw center
+mcgraw
+pace
+pace center
+women's
+women's center
+spoon
