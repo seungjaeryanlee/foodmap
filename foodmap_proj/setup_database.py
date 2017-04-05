@@ -6,10 +6,8 @@
 # Runs the necessary Django commands to intialize/update the project's database.
 # You can also rerun it each time the models for the database are updated as a
 # shortcut for makemigrations + migrate. Optionally takes the -p argument to
-# auto-populate with either sample data or real data.
-#
-# NOTE: Populating with real data requires scraping GPS coordinates for every
-# location at Princeton, so it will take a substantial amount of time.
+# auto-populate with either sample data or real data. If you choose to import
+# real data, you must also have the locations.json file in the same directory.
 #-------------------------------------------------------------------------------
 
 # Check usage
@@ -37,42 +35,22 @@ django.setup()
 
 #-------------------------------------------------------------------------------
 
-def populate_locations_table(): # TODO: Update this method according to TODOs after testing
-    from selenium import webdriver
-    driver = webdriver.PhantomJS()
+def populate_locations_table():
+    from django.db import IntegrityError
+    from foodmap_app.models import Location
+    import json
 
-    # Read in all location names from locations.txt
-    locations_file = open('locations.txt', 'r')
-    locations = [location.strip() for location in locations_file.readlines()]
-
-    # Get lat/lng coordinates for each location from m.princeton.edu's map
-    # for i in range (0, 897 + 1):
-    for i in range(0, 5): # TODO: replace this line with the one above it after testing
-        driver.get('http://m.princeton.edu/map/detail?feed=91eda3cbe8&group=princeton&featureindex=' + str(i) + '&category=91eda3cbe8%3AALL&_b=%5B%7B%22t%22%3A%22Map%22%2C%22lt%22%3A%22Map%22%2C%22p%22%3A%22index%22%2C%22a%22%3A%22%22%7D%5D#')
-
-        # Skip this page if the location is not one that we want
-        location = driver.find_element_by_css_selector('h2.nonfocal').text.lower()
-        # if not location in locations: # TODO: uncomment this after testing
-        #     continue
-
-        # Go to "Directions" tab
-        directions_tab = driver.find_element_by_link_text('Directions')
-        directions_tab.click()
-
-        # Extract lat/lng coordinates from "View in Google Maps" button
-        # Link is of the form:
-        # http://maps.google.com? ... &q=loc:LAT,LNG+ ...
-        button = driver.find_element_by_link_text('View in Google Maps')
-        link = button.get_attribute('href')
-        lat_str = link[link.index('q=loc:')+len('q=loc:'):link.index(',')]
-        lng_str = link[link.index(',')+1:link.index('+')]
-        lat = float(lat_str[:6])
-        lng = float(lng_str[:7])
-
-        # TODO: Insert entry into table
-        print >> sys.stderr, '%s\t|\t%s\t|\t%s' % (location, str(lat), str(lng))
-
-    driver.quit()
+    # Read in entries from locations.json, load into Location table
+    locations = json.loads(open('locations.json', 'r').read())
+    for location in locations:
+        try:
+            Location(
+                name=location['name'],
+                lat=float(location['lat']),
+                lng=float(location['lng'])
+            ).save()
+        except IntegrityError as e:
+            print >> sys.stderr, 'Duplicate location %s: not entered' % location
 
 #-------------------------------------------------------------------------------
 
