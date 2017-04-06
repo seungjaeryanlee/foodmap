@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# setup
+# Author: Michael Friedman
+#
+# Sets up your environment with the necessary dependencies to work on this
+# project, and initializes the database. As more dependencies become required,
+# update this script to install them.
+
+# Validate usage
+usage="usage: ./setup [ubuntu|mac]"
+if [ $# -ne 1 ]; then
+  echo $usage
+  exit
+elif ! [ "$1" == "ubuntu" ] || [ "$1" == "mac" ]; then
+  echo $usage
+  exit
+fi
+os="$1"
+
+# Set up python virtual environment
+if [ ! -d "venv" ]; then
+  echo "Setting up Python virutal environment..."
+  virtualenv venv
+  echo "Done!"
+  echo
+fi
+source venv/bin/activate
+
+# Download dependencies
+echo "Downloading dependencies..."
+pip install Django==1.10.6
+pip install Pillow==4.0.0
+pip install selenium==3.3.1
+# if [ "$os" == "ubuntu" ]; then
+#   echo "--------------------------------------------------"
+#   echo "The following packages require root permission."
+#   echo "You will be prompted for a password:"
+#   echo "sudo apt-get install -y phantomjs" # PASTE THE COMMAND BEING RUN AS ROOT HERE AS WELL
+#   echo "--------------------------------------------------"
+#   sudo apt-get install -y phantomjs # list all packages to be installed in this one line
+# elif [ "$os" == "mac" ]; then
+#   brew install phantomjs
+# fi
+echo "Done!"
+echo
+
+# Set up database
+echo "Setting up database..."
+python setup_database.py -p real
+echo "Done!"
+echo
+
+deactivate
+
+echo "Remember to activate the Python virtual environment by running 'source venv/bin/activate' to use the installed dependencies. Run 'deactivate' to disable the environment when finished working."
+
