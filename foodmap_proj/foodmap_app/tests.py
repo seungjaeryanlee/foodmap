@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import IntegrityError, transaction
@@ -9,31 +10,6 @@ from foodmap_proj.settings import MEDIA_ROOT
 from .models import Location, Offering
 
 # Create your tests here.
-
-#-------------------------------------------------------------------------------
-
-### View tests
-
-class IndexViewTests(TestCase):
-    '''
-    Tests for the index (landing) page.
-    '''
-
-    def test_index_page_loads_database_contents(self):
-        '''
-        Tests that the index page loads with database contents.
-        '''
-        response = self.client.get(reverse('foodmap_app:index'))
-        locations = Location.objects.all()
-        for location in locations:
-            self.assertContains(response.content, str(location))
-        offerings = Offering.objects.all()
-        for offering in offerings:
-            self.assertContains(response.content, str(offering))
-
-#-------------------------------------------------------------------------------
-
-### Database tests
 
 # A test image to store in an Offering
 TEST_IMAGE = '100x100.png'
@@ -64,6 +40,104 @@ def create_offering(timestamp=timezone.now(), location=0, title='Fresh pizza!',
     return Offering(timestamp=timestamp, location=location, title=title,
         description=description, image=image, thread_id=thread_id)
 
+#-------------------------------------------------------------------------------
+
+### View tests
+
+class IndexViewTests(TestCase):
+    '''
+    Tests for the index (landing) page.
+    '''
+
+    def test_index_page_loads_database_contents(self):
+        '''
+        Tests that the index page loads with database contents.
+        '''
+        response = self.client.get(reverse('foodmap_app:index'))
+        locations = Location.objects.all()
+        for location in locations:
+            self.assertContains(response.content, str(location))
+        offerings = Offering.objects.all()
+        for offering in offerings:
+            self.assertContains(response.content, str(offering))
+
+
+class LocationsViewTests(TestCase):
+    '''
+    Tests for retrieving all locations in JSON.
+    '''
+
+    def test_locations_valid(self):
+        '''
+        Requests all locations when there are some locaions in the database,
+        and checks that we get back correctly formatted JSON.
+        '''
+        # Make two locations
+        locations = [
+            create_location(name='Frist Campus Center'),
+            create_location(name='Computer Science Building')
+        ]
+        for location in locations:
+            location.save()
+
+        # Make the request
+        response = self.client.get(reverse('foodmap_app:locations'))
+        try:
+            parsed_response = json.loads(response.content)  # array of JSON objects, as specified in views.py
+        except:
+            self.fail('JSON response could not be parsed')
+
+        # Verify response is correct
+        test_locations = parsed_response
+        self.assertEqual(len(test_locations), len(locations))  # has correct number of locations
+        for i in range(0, len(locations)):
+            self.assertEqual(sorted(test_locations[i].keys()), ['lat', 'lng', 'name'])  # has correct attributes
+
+            # Has correct contents in each attribute
+            self.assertEqual(test_locations[i]['name'], locations[i].name)
+            self.assertEqual(float(test_locations[i]['lat']), locations[i].lat)
+            self.assertEqual(float(test_locations[i]['lng']), locations[i].lng)
+
+
+    def test_locations_with_empty_database(self):
+        '''
+        Requets all locations when there are none in the database, and checks
+        that we get back an empty array.
+        '''
+        response = self.client.get(reverse('foodmap_app:locations'))
+        try:
+            parsed_response = json.loads(response.content)
+        except:
+            self.fail('JSON response could not be parsed')
+
+        # Verify response is correct
+        self.assertEqual(parsed_response, [])
+
+
+class OfferingsViewTests(TestCase):
+    '''
+    Tests for retrieving the offering for a particular location in JSON.
+    '''
+
+    def test_offerings_for_valid_location(self):
+        '''
+        Requests the offering for a location that is in the database, and checks
+        that we get back correctly formatted JSON. Should only return the
+        offering with the most recent timestamp, if there are more than one
+        offering.
+        '''
+        pass
+
+    def test_offerings_for_nonexistent_location(self):
+        '''
+        Requests the offering for a location that is *not* in the database,
+        and checks that we get back an empty JSON object.
+        '''
+        pass
+
+#-------------------------------------------------------------------------------
+
+### Database tests
 
 class OfferingsTableTests(TestCase):
     '''
