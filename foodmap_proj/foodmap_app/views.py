@@ -1,6 +1,7 @@
 import json
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.utils import timezone
 from .models import Location, Offering
 
 # Create your views here.
@@ -12,37 +13,46 @@ def index(request):
     return render(request, 'index.html', {})
 
 
-def locations(request):
+def offerings(request):
     '''
-    Responds with the name and GPS coordinates of every location, formatted
-    in JSON:
+    Responds with all of the most recent offerings at every location with
+    an offering, formatted in JSON:
     [
-        {"name": "Frist Campus Center", "lat": "40.345337090919", "lng": "-74.655215048038"},
-        {"name": "", "lat": "", "lng": ""},
+        {
+            "location": {"name": "Frist Campus Center", "lat": "12.3456789", "lng": "12.3456789"},
+            "title": "Pizza!",
+            "description": "Come eat!",
+            "minutes": 15
+        },
         ...
     ]
-    Note that if there are no locations, this array will be empty.
     '''
-    # Get all locations from database
-    locations = Location.objects.all()
+    offerings = Offering.objects.order_by('-timestamp')
+    if len(offerings) == 0:
+        return HttpResponse(json.dumps({}))
 
-    # Format data in JSON, return response
-    locations_json = []
-    for location in locations:
-        locations_json.append({
-            'name': location.name,
-            'lat': str(location.lat),
-            'lng': str(location.lng)
+    # If any location has more than one offering, filter out the old ones
+    most_recent_offerings = []
+    locations_with_offerings = []
+    now = timezone.now()
+    for offering in offerings:
+        if offering.location in locations_with_offerings:
+           continue  # newest offering is already in most_recent_offerings
+
+        most_recent_offerings.append({
+            'location': {
+                'name': offering.location.name,
+                'lat': str(offering.location.lat),
+                'lng': str(offering.location.lng)
+            },
+            'title': offering.title,
+            'description': offering.description,
+            'minutes': int((now - offering.timestamp).seconds / 60)
         })
-    return HttpResponse(json.dumps(locations_json))
+        locations_with_offerings.append(offering.location)
 
-
-def offerings(request, location):
-    '''
-    Responds with the current offering at the location with name 'location',
-    formatted in JSON.
-    '''
-    pass
+    # Json-ify and return
+    return HttpResponse(json.dumps(most_recent_offerings))
 
 
 def test(request):

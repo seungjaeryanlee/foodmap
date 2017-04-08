@@ -51,26 +51,21 @@ class IndexViewTests(TestCase):
 
     def test_index_page_loads_database_contents(self):
         '''
-        Tests that the index page loads with database contents.
+        Tests that the index page loads with the map.
         '''
         response = self.client.get(reverse('foodmap_app:index'))
-        locations = Location.objects.all()
-        for location in locations:
-            self.assertContains(response.content, str(location))
-        offerings = Offering.objects.all()
-        for offering in offerings:
-            self.assertContains(response.content, str(offering))
+        # TODO: Check that the map loaded properly
 
 
-class LocationsViewTests(TestCase):
+class OfferingsViewTests(TestCase):
     '''
-    Tests for retrieving all locations in JSON.
+    Tests for retrieving all of the most recent offerings in JSON.
     '''
 
-    def test_locations_valid(self):
+    def test_offerings_valid(self):
         '''
-        Requests all locations when there are some locaions in the database,
-        and checks that we get back correctly formatted JSON.
+        Requests all of the most recent offerings (from each location with
+        an offering), and checks that we get back correctly formatted JSON.
         '''
         # Make two locations
         locations = [
@@ -80,60 +75,88 @@ class LocationsViewTests(TestCase):
         for location in locations:
             location.save()
 
+        # Make two offerings with different timestamps for each location
+        offerings_now = [
+            create_offering(
+                timestamp=timezone.now() - datetime.timedelta(minutes=30),
+                location=locations[i],
+                thread_id='%16d' % i      # thread_id must be unique
+            ) for i in range(0, len(locations))
+        ]
+        for offering in offerings_now:
+            offering.save()
+
+        offerings_before = [
+            create_offering(
+                timestamp=offering.timestamp - datetime.timedelta(days=1),
+                location=offering.location,
+                thread_id='%16s' % (100 - int(offering.thread_id))  # thread_id must be unique
+            ) for offering in offerings_now
+        ]
+        for offering in offerings_before:
+            offering.save()
+
         # Make the request
-        response = self.client.get(reverse('foodmap_app:locations'))
+        response = self.client.get(reverse('foodmap_app:offerings'))
         try:
             parsed_response = json.loads(response.content)  # array of JSON objects, as specified in views.py
         except:
             self.fail('JSON response could not be parsed')
 
-        # Verify response is correct
-        test_locations = parsed_response
-        self.assertEqual(len(test_locations), len(locations))  # has correct number of locations
-        for i in range(0, len(locations)):
-            self.assertEqual(sorted(test_locations[i].keys()), ['lat', 'lng', 'name'])  # has correct attributes
+        # Verify the response is correct
+        test_offerings = parsed_response
+        actual_offerings = offerings_now
+        self.assertEqual(len(test_offerings), len(actual_offerings))  # has correct number of offerings
 
-            # Has correct contents in each attribute
-            self.assertEqual(test_locations[i]['name'], locations[i].name)
-            self.assertEqual(float(test_locations[i]['lat']), locations[i].lat)
-            self.assertEqual(float(test_locations[i]['lng']), locations[i].lng)
+        # Sort test and actual offerings so they can be compared side-by-side
+        for i in range(0, len(test_offerings)):
+            self.assertIn('location', test_offerings[i].keys())
+            self.assertIn('name', test_offerings[i]['location'].keys())
+        test_offerings = sorted(test_offerings, cmp=lambda x, y: cmp(x['location']['name'], y['location']['name']))
+        actual_offerings = sorted(actual_offerings, cmp=lambda x, y: cmp(x.location.name, y.location.name))
+
+        # Compare test offerings vs actual offerings
+        for i in range(0, len(actual_offerings)):
+            # Has correct attributes
+            self.assertEqual(sorted(test_offerings[i].keys()), ['description', 'location', 'minutes', 'title'])
+
+            # Has correct title and description
+            self.assertEqual(test_offerings[i]['title'], actual_offerings[i].title)
+            self.assertEqual(test_offerings[i]['description'], actual_offerings[i].description)
+
+            # Has correct minutes
+            approx_seconds = (timezone.now() - actual_offerings[i].timestamp).seconds
+            test_seconds = test_offerings[i]['minutes'] * 60
+            self.assertAlmostEqual(test_seconds, approx_seconds, delta=5)  # seconds should be within a small delta
+
+            # Has correct location
+            test_location = test_offerings[i]['location']
+            actual_location = actual_offerings[i].location
+            self.assertEqual(sorted(test_location.keys()), ['lat', 'lng', 'name']) # has correct attributes
+            self.assertEqual(test_location['name'], actual_location.name)
+            self.assertEqual(float(test_location['lat']), actual_location.lat)
+            self.assertEqual(float(test_location['lng']), actual_location.lng)
+
+        # Clean up database
+        for offering in offerings_now:
+            offering.delete()
+        for offering in offerings_before:
+            offering.delete()
 
 
-    def test_locations_with_empty_database(self):
+    def test_offerings_with_empty_database(self):
         '''
-        Requets all locations when there are none in the database, and checks
-        that we get back an empty array.
+        Requests all of the most recent offerings when there are no offerings
+        to show. Checks that we get back an empty JSON object.
         '''
-        response = self.client.get(reverse('foodmap_app:locations'))
+        response = self.client.get(reverse('foodmap_app:offerings'))
         try:
             parsed_response = json.loads(response.content)
         except:
             self.fail('JSON response could not be parsed')
 
-        # Verify response is correct
-        self.assertEqual(parsed_response, [])
-
-
-class OfferingsViewTests(TestCase):
-    '''
-    Tests for retrieving the offering for a particular location in JSON.
-    '''
-
-    def test_offerings_for_valid_location(self):
-        '''
-        Requests the offering for a location that is in the database, and checks
-        that we get back correctly formatted JSON. Should only return the
-        offering with the most recent timestamp, if there are more than one
-        offering.
-        '''
-        pass
-
-    def test_offerings_for_nonexistent_location(self):
-        '''
-        Requests the offering for a location that is *not* in the database,
-        and checks that we get back an empty JSON object.
-        '''
-        pass
+        # Verify that response is correct
+        self.assertEqual(parsed_response, {})
 
 #-------------------------------------------------------------------------------
 

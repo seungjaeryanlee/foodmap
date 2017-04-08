@@ -33,10 +33,6 @@ $(document).ready(function() {
     /*------------------------------------------------------------------------*/
 
     // Pull locations and their GPS coordinates from the database, store in 'places'
-    // var places = {
-    //     "type": "FeatureCollection",
-    //     "features": []  // will contain feature objects; populated below
-    // };
 
     var places = {
         "type": "FeatureCollection",
@@ -44,14 +40,14 @@ $(document).ready(function() {
     };
 
     $.ajax({
-        url: 'http://localhost:8000/locations',
+        url: 'http://localhost:8000/offerings',
         async: false,
         success: function(result) {
             // Parse JSON response and fill in places.features with location names
             // and GPS coordinates
-            var locations = JSON.parse(result);
-            if (locations.length > 0) {
-                for (i = 0; i < locations.length; i++) {
+            var offerings = JSON.parse(result);
+            if (offerings.length > 0) {
+                for (i = 0; i < offerings.length; i++) {
                     // Each feature has mostly standard parameters. We set 'coordinates'
                     // (GPS coordinates), 'popupContent' (text that appears in a
                     // popup window), and 'id' (which just needs to be a unique integer).
@@ -62,18 +58,18 @@ $(document).ready(function() {
                             "coordinates": [
                                 // NOTE: The format for the coordinates is LONGITUDE, LATITUDE
                                 // (backwards from the norm). This is DUMB! But ugh such is life.
-                                parseFloat(locations[i].lng), parseFloat(locations[i].lat)
+                                parseFloat(offerings[i].location.lng), parseFloat(offerings[i].location.lat)
                             ]
                         },
                         "properties": {
-                            "popupContent": locations[i].name  // by default this is just location's name
+                            "popupContent": offerings[i].location.name  // by default this is just location's name
                         },
                         "id": i
                     });
                 }
             } else {
-                // Show error message in the console
-                console.log('No locations found in the database');
+                // Show message in the console
+                console.log('No offerings found in the database');
             }
         }
     });
