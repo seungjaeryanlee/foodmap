@@ -25,7 +25,7 @@ SECRET_KEY = 'vrg+496us^_trq72er&6tbm2md!-g0pggirq(qbc85n=*k4wcf'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['foodmap333.herokuapp.com']
 
 
 # Application definition
@@ -117,7 +117,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 
 # Base directory where files/images in the database are actually stored.
