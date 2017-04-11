@@ -102,3 +102,6 @@ ENV/
 
 # Staticfiles
 static/
+
+# Node
+node_modules/
