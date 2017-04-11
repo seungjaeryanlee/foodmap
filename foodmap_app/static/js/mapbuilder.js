@@ -40,7 +40,7 @@
     };
 
     $.ajax({
-        url: 'http://localhost:8000/offerings',
+        url: document.URL + 'offerings',
         async: false,
         success: function(result) {
             // Parse JSON response and fill in places.features with location names
