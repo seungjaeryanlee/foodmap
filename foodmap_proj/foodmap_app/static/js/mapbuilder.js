@@ -60,7 +60,7 @@
                                 ]
                             },
                             "properties": {
-                            "popupContent": "<b>" + offerings[i].name + "</b><br><i>"+offerings[i].title + "</i><br>" + offerings[i].minutes + " minutes old",  // by default this is just location's name
+                            "popupContent": "<b>" + offerings[i].name + "</b><br><i>"+offerings[i].title + "</i><br>" + (parseFloat(offerings[i].minutes) >= 60? "1 hour, "+(parseFloat(offerings[i].minutes)-60): offerings[i].minutes) + " minutes old",  // by default this is just location's name
                             "extra": offerings[i].description
                         },
                         "id": i
