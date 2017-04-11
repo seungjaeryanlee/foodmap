@@ -123,3 +123,6 @@ STATIC_URL = '/static/'
 # Base directory where files/images in the database are actually stored.
 # The database itself only holds the path to these files/images.
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# For forcing HTTPS
+SECURE_SSL_REDIRECT = True
