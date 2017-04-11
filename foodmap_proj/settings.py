@@ -25,7 +25,7 @@ SECRET_KEY = 'vrg+496us^_trq72er&6tbm2md!-g0pggirq(qbc85n=*k4wcf'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['foodmap333.herokuapp.com']
+ALLOWED_HOSTS = ['foodmap333.herokuapp.com', 'localhost']
 
 
 # Application definition
