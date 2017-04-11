@@ -35,13 +35,13 @@ module.exports.DELETE = DELETE;
 module.exports.INSERT = INSERT;
 
 // Data files
-var foods = fs.readFileSync('./data/foods.txt').toString().split('\n');
-var locations = fs.readFileSync('./data/locations.txt').toString().split('\n');
-var db = new sqlite3.Database('./data/db.sqlite3');
+var foods = fs.readFileSync(__dirname + '/data/foods.txt').toString().split('\n');
+var locations = fs.readFileSync(__dirname + '/data/locations.txt').toString().split('\n');
+var db = new sqlite3.Database(__dirname + '/../db.sqlite3');
 
 
 // Load client secrets from a local file.
-fs.readFile('client_secret.json', function processClientSecrets(err, content) {
+fs.readFile(__dirname + 'client_secret.json', function processClientSecrets(err, content) {
     if (err) {
         console.log('Error loading client secret file: ' + err);
         return;
