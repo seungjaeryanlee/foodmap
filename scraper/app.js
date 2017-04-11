@@ -48,6 +48,10 @@ for (location of locations) {
     aliasList.push(tokens[0]);
 }
 
+if(process.env.client_secret) { // FIXME: Better way to detect Heroku?
+    fs.writeFile(__dirname + '/client_secret.json', process.env.client_secret);
+}
+
 // Load client secrets from a local file.
 fs.readFile(__dirname + '/client_secret.json', function processClientSecrets(err, content) {
     if (err) {
