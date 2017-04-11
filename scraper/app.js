@@ -36,12 +36,20 @@ module.exports.INSERT = INSERT;
 
 // Data files
 var foods = fs.readFileSync(__dirname + '/data/foods.txt').toString().split('\n');
-var locations = fs.readFileSync(__dirname + '/data/locations.txt').toString().split('\n');
+var locations = fs.readFileSync(__dirname + '/data/locationMap.txt').toString().split('\n');
 var db = new sqlite3.Database(__dirname + '/../db.sqlite3');
 
+// Extract location map and alias
+var locationMap = {};
+var aliasList = [];
+for (location of locations) {
+    var tokens = location.split(',');
+    locationMap[tokens[0]] = tokens[1];
+    aliasList.push(tokens[0]);
+}
 
 // Load client secrets from a local file.
-fs.readFile(__dirname + 'client_secret.json', function processClientSecrets(err, content) {
+fs.readFile(__dirname + '/client_secret.json', function processClientSecrets(err, content) {
     if (err) {
         console.log('Error loading client secret file: ' + err);
         return;
@@ -143,7 +151,9 @@ var main = function (auth) {
         // if unread message exists
         if (!err && res && res.messages && res.messages.length) {
             for(var i = 0; i < res.messages.length; i++) {
-                parseEmail(res.messages[i].id, markAsRead);
+                // FIXME: Restore after testing
+                // parseEmail(res.messages[i].id, markAsRead);
+                parseEmail(res.messages[i].id, function(){});
             }
         } else {
             console.log('No unread message exists');
@@ -184,11 +194,9 @@ function parseEmail(messageId, callback) {
         // INSERT or DELETE entry
         if(getRequestType(entry.title+entry.body) == INSERT) {
             insertToDB(entry);
-            console.log("Entry inserted to database.");
         }
         else {
             deleteFromDB(entry);
-            console.log("Entry deleted from database.");
         }
     });
 
@@ -351,7 +359,8 @@ function getImageFromMime(mimeMessage) {
 
                 // Create file
                 // FIXME: Should use different file name in case of conflict!
-                fs.writeFile(imageName, imageData, function(err) {});
+                // FIXME: Temporarily disable for speed
+                //fs.writeFile(__dirname + '/' + imageName, imageData, function(err) {});
             });
 
             return {name: imageName, data: imageData};
@@ -388,17 +397,16 @@ function getFood(text) {
  */
 function getLocation(text) {
     // FIXME: There should only be one location per email
-    var matches = [];    
+    var location = "";
 
     // FIXME: Better list of punctuations
     text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
-    for(location of locations) {
-        if(text.indexOf(location.toLowerCase()) > - 1) { // Substring search
-            matches.push(location);
+    for(loc of aliasList) {
+        if(text.indexOf(loc.toLowerCase()) > - 1) { // Substring search
+            location = locationMap[loc];
         }
     }
-
-    return matches;
+    return location;
 }
 
 /**
@@ -407,20 +415,32 @@ function getLocation(text) {
  * @param {Object} entry The entry to be inserted to the database
  */
 function insertToDB(entry) {
+    // FIXME: Not run if no location found?
     db.serialize(function() {
-        // FIXME: Dummy Database
-        db.run("CREATE TABLE if not exists foodmap_app_offering (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TEXT, location_id TEXT, title TEXT, description TEXT, thread_id TEXT, image TEXT)");
-        if(typeof entry.image === 'undefined') {
-            var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, thread_id) VALUES (?, ?, ?, ?, ?)");
-            stmt.run(entry.timestamp, entry.location.toString(), entry.food.toString(), entry.body, entry.threadId);
-            stmt.finalize();
-        }
-        else {
-            var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, thread_id, image) VALUES (?, ?, ?, ?, ?, ?)");
-            stmt.run(entry.timestamp, entry.location.toString(), entry.food.toString(), entry.body, entry.threadId, entry.image.name);
-            stmt.finalize();
-        }
+        db.each("SELECT id FROM foodmap_app_location WHERE name = ?", [entry.location], function(err, row) {
+            if(err) {
+                console.log(err);
+            }
+            var locationId = row.id;
+            
+            db.serialize(function() {
+                if(typeof entry.image === 'undefined') {
+                    // FIXME: Temporarily don't have thread_id
+                    var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description) VALUES (?, ?, ?, ?)");
+                    stmt.run(entry.timestamp, locationId, entry.food.toString(), entry.body);
+                    stmt.finalize();
+                }
+                else {
+                    var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, image) VALUES (?, ?, ?, ?, ?)");
+                    stmt.run(entry.timestamp, locationId, entry.food.toString(), entry.body, entry.image.name);
+                    stmt.finalize();
+                }
+            });
+            console.log("Entry inserted to database.");
+        });
     });
+
+    
 }
 
 /**
@@ -433,6 +453,7 @@ function deleteFromDB(entry) {
     db.serialize(function() {
         db.run("DELETE FROM foodmap_app_offering WHERE thread_id=(?)", entry.threadId);
     });
+    console.log("Entry deleted from database.");
 
     // FIXME: False positive?
 }
