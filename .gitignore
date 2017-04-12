@@ -99,3 +99,9 @@ ENV/
 # Sublime Text stuff
 *.sublime-project
 *.sublime-workspace
+
+# Staticfiles
+static/
+
+# Node
+node_modules/

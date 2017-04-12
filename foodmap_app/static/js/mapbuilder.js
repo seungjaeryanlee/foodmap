@@ -33,38 +33,39 @@
     /*------------------------------------------------------------------------*/
 
     // Pull locations and their GPS coordinates from the database, store in 'places'
-    // var places = {
-    //     "type": "FeatureCollection",
-    //     "features": []  // will contain feature objects; populated below
-    // };
 
-    var offering = {
+    var offerings = {
         "type": "FeatureCollection",
         "features": []
     };
 
     $.ajax({
-        url: 'http://localhost:8000/offerings',
+        url: document.URL + 'offerings',
         async: false,
         success: function(result) {
             // Parse JSON response and fill in places.features with location names
             // and GPS coordinates
-            var offerings = JSON.parse(result);
-            for (i = 0; i < offerings.length; i++) {
-               offering.features.push({
-                "type": "Point",
-                "coordinates": [
-                                // NOTE: The format for the coordinates is LONGITUDE, LATITUDE
-                                // (backwards from the norm). This is DUMB! But ugh such is life.
-                                parseFloat(offerings[i].lng), parseFloat(offerings[i].lat)
-                                ]
-                            },
-                            "properties": {
-                            "popupContent": "<b>" + offerings[i].name + "</b><br><i>"+offerings[i].title + "</i><br>" + (parseFloat(offerings[i].minutes) >= 60? "1 hour, "+(parseFloat(offerings[i].minutes)-60): offerings[i].minutes) + " minutes old",  // by default this is just location's name
-                            "extra": offerings[i].description
-                        },
-                        "id": i
-                    });
+            var response_offerings = JSON.parse(result);
+            for (i = 0; i < response_offerings.length; i++) {
+                // Each feature has mostly standard parameters. We set 'coordinates'
+                // (GPS coordinates), 'popupContent' (text that appears in a
+                // popup window), and 'id' (which just needs to be a unique integer).
+               offerings.features.push({
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [
+                        // NOTE: The format for the coordinates is LONGITUDE, LATITUDE
+                        // (backwards from the norm). This is DUMB! But ugh such is life.
+                        parseFloat(response_offerings[i].location.lng), parseFloat(response_offerings[i].location.lat)
+                    ]
+                },
+                "properties": {
+                    "popupContent": response_offerings[i].title + '\n' + response_offerings[i].minutes + " minutes old",  // by default this is just location's name
+                    "extra": response_offerings[i].description
+                },
+                "id": i
+            });
            }
        }
    });
@@ -73,7 +74,26 @@
 
     // Create and define behavior of markers
 
-    layers.offering = L.geoJSON(offering, {
+    // On mouse hover
+    function onSetHover(e) {
+        var marker = e.target;
+        marker.setStyle({
+            weight: 5,
+            color: '#666',
+            dashArray: '',
+            fillOpacity: 0.7
+        });
+        this.openPopup();
+    }
+
+    // On removing mouse hover
+    function onRemoveHover(e) {
+        var marker = e.target;
+        layers.offerings.resetStyle(marker);
+        this.closePopup();
+    }
+
+    layers.offerings = L.geoJSON(offerings, {
         style: function (feature) {
             return feature.properties && feature.properties.style;
         },
@@ -82,11 +102,11 @@
             // Adds mouse hover/click listeners and sets the marker's popup window
             // content. The parameter 'feature' passed in is one of the feature
             // objects in 'places', defined in the last section.
-            var popupContent = '<h1>' + feature.properties.popupContent + '</h1>';
+            var popupContent = feature.properties.popupContent;
             layer.bindPopup(popupContent, {closeButton: false, autoPan: false});
             layer.on({
-                'mouseover': layer.openPopup,
-                'mouseout': layer.closePopup,
+                'mouseover': onSetHover,
+                'mouseout': onRemoveHover,
                 'click': function(){alert(feature.properties.extra);}
             });
         },
