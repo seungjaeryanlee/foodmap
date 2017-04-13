@@ -8,15 +8,11 @@
 # update this script to install them.
 
 # Validate usage
-usage="usage: ./setup [ubuntu|mac]"
-if [ $# -ne 1 ]; then
-  echo $usage
-  exit
-elif ! [ "$1" == "ubuntu" ] || [ "$1" == "mac" ]; then
+usage="usage: ./setup"
+if [ $# -ne 0 ]; then
   echo $usage
   exit
 fi
-os="$1"
 
 # Set up python virtual environment
 if [ ! -d "venv" ]; then
@@ -29,9 +25,7 @@ source venv/bin/activate
 
 # Download dependencies
 echo "Downloading dependencies..."
-pip install Django==1.10.6
-pip install Pillow==4.0.0
-pip install selenium==3.3.1
+pip install -r requirements.txt
 # if [ "$os" == "ubuntu" ]; then
 #   echo "--------------------------------------------------"
 #   echo "The following packages require root permission."
