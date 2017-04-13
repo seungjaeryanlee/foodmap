@@ -61,7 +61,7 @@
                     ]
                 },
                 "properties": {
-                    "popupContent": response_offerings[i].title + '\n' + response_offerings[i].minutes + " minutes old",  // by default this is just location's name
+                    "popupContent": "<b>" + offerings[i].name + "</b><br><i>"+offerings[i].title + "</i><br>" + (parseFloat(offerings[i].minutes) >= 60? "1 hour, "+(parseFloat(offerings[i].minutes)-60): offerings[i].minutes) + " minutes old",  // by default this is just location's name
                     "extra": response_offerings[i].description
                 },
                 "id": i
@@ -107,7 +107,7 @@
             layer.on({
                 'mouseover': onSetHover,
                 'mouseout': onRemoveHover,
-                'click': function(){alert(feature.properties.extra);}
+                'click': function(){alert('<h1>' + feature.properties.popupContent + '<br>' + feature.properties.extra + '</h1>');}
             });
         },
 
