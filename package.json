@@ -12,8 +12,8 @@
     "mocha": "^3.2.0"
   },
   "scripts": {
-    "start": "node app.js",
-    "test": "mocha"
+    "start": "node scraper/app.js",
+    "test": "mocha scraper/test"
   },
   "author": "Seung Jae (Ryan) Lee",
   "license": "ISC",
