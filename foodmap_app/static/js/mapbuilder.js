@@ -61,7 +61,7 @@
                     ]
                 },
                 "properties": {
-                    "popupContent": "<b>" + offerings[i].name + "</b><br><i>"+offerings[i].title + "</i><br>" + (parseFloat(offerings[i].minutes) >= 60? "1 hour, "+(parseFloat(offerings[i].minutes)-60): offerings[i].minutes) + " minutes old",  // by default this is just location's name
+                    "popupContent": "<b>" + response_offerings[i].location.name + "</b><br><i>"+ response_offerings[i].title + "</i><br>" + (parseFloat(response_offerings[i].minutes) >= 60? "1 hour, "+(parseFloat(response_offerings[i].minutes)-60): response_offerings[i].minutes) + " minutes old",  // by default this is just location's name
                     "extra": response_offerings[i].description
                 },
                 "id": i
