@@ -93,11 +93,17 @@
         this.closePopup();
     }
 
+  var sidebar = L.control.sidebar('sidebar', {
+        closeButton: true,
+        position: 'left'
+    });
+  map.addControl(sidebar);
+
     layers.offerings = L.geoJSON(offerings, {
         style: function (feature) {
             return feature.properties && feature.properties.style;
         },
-
+     
         onEachFeature: function (feature, layer) {
             // Adds mouse hover/click listeners and sets the marker's popup window
             // content. The parameter 'feature' passed in is one of the feature
@@ -107,8 +113,8 @@
             layer.on({
                 'mouseover': onSetHover,
                 'mouseout': onRemoveHover,
-                'click': function(){alert('<h1>' + feature.properties.popupContent + '<br>' + feature.properties.extra + '</h1>');}
-            });
+                'click': function() { sidebar.setContent('<h1>' + feature.properties.popupContent + '<br>' + feature.properties.extra + '</h1>'); sidebar.show(); }
+                    });
         },
 
         pointToLayer: function (feature, latlng) {
