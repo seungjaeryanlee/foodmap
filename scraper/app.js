@@ -155,9 +155,11 @@ var main = function (auth) {
         // if unread message exists
         if (!err && res && res.messages && res.messages.length) {
             for(var i = 0; i < res.messages.length; i++) {
-                // FIXME: Restore after testing
-                // parseEmail(res.messages[i].id, markAsRead);
-                parseEmail(res.messages[i].id, function(){});
+                (function(index) {
+                    // Timeout to prevent making too many requests at once    
+                    // setTimeout(parseEmail, 1000+(1000*index), res.messages[index].id, markAsRead)
+                    setTimeout(parseEmail, 1000+(1000*index), res.messages[index].id, function(){})
+                })(i);
             }
         } else {
             console.log('No unread message exists');
@@ -203,10 +205,6 @@ function parseEmail(messageId, callback) {
             deleteFromDB(entry);
         }
     });
-
-    // Disable for testing
-    // Timeout to prevent making too many requests at once    
-    setTimeout(callback, 500, messageId);
 }
 
 /**
