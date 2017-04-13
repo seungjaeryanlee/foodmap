@@ -14,7 +14,7 @@
 
     L.control.locate({options:{
         setView: 'untilPan',
-        icon: 'icon-location',
+        icon: 'icon-location'
     }}).addTo(map);
     // L.Control.extend();
 
@@ -74,22 +74,23 @@
 
     // Create and define behavior of markers
 
+    var marker = {  // container variable for marker properties
+        icon: icons.fork_and_knife,
+        width: 32,
+        height: 37,
+        default_opacity: 0.7,
+        hover_opacity: 1.0
+    };
+
     // On mouse hover
     function onSetHover(e) {
-        var marker = e.target;
-        marker.setStyle({
-            weight: 5,
-            color: '#666',
-            dashArray: '',
-            fillOpacity: 0.7
-        });
+        this.setOpacity(marker.hover_opacity);
         this.openPopup();
     }
 
     // On removing mouse hover
     function onRemoveHover(e) {
-        var marker = e.target;
-        layers.offerings.resetStyle(marker);
+        this.setOpacity(marker.default_opacity);
         this.closePopup();
     }
 
@@ -112,13 +113,15 @@
         },
 
         pointToLayer: function (feature, latlng) {
-            return L.circleMarker(latlng, {
-                radius: 8,
-                fillColor: "#ff7800",
-                color: "#000",
-                weight: 0.2,
-                opacity: 0.5,
-                fillOpacity: 0.4
+            return L.marker(latlng, {
+                icon: L.icon({
+                  iconUrl: marker.icon,
+                  iconSize: [marker.width, marker.height],
+                  iconAnchor: [marker.width / 2, marker.height],  // rel to top-left
+                  popupAnchor: [0, -marker.height]  // rel to iconAnchor
+                }),
+                opacity: marker.default_opacity,
+                riseOnHover: true
             });
         }
     }).addTo(map);

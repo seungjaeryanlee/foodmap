@@ -3,6 +3,9 @@
  *
  * Our custom styles on the main page index.html
  */
+
+/* Map */
+
 #map {
     position:absolute;
     left: 0;
@@ -57,6 +60,10 @@ img.leaflet-image-layer {
 a:hover {
     color: #0078A8;
 }
+
+
+/* Navbar */
+
 /* prevent navbar collapse and force horiontal scroll*/
 body, nav.navbar.navbar-default {
     margin-bottom: 0px;
@@ -102,8 +109,7 @@ body, nav.navbar.navbar-default {
 }
 
 
-/* Typeahead styling*/
-
+/* Typeahead */
 
 .typeahead,
 .tt-query,
