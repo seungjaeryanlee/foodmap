@@ -32,43 +32,59 @@
 
     /*------------------------------------------------------------------------*/
 
-    // Pull locations and their GPS coordinates from the database, store in 'places'
+    // Pull latest offerings from database, store in 'offerings'
 
-    var offerings = {
-        "type": "FeatureCollection",
-        "features": []
-    };
+    function pullOfferings() {
+        var offerings = {
+            "type": "FeatureCollection",
+            "features": [],
+            "error": false   // this is set to true to indicate a failure to retrieve offerings
+        };
 
-    $.ajax({
-        url: document.URL + 'offerings',
-        async: false,
-        success: function(result) {
-            // Parse JSON response and fill in places.features with location names
-            // and GPS coordinates
-            var response_offerings = JSON.parse(result);
-            for (i = 0; i < response_offerings.length; i++) {
-                // Each feature has mostly standard parameters. We set 'coordinates'
-                // (GPS coordinates), 'popupContent' (text that appears in a
-                // popup window), and 'id' (which just needs to be a unique integer).
-               offerings.features.push({
-                "type": "Feature",
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [
-                        // NOTE: The format for the coordinates is LONGITUDE, LATITUDE
-                        // (backwards from the norm). This is DUMB! But ugh such is life.
-                        parseFloat(response_offerings[i].location.lng), parseFloat(response_offerings[i].location.lat)
-                    ]
-                },
-                "properties": {
-                    "popupContent": "<b>" + response_offerings[i].location.name + "</b><br><i>"+ response_offerings[i].title + "</i><br>" + (parseFloat(response_offerings[i].minutes) >= 60? "1 hour, "+(parseFloat(response_offerings[i].minutes)-60): response_offerings[i].minutes) + " minutes old",  // by default this is just location's name
-                    "extra": response_offerings[i].description
-                },
-                "id": i
-            });
-           }
-       }
-   });
+        $.ajax({
+            url: document.URL + 'offerings',
+            async: false,
+            timeout: 5000,
+            success: function(result) {
+                // Parse JSON response and fill in places.features with location names
+                // and GPS coordinates
+                var response_offerings = JSON.parse(result);
+                for (i = 0; i < response_offerings.length; i++) {
+                    // Each feature has mostly standard parameters. We set 'coordinates'
+                    // (GPS coordinates), 'popupContent' (text that appears in a
+                    // popup window), and 'id' (which just needs to be a unique integer).
+                    offerings.features.push({
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                // NOTE: The format for the coordinates is LONGITUDE, LATITUDE
+                                // (backwards from the norm). This is DUMB! But ugh such is life.
+                                parseFloat(response_offerings[i].location.lng), parseFloat(response_offerings[i].location.lat)
+                            ]
+                        },
+                        "properties": {
+                            "popupContent": "<b>" + response_offerings[i].location.name + "</b><br><i>"+ response_offerings[i].title + "</i><br>" + (parseFloat(response_offerings[i].minutes) >= 60? "1 hour, "+(parseFloat(response_offerings[i].minutes)-60): response_offerings[i].minutes) + " minutes old",  // by default this is just location's name
+                            "extra": response_offerings[i].description
+                        },
+                        "id": i
+                    });
+                }
+            },
+
+            error: function() {
+                offerings.error = true;
+            }
+        });
+
+        return offerings;
+    }
+
+    var offerings = pullOfferings();
+    if (offerings.error) {
+        // TODO: Make a nicer looking error message built into the UI
+        alert('Oops! We could not get the free food offerings!');
+    }
 
     /*------------------------------------------------------------------------*/
 
@@ -94,36 +110,52 @@
         this.closePopup();
     }
 
-    layers.offerings = L.geoJSON(offerings, {
-        style: function (feature) {
-            return feature.properties && feature.properties.style;
-        },
+    // Place markers on map
+    function placeMarkers() {
+        layers.offerings = L.geoJSON(offerings, {
+            style: function (feature) {
+                return feature.properties && feature.properties.style;
+            },
 
-        onEachFeature: function (feature, layer) {
-            // Adds mouse hover/click listeners and sets the marker's popup window
-            // content. The parameter 'feature' passed in is one of the feature
-            // objects in 'places', defined in the last section.
-            var popupContent = feature.properties.popupContent;
-            layer.bindPopup(popupContent, {closeButton: false, autoPan: false});
-            layer.on({
-                'mouseover': onSetHover,
-                'mouseout': onRemoveHover,
-                'click': function(){alert('<h1>' + feature.properties.popupContent + '<br>' + feature.properties.extra + '</h1>');}
-            });
-        },
+            onEachFeature: function (feature, layer) {
+                // Adds mouse hover/click listeners and sets the marker's popup window
+                // content. The parameter 'feature' passed in is one of the feature
+                // objects in 'places', defined in the last section.
+                var popupContent = feature.properties.popupContent;
+                layer.bindPopup(popupContent, {closeButton: false, autoPan: false});
+                layer.on({
+                    'mouseover': onSetHover,
+                    'mouseout': onRemoveHover,
+                    'click': function(){alert('<h1>' + feature.properties.popupContent + '<br>' + feature.properties.extra + '</h1>');}
+                });
+            },
 
-        pointToLayer: function (feature, latlng) {
-            return L.marker(latlng, {
-                icon: L.icon({
-                  iconUrl: marker.icon,
-                  iconSize: [marker.width, marker.height],
-                  iconAnchor: [marker.width / 2, marker.height],  // rel to top-left
-                  popupAnchor: [0, -marker.height]  // rel to iconAnchor
-                }),
-                opacity: marker.default_opacity,
-                riseOnHover: true
-            });
+            pointToLayer: function (feature, latlng) {
+                return L.marker(latlng, {
+                    icon: L.icon({
+                      iconUrl: marker.icon,
+                      iconSize: [marker.width, marker.height],
+                      iconAnchor: [marker.width / 2, marker.height],  // rel to top-left
+                      popupAnchor: [0, -marker.height]  // rel to iconAnchor
+                    }),
+                    opacity: marker.default_opacity,
+                    riseOnHover: true
+                });
+            }
+        }).addTo(map);
+    }
+
+    placeMarkers();
+
+    // Update markers every minute
+    setInterval(function() {
+        offerings = pullOfferings();
+        if (!offerings.error) {
+            map.removeLayer(layers.offerings);
+            placeMarkers();
+        } else {
+            console.log('Failed to update markers. Retaining the old markers.');
         }
-    }).addTo(map);
+    }, 60000);
 
 });
