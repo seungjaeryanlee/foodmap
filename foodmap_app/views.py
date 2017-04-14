@@ -1,3 +1,4 @@
+import datetime
 import json
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -15,8 +16,8 @@ def index(request):
 
 def offerings(request):
     '''
-    Responds with all of the most recent offerings at every location with
-    an offering, formatted in JSON:
+    Responds with all of the most recent offerings (under 2 hours old) at every
+    location with an offering, formatted in JSON:
     [
         {
             "location": {"name": "Frist Campus Center", "lat": "12.3456789", "lng": "12.3456789"},
@@ -27,14 +28,16 @@ def offerings(request):
         ...
     ]
     '''
-    offerings = Offering.objects.order_by('-timestamp')
+    # Pull all offerings under 2 hours old
+    now = timezone.now()
+    min_timestamp = now - datetime.timedelta(hours=2)
+    offerings = Offering.objects.filter(timestamp__gte=min_timestamp).order_by('-timestamp')
     if len(offerings) == 0:
         return HttpResponse(json.dumps({}))
 
-    # If any location has more than one offering, filter out the old ones
+    # If any location has more than one offering, filter out the older ones
     most_recent_offerings = []
     locations_with_offerings = []
-    now = timezone.now()
     for offering in offerings:
         if offering.location in locations_with_offerings:
            continue  # newest offering is already in most_recent_offerings
