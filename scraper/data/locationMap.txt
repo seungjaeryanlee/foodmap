@@ -436,3 +436,28 @@ Wu Hall,Wu Hall
 Wyman Cottage,Wyman Cottage
 Wyman House,Wyman House
 Yoseloff Hall,Yoseloff Hall
+betts auditorium,Architecture Building
+class of 1970 theatre,1981 Hall
+dodds auditorium,Robertson Halls
+forbes college black box,Forbes Main
+richardson auditorium,Alexander Hall
+rocky/mathey theater,Madison Hall
+1901 hall,1901-Laughlin Hall
+laughlin hall,1901-Laughlin Hall
+1927 Hall,1927 - Clapp Hall
+Clapp Hall,1927 - Clapp Hall
+Clapp,1927 - Clapp Hall
+Princeton Station,Princeton Station (Dinky)
+frist gallery,Frist Campus Center
+Frist,Frist Campus Center
+Engineering QUAD,Enginerring QUAD
+equad,Enginerring QUAD
+feinberg,Feinberg Hall
+CJL,Center for Jewish Life
+Wilcox,Wilcox Hall
+math building,Fine Hall
+cos building,Computer Science Building
+cs building,Computer Science Building
+fine tower,Fine Hall
+digital learning lab,Lewis Library
+mccosh health,McCosh Health Center

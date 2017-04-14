@@ -155,9 +155,11 @@ var main = function (auth) {
         // if unread message exists
         if (!err && res && res.messages && res.messages.length) {
             for(var i = 0; i < res.messages.length; i++) {
-                // FIXME: Restore after testing
-                // parseEmail(res.messages[i].id, markAsRead);
-                parseEmail(res.messages[i].id, function(){});
+                (function(index) {
+                    // Timeout to prevent making too many requests at once    
+                    // setTimeout(parseEmail, 1000+(1000*index), res.messages[index].id, markAsRead)
+                    setTimeout(parseEmail, 1000+(1000*index), res.messages[index].id, function(){})
+                })(i);
             }
         } else {
             console.log('No unread message exists');
@@ -203,10 +205,6 @@ function parseEmail(messageId, callback) {
             deleteFromDB(entry);
         }
     });
-
-    // Disable for testing
-    // Timeout to prevent making too many requests at once    
-    setTimeout(callback, 500, messageId);
 }
 
 /**
@@ -387,6 +385,7 @@ function getFood(text) {
     text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
     for(food of foods) {
         if(text.indexOf(food.toLowerCase()) > - 1) { // Substring search
+            food = food.charAt(0).toUpperCase() + food.slice(1);
             matches.push(food);
         }
     }
@@ -431,12 +430,12 @@ function insertToDB(entry) {
                 if(typeof entry.image === 'undefined') {
                     // FIXME: Temporarily don't have thread_id
                     var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description) VALUES (?, ?, ?, ?)");
-                    stmt.run(entry.timestamp, locationId, entry.food.toString(), entry.body);
+                    stmt.run(entry.timestamp, locationId, entry.food.join('. '), entry.body);
                     stmt.finalize();
                 }
                 else {
                     var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, image) VALUES (?, ?, ?, ?, ?)");
-                    stmt.run(entry.timestamp, locationId, entry.food.toString(), entry.body, entry.image.name);
+                    stmt.run(entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.image.name);
                     stmt.finalize();
                 }
             });
