@@ -385,6 +385,7 @@ function getFood(text) {
     text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
     for(food of foods) {
         if(text.indexOf(food.toLowerCase()) > - 1) { // Substring search
+            food = food.charAt(0).toUpperCase() + food.slice(1);
             matches.push(food);
         }
     }
@@ -429,12 +430,12 @@ function insertToDB(entry) {
                 if(typeof entry.image === 'undefined') {
                     // FIXME: Temporarily don't have thread_id
                     var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description) VALUES (?, ?, ?, ?)");
-                    stmt.run(entry.timestamp, locationId, entry.food.toString(), entry.body);
+                    stmt.run(entry.timestamp, locationId, entry.food.join('. '), entry.body);
                     stmt.finalize();
                 }
                 else {
                     var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, image) VALUES (?, ?, ?, ?, ?)");
-                    stmt.run(entry.timestamp, locationId, entry.food.toString(), entry.body, entry.image.name);
+                    stmt.run(entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.image.name);
                     stmt.finalize();
                 }
             });
