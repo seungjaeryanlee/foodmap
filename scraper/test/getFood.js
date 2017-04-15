@@ -11,41 +11,41 @@ describe('getFood()', function() {
         })
     })
     describe('one match', function() {
-        it('getFood(\"pizza\") should equal [\"pizza\"]', function() {
-            assert.deepEqual(app.getFood("pizza"), ["pizza"]);
+        it('getFood(\"pizza\") should equal [\"Pizza\"]', function() {
+            assert.deepEqual(app.getFood("pizza"), ["Pizza"]);
         })
-        it('getFood(\"lots of sushi\") should equal [\"sushi\"]', function() {
-            assert.deepEqual(app.getFood("lots of sushi"), ["sushi"]);
+        it('getFood(\"lots of sushi\") should equal [\"Sushi\"]', function() {
+            assert.deepEqual(app.getFood("lots of sushi"), ["Sushi"]);
         })
     })
     describe('multiple matches', function() {
-        it('getFood(\"burrito taco\") should equal [\"burrito\", \"taco\"]', function() {
-            assert.deepEqual(app.getFood("burrito taco"), ["burrito", "taco"]);
+        it('getFood(\"burrito taco\") should equal [\"Burrito\", \"Taco\"]', function() {
+            assert.deepEqual(app.getFood("burrito taco"), ["Burrito", "Taco"]);
         })
-        it('getFood(\"taco burrito\") should equal [\"burrito\", \"taco\"]', function() {
-            assert.deepEqual(app.getFood("taco burrito"), ["burrito", "taco"]);
+        it('getFood(\"taco burrito\") should equal [\"Burrito\", \"Taco\"]', function() {
+            assert.deepEqual(app.getFood("taco burrito"), ["Burrito", "Taco"]);
         })
-        it('getFood(\"come and get bagel and muffin\") should equal [\"bagel\", \"muffin\"]', function() {
-            assert.deepEqual(app.getFood("come and get bagel and muffin"), ["bagel", "muffin"]);
+        it('getFood(\"come and get bagel and muffin\") should equal [\"Bagel\", \"Muffin\"]', function() {
+            assert.deepEqual(app.getFood("come and get bagel and muffin"), ["Bagel", "Muffin"]);
         })
     })
     describe('case-insensitive match', function() {
-        it('getFood(\"Mehek with milk\") should equal [\"mehek\", \"milk\"]', function() {
-            assert.deepEqual(app.getFood("Mehek with milk"), ["mehek", "milk"]);
+        it('getFood(\"Mehek with milk\") should equal [\"Mehek\", \"Milk\"]', function() {
+            assert.deepEqual(app.getFood("Mehek with milk"), ["Mehek", "Milk"]);
         })
-        it('getFood(\"PAPA JOHNS\") should equal [\"papa johns\"]', function() {
-            assert.deepEqual(app.getFood("PAPA JOHNS"), ["papa johns"]);
+        it('getFood(\"PAPA JOHNS\") should equal [\"Papa johns\"]', function() {
+            assert.deepEqual(app.getFood("PAPA JOHNS"), ["Papa johns"]);
         })
-        it('getFood(\"Get excited for TiRaMiSu!\") should equal [\"tiramisu\"]', function() {
-            assert.deepEqual(app.getFood("Get excited for TiRaMiSu!"), ["tiramisu"]);
+        it('getFood(\"Get excited for TiRaMiSu!\") should equal [\"Tiramisu\"]', function() {
+            assert.deepEqual(app.getFood("Get excited for TiRaMiSu!"), ["Tiramisu"]);
         })
     })
     describe('punctuation deletion', function() {
-        it('getFood(\"Time for P.I.Z.Z.A\") should equal [\"pizza\"]', function() {
-            assert.deepEqual(app.getFood("Time for P.I.Z.Z.A"), ["pizza"]);
+        it('getFood(\"Time for P.I.Z.Z.A\") should equal [\"Pizza\"]', function() {
+            assert.deepEqual(app.getFood("Time for P.I.Z.Z.A"), ["Pizza"]);
         })
-        it('getFood(\"Food from Olive\'s\") should equal [\"olives\"]', function() {
-            assert.deepEqual(app.getFood("Food from Olive\'s"), ["olives"]);
+        it('getFood(\"Food from Olive\'s\") should equal [\"Olives\"]', function() {
+            assert.deepEqual(app.getFood("Food from Olive\'s"), ["Olives"]);
         })
     })
     describe('biggest substring', function(){});
