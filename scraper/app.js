@@ -198,7 +198,7 @@ function parseEmail(messageId, callback) {
         // })
 
         entry = formatEmail(result, messageId);
-
+        console.log(entry);
         // INSERT or DELETE entry
         if(getRequestType(entry.title+entry.body) == INSERT) {
             insertToDB(entry);
@@ -328,6 +328,9 @@ function getBodyFromMime(mimeMessage) {
         console.log("getBodyFromMime() unexpected case");
         body = "";
     }
+
+    /* Delete FreeFood footer */
+    body = body.replace("-----\r\nYou are receiving this email because you are subscribed to the Free Food mailing list, operated by the USG. If you have questions or are having difficulties with this listserv, please send an email to usg@princeton.edu.\r\n\r\nIn your message to the freefood listserv, please state what type of food it is, where it is, until when it will be available and how delicious it is.\r\n\r\nTo unsubscribe, please email listserv@princeton.edu the line UNSUBSRIBE FREEFOOD in the body of the message. Please be sure to remove your e-mail signature (if any) before you send that message.\r\n","");
 
     return body;
 }
