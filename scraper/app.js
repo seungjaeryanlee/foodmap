@@ -424,17 +424,17 @@ function insertToDB(entry) {
         if (err) throw err;
         console.log('Connected to postgres! Getting schemas...');
 
-        client.query('SELECT id FROM foodmap_app_location WHERE name = ?', [entry.location], function(err, result) {
+        client.query('SELECT id FROM foodmap_app_location WHERE name = $1', [entry.location], function(err, result) {
             if (err) throw err;
 
             var locationId = result.rows[0].id;
 
             if(typeof entry.image === 'undefined') {
-                client.query('INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, thread_id) VALUES (?, ?, ?, ?, ?)',
+                client.query('INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, thread_id) VALUES ($1, $2, $3, $4, $5)',
                     [entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.threadId]);
             }
             else {
-                client.query('INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, thread_id, image) VALUES (?, ?, ?, ?, ?, ?)',
+                client.query('INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, thread_id, image) VALUES ($1, $2, $3, $4, $5, $6)',
                     [entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.threadId, entry.image.name]);
             }
 
@@ -454,7 +454,7 @@ function deleteFromDB(entry) {
         if (err) throw err;
         console.log('Connected to postgres! Getting schemas...');
 
-        client.query('DELETE FROM foodmap_app_offering WHERE thread_id=(?)', [entry.threadId]);
+        client.query('DELETE FROM foodmap_app_offering WHERE thread_id=($1)', [entry.threadId]);
         console.log("Entry deleted from database.");
     });
     // FIXME: False positive?
