@@ -14,7 +14,7 @@ location_name_max_length = 50
 location_lat_lng_decimal_places = 12
 
 offering_title_max_length = 100
-offering_description_max_length = 1000
+offering_description_max_length = 10000
 offering_thread_id_max_length = 16
 
 class Location(models.Model):
