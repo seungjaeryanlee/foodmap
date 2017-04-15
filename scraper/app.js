@@ -10,7 +10,10 @@ var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
 var util = require('util');
-var sqlite3 = require('sqlite3').verbose();
+var pg = require('pg');
+
+// https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-node-js
+pg.defaults.ssl = true;
 
 // read/write access except delete for gmail, and read/write access to calendar
 var SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
@@ -37,7 +40,6 @@ module.exports.INSERT = INSERT;
 // Data files
 var foods = fs.readFileSync(__dirname + '/data/foods.txt').toString().split('\n');
 var locations = fs.readFileSync(__dirname + '/data/locationMap.txt').toString().split('\n');
-var db = new sqlite3.Database(__dirname + '/../db.sqlite3');
 
 // Extract location map and alias
 var locationMap = {};
@@ -327,6 +329,12 @@ function getBodyFromMime(mimeMessage) {
         body = "";
     }
 
+    /* Delete FreeFood footer */
+    body = body.replace('-----\r\nYou are receiving this email because you are subscribed to the Free Food mailing list, operated by the USG. If you have questions or are having difficulties with this listserv, please send an email to usg@princeton.edu.\r\n\r\nIn your message to the freefood listserv, please state what type of food it is, where it is, until when it will be available and how delicious it is.\r\n\r\nTo unsubscribe, please email listserv@princeton.edu the line UNSUBSRIBE FREEFOOD in the body of the message. Please be sure to remove your e-mail signature (if any) before you send that message.\r\n', '');
+
+    /* Delete null character 0x00 */
+    body = body.replace(/\0/g, '');
+    
     return body;
 }
 
@@ -418,32 +426,30 @@ function getLocation(text) {
  * @param {Object} entry The entry to be inserted to the database
  */
 function insertToDB(entry) {
-    // FIXME: Not run if no location found?
-    db.serialize(function() {
-        db.each("SELECT id FROM foodmap_app_location WHERE name = ?", [entry.location], function(err, row) {
-            if(err) {
-                console.log(err);
+    pg.connect(process.env.DATABASE_URL, function(err, client) {
+        if (err) throw err;
+        console.log('Connected to postgres! Getting schemas...');
+
+        client.query('SELECT id FROM foodmap_app_location WHERE name = $1', [entry.location], function(err, result) {
+            if (err) throw err;
+
+            console.log(entry.location);
+            console.log(result);
+            if(!result || !result.rows || !result.rows[0]) { return; }
+            var locationId = result.rows[0].id;
+
+            if(typeof entry.image === 'undefined') {
+                client.query('INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, thread_id) VALUES ($1, $2, $3, $4, $5)',
+                    [entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.threadId]);
             }
-            var locationId = row.id;
-            
-            db.serialize(function() {
-                if(typeof entry.image === 'undefined') {
-                    // FIXME: Temporarily don't have thread_id
-                    var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description) VALUES (?, ?, ?, ?)");
-                    stmt.run(entry.timestamp, locationId, entry.food.join('. '), entry.body);
-                    stmt.finalize();
-                }
-                else {
-                    var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, image) VALUES (?, ?, ?, ?, ?)");
-                    stmt.run(entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.image.name);
-                    stmt.finalize();
-                }
-            });
+            else {
+                client.query('INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, thread_id, image) VALUES ($1, $2, $3, $4, $5, $6)',
+                    [entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.threadId, entry.image.name]);
+            }
+
             console.log("Entry inserted to database.");
         });
     });
-
-    
 }
 
 /**
@@ -453,11 +459,13 @@ function insertToDB(entry) {
  */
 function deleteFromDB(entry) {
     // If there is an entry with the given ThreadID, Delete
-    db.serialize(function() {
-        db.run("DELETE FROM foodmap_app_offering WHERE thread_id=(?)", entry.threadId);
-    });
-    console.log("Entry deleted from database.");
+    pg.connect(process.env.DATABASE_URL, function(err, client) {
+        if (err) throw err;
+        console.log('Connected to postgres! Getting schemas...');
 
+        client.query('DELETE FROM foodmap_app_offering WHERE thread_id=($1)', [entry.threadId]);
+        console.log("Entry deleted from database.");
+    });
     // FIXME: False positive?
 }
 
