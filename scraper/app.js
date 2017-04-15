@@ -198,7 +198,7 @@ function parseEmail(messageId, callback) {
         // })
 
         entry = formatEmail(result, messageId);
-        console.log(entry);
+
         // INSERT or DELETE entry
         if(getRequestType(entry.title+entry.body) == INSERT) {
             insertToDB(entry);
@@ -430,6 +430,9 @@ function insertToDB(entry) {
         client.query('SELECT id FROM foodmap_app_location WHERE name = $1', [entry.location], function(err, result) {
             if (err) throw err;
 
+            console.log(id);
+            console.log(result);
+            if(!result || !result.rows || !result.rows[0]) { return; }
             var locationId = result.rows[0].id;
 
             if(typeof entry.image === 'undefined') {
