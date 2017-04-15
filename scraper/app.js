@@ -40,7 +40,6 @@ module.exports.INSERT = INSERT;
 // Data files
 var foods = fs.readFileSync(__dirname + '/data/foods.txt').toString().split('\n');
 var locations = fs.readFileSync(__dirname + '/data/locationMap.txt').toString().split('\n');
-var db = new sqlite3.Database(__dirname + '/../db.sqlite3');
 
 // Extract location map and alias
 var locationMap = {};
