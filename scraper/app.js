@@ -10,7 +10,10 @@ var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
 var util = require('util');
-var sqlite3 = require('sqlite3').verbose();
+var pg = require('pg');
+
+// https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-node-js
+pg.defaults.ssl = true;
 
 // read/write access except delete for gmail, and read/write access to calendar
 var SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
@@ -418,32 +421,27 @@ function getLocation(text) {
  * @param {Object} entry The entry to be inserted to the database
  */
 function insertToDB(entry) {
-    // FIXME: Not run if no location found?
-    db.serialize(function() {
-        db.each("SELECT id FROM foodmap_app_location WHERE name = ?", [entry.location], function(err, row) {
-            if(err) {
-                console.log(err);
+    pg.connect(process.env.DATABASE_URL, function(err, client) {
+        if (err) throw err;
+        console.log('Connected to postgres! Getting schemas...');
+
+        client.query('SELECT id FROM foodmap_app_location WHERE name = ?', [entry.location], function(err, result) {
+            if (err) throw err;
+
+            var locationId = result.rows[0].id;
+
+            if(typeof entry.image === 'undefined') {
+                client.query('INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, thread_id) VALUES (?, ?, ?, ?, ?)',
+                    [entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.threadId]);
             }
-            var locationId = row.id;
-            
-            db.serialize(function() {
-                if(typeof entry.image === 'undefined') {
-                    // FIXME: Temporarily don't have thread_id
-                    var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description) VALUES (?, ?, ?, ?)");
-                    stmt.run(entry.timestamp, locationId, entry.food.join('. '), entry.body);
-                    stmt.finalize();
-                }
-                else {
-                    var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, image) VALUES (?, ?, ?, ?, ?)");
-                    stmt.run(entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.image.name);
-                    stmt.finalize();
-                }
-            });
+            else {
+                client.query('INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, thread_id, image) VALUES (?, ?, ?, ?, ?, ?)',
+                    [entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.threadId, entry.image.name]);
+            }
+
             console.log("Entry inserted to database.");
         });
     });
-
-    
 }
 
 /**
@@ -453,11 +451,13 @@ function insertToDB(entry) {
  */
 function deleteFromDB(entry) {
     // If there is an entry with the given ThreadID, Delete
-    db.serialize(function() {
-        db.run("DELETE FROM foodmap_app_offering WHERE thread_id=(?)", entry.threadId);
-    });
-    console.log("Entry deleted from database.");
+    pg.connect(process.env.DATABASE_URL, function(err, client) {
+        if (err) throw err;
+        console.log('Connected to postgres! Getting schemas...');
 
+        client.query('DELETE FROM foodmap_app_offering WHERE thread_id=(?)', [entry.threadId]);
+        console.log("Entry deleted from database.");
+    });
     // FIXME: False positive?
 }
 

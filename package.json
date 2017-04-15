@@ -6,7 +6,7 @@
   "dependencies": {
     "google-auth-library": "^0.10.0",
     "googleapis": "^18.0.0",
-    "sqlite3": "^3.1.8"
+    "pg": "6.1.5"
   },
   "devDependencies": {
     "mocha": "^3.2.0"
