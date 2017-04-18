@@ -2,241 +2,72 @@ roma
 roma theater
 roma classroom
 whitman black box
-taplin auditorium
-taylor auditorium
-theatre intime
-wilson college black box
-1912 pavilion
 alexander
-alexander hall
 andlinger
-andlinger center
 baker
 bendheim
-bendheim center
-bendheim
-bendheim hall
 blair
-blair hall
 bloomberg
-bloomberg hall
 bobst
-bobst hall
 bogle
-bogle hall
 bowen
-bowen hall
 brown
-brown hall
 burr
-burr hall
 buyers
-buyers hall
 campbell
-campbell hall
 cannon
-cannon club
 cap and gown
-cap and gown club
-chancellor green
-chapel
 charter
-charter club
 clio
-clio hall
-cloister inn
 colonial
-colonial club
 corwin
-corwin hall
 cottage
-cottage club
 cuyler
-cuyler hall
 dickinson
-dickinson hall
 dod
-dod hall
 dodge
-dodge hall
 dodge-osborn
-dodge-osborn hall
 edwards
-edwards hall
 eno
-eno hall
 fields
-fields center
 fine
 fisher
-fisher hall
-forbes addition
-forbes main inn
-forbes
 forrestal
 foulke
-foulke hall
-frick chemistry laboratory
-frick
-friend
 gauss
-gauss hall
 green
-green hall
 guyot
-guyot hall
 hamilton
-hamilton hall
 hargadon
-hargadon hall
 henry
-henry hall
-henry house
 holder
-holder hall
-icahn
 ivy
-ivy club
 jadwin
-jadwin hall
 joline
-joline hall
 jones
-jones hall
-econ building
-studio lab
-lauritzen
-lauritzen hall
-little
-little hall
 lockhart
-lockhart hall
-macmillan building
 madison
-madison hall
 maeder
-maeder hall
 marx
-marx hall
 mccormick
-mccormick hall
 mcdonnell
-mcdonnell hall
 moffett
-lt lab
-lt laboratory
-lewis thomas
-lewis-thomas
-moran building
-murray theater
 nassau
-nassau hall
-new graduate college
-old graduate college
 patton
-patton hall
-peretsman-scully
-peretsman-scully hall
 peyton
-peyton hall
 pyne
-pyne hall
 quadrangle
-quadrangle club
 robertson
-robertson hall
 sayre
-sayre hall
-scheide caldwell house
 scully
-scully hall
-sherrerd
-sherrerd hall
-spelman
-spelman hall
 stanhope
-stanhope hall
 terrace
-terrace club
-tiger inn
 tower
-tower club
 von neumann
-von neumann hall
 walker
-walker hall
 wallace
-wallace hall
 wendell
-wendell hall
-west college
-west lodge
 whig
-whig hall
 wilf
-wilf hall
-witherspoon
-witherspoon hall
 wright
-wright hall
-wu
-wu hall
-wyman house
 yoseloff
-yoseloff hall
-atrium cafe
-butler college dining
-butler college dining hall
-cafe vivian
-chancellor green cafe
-chemistry cafe
-equad cafe
-forbes dining
-forbes dining hall
-forbes pdr
-forbes private dining room
-mathey
-rocky
-wilson
-butler
-whitman
-whitman pdr
-butler pdr
-wilson pdr
-rocky pdr
-mathey pdr
-whitman private dining room
-mathey private dining room
-butler private dining room
-wilson private dining room
-rocky private dining room
-late meal
-graduate college dining
-graduate college dining hall
-mathey dining
-mathey dining hall
-rockefeller dining
-rockefeller dining hall
-studio 34
-studio
-whitman dining
-whitman dining hall
-wilson dining
-wilson dining hall
-woodrow wilson school
-woody woo
-carl a. fields
-carl fields
-davis international
-davis international center
-lesbian gay bisexual transgender
-lesbian gay bisexual transgender center
-lgbt center
-mcgraw
-mcgraw center
-mcgraw
-pace
-pace center
-women's
-women's center
-spoon
