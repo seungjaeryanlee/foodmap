@@ -6,7 +6,7 @@ from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
-from foodmap_proj.settings import MEDIA_ROOT
+from foodmap_proj.settings.common import MEDIA_ROOT
 from .models import Location, Offering
 
 # Create your tests here.
