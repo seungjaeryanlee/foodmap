@@ -8,6 +8,15 @@ https://docs.djangoproject.com/en/1.10/topics/settings/
 
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.10/ref/settings/
+
+------------------------------------------------------------------------
+
+Settings explicitly excluded, which must be specified in production.py or
+development.py specific settings:
+- ALLOWED_HOSTS
+- SECRET_KEY
+- DEBUG
+- DATABASES
 """
 
 import os
@@ -18,15 +27,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'vrg+496us^_trq72er&6tbm2md!-g0pggirq(qbc85n=*k4wcf'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['foodmap333.herokuapp.com', 'localhost']
-
 
 # Application definition
 
@@ -73,14 +73,7 @@ WSGI_APPLICATION = 'foodmap_proj.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-
+# See production.py or development.py
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators

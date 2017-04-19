@@ -18,6 +18,12 @@ fi
 if [ ! -d "venv" ]; then
   echo "Setting up Python virutal environment..."
   virtualenv venv
+
+  cd venv/bin/
+  echo '# Set DJANGO_SETTINGS_MODULE so Django knows where to find project settings' >> activate
+  echo 'export DJANGO_SETTINGS_MODULE="foodmap_proj.settings.development"' >> activate
+  cd ../..
+
   echo "Done!"
   echo
 fi

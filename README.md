@@ -36,8 +36,16 @@ Also, since the database itself is not committed with the code, there is some ex
 
 The `setup` script automates both the dependency installations and the database setup for you. It installs the dependencies using Python's package manager `pip`, and then runs `setup_database.py`.
 
+We also give credit to the following resources that we used in this project:
+- Bootstrap 3.3.7: CSS framework for web pages
+- jQuery 2.2.3: standard JS library for dynamic content (AJAX, animations, etc.)
+- Leaflet 1.0.3: map framework/library for CSS/JS
+- Leaflet Locate Control https://github.com/domoritz/leaflet-locatecontrol: Leaflet CSS/JSplugin for finding a user's geolocation
+- Maps Icons Collection https://mapicons.mapsmarker.com: provides icons for map markers
+- PhantomJS: virtual browser for web scraping (used to scrape data in `locations.json`)
+
 ### Basic usage
-Here are some common commands for reference. All of them use the `manage.py` module located in the root of this project. See the official django tutorial and/or documentation (`https://docs.djangoproject.com/en/1.10/`) for more details:
+Here are some common commands for reference. All of them use the `manage.py` module located in the root of this project. See the official django tutorial and/or documentation (https://docs.djangoproject.com/en/1.10/) for more details:
 
 - `python manage.py runserver`: Starts a web server for the project at IP address 127.0.0.1 (localhost) on port 8000.
 - `python manage.py shell`: Loads up an interactive Python shell (as if you just typed `python` into your terminal), but auto-configures Django so you can import and run any modules/code in this project.

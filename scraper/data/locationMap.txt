@@ -436,3 +436,142 @@ Wu Hall,Wu Hall
 Wyman Cottage,Wyman Cottage
 Wyman House,Wyman House
 Yoseloff Hall,Yoseloff Hall
+betts auditorium,Architecture Building
+class of 1970 theatre,1981 Hall
+dodds auditorium,Robertson Halls
+forbes college black box,Forbes Main
+richardson auditorium,Alexander Hall
+rocky/mathey theater,Madison Hall
+1901 hall,1901-Laughlin Hall
+laughlin hall,1901-Laughlin Hall
+1927 Hall,1927 - Clapp Hall
+Clapp Hall,1927 - Clapp Hall
+Clapp,1927 - Clapp Hall
+Princeton Station,Princeton Station (Dinky)
+frist gallery,Frist Campus Center
+Frist,Frist Campus Center
+Engineering QUAD,Enginerring QUAD
+equad,Enginerring QUAD
+feinberg,Feinberg Hall
+CJL,Center for Jewish Life
+Wilcox,Wilcox Hall
+math building,Fine Hall
+cos building,Computer Science Building
+cs building,Computer Science Building
+fine tower,Fine Hall
+digital learning lab,Lewis Library
+mccosh health,McCosh Health Center
+CAF 1985 room,Fields Center
+Frist MPR,Frist Campus Center
+Frist pool tables,Frist Campus Center
+Witherspoon,Witherspoon Hall
+Wilson commons,Wilcox Hall
+Frist West TV Lounge,Frist Campus Center
+the wa,Wawa
+E-quad,Enginerring QUAD
+1915 room,1915 Hall
+Brush Gallery,Jadwin Hall
+Campus Club Dining Room,Campus Club
+east pyne,East Pyne Building
+j street,Wilcox Hall
+studio 34,1967 Hall
+Carl A Fields Center,Fields Center
+murray dodge,Dodge Hall
+LGBT Center,Frist Campus Center
+Frist basement,Frist Campus Center
+CAF multipurpose room,Fields Center
+Carl Field Center,Fields Center
+Campus Club Prospect Room,Campus Club
+LGBT ctr,Frist Campus Center
+Prospect Room Campus Club,Campus Club
+rainbow lounge,Frist Campus Center
+Rocky Common Room,Madison Hall
+Wilson blackbox,Wilcox Hall
+Wilson black box,Wilcox Hall
+Whitman DH,Community Hall
+Whitman dining hall,Community Hall
+Whitman dining,Community Hall
+Whitman dhall,Community Hall
+women's center,Frist Campus Center
+mathey common room,Madison Hall
+rocky dining hall,Madison Hall
+rocky dhall,Madison Hall
+rocky dh,Madison Hall
+rocky pdr,Madison Hall
+rocky private dining room,Madison Hall
+mathey dining hall,Hamilton Hall
+mathey dhall,Hamilton Hall
+mathey dh,Hamilton Hall
+in whig,Whig Hall
+McCormick,McCormick Hall
+Chancellor Green Cafe,Chancellor Green
+whitman cafe,Community Hall
+wendell c307 kitchen,Wendell Hall C
+Witherspoon's,Frist Campus Center
+Witherspoon kitchen,Witherspoon Hall
+Witherspoon Grill,Frist Campus Center
+Lauritzen,Lauritzen Hall
+Dillon,Dillon Gym
+McGraw,Frist Campus Center
+Wu Dining Hall,Wu Hall
+butler dining hall,Wu Hall
+butler dhall,Wu Hall
+butler dh,Wu Hall
+butler pdr,Wu Hall
+butler private dining room,Wu Hall
+wilson pdr,Wilcox Hall
+wilson private dining room,Wilcox Hall
+Carl A Fields,Fields center
+Carl Fields,Fields Center
+mcgraw center,Frist Campus Center
+mathey pdr,Hamilton Hall
+mathey private dining room,Hamilton Hall
+wilson college black box,Wilcox Hall
+wilson college blackbox,Wilcox Hall
+Frick,Frick Chemistry Laboratory
+late meal area,Frist Campus Center
+Cafe vivian,Frist Campus Center
+Sherrerd,Sherrerd Hall
+rockefeller dhall,Madison Hall
+rockefeller dh,Madison Hall
+rockefeller dining,Madison Hall
+rockefeller dining hall,Madison Hall
+woodrow wilson school,Robertson Hall
+woody woo building,Robertson Hall
+whitman pdr,Community Hall
+whitman private dining room,Community Hall
+1912 Pavilion,Roberts Stadium
+pace center,Frist Campus Center
+peretsman-scully,Peretsman-Scully Hall
+icahn,Icahn Laboratory
+Studio Lab,Fine Hall
+Bloomberg,Bloomberg Hall
+bendheim,Bendheim Center
+in friend,Friend Center
+Spelman Hall,Spelman Halls
+Spelman,Spelman Halls
+Wendell Hall,Wendell Hall B
+Theatre Intime,Murray Theater
+Taplin Auditorium,Fine Hall
+taylor auditorium,Frick Chemistry Laboratory
+davis ic,Louis A. Simpson International Building
+davis international,Louis A. Simpson International Building
+davis international center,Louis A. Simpson International Building
+Forbes dining hall,Forbes Main
+forbes dh,Forbes Main
+forbes dhall,Forbes Main
+forbes pdr,Forbes Main
+forbes private dining room,Forbes Main
+econ building,Julis Romo Rabinowitz Building
+lt laboratory,Thomas Laboratory
+lt lab,Thomas Laboratory
+lewis thomas lab,Thomas Laboratory
+lewis-thomas lab,Thomas Laboratory
+lewis thomas laboratory,Thomas Laboratory
+lewis-thomas laboratory,Thomas Laboratory
+atrium cafe,Louis A. Simpson International Building
+chemistry cafe,Frick Chemistry Laboratory
+graduate college dining,Old Graduate College
+graduate college dining hall,Old Graduate College
+graduate college dh,Old Graduate College
+graduate college dhall,Old Graduate College

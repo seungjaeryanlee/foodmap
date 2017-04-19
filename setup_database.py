@@ -30,7 +30,7 @@ populate = None if len(sys.argv) != 3 else sys.argv[2]
 # Some setup before we can interact with Django
 import os
 import django
-os.environ['DJANGO_SETTINGS_MODULE'] = 'foodmap_proj.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'foodmap_proj.settings.development'
 django.setup()
 
 #-------------------------------------------------------------------------------

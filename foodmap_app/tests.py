@@ -6,7 +6,7 @@ from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
-from foodmap_proj.settings import MEDIA_ROOT
+from foodmap_proj.settings.common import MEDIA_ROOT
 from .models import Location, Offering
 
 # Create your tests here.
@@ -75,7 +75,7 @@ class OfferingsViewTests(TestCase):
         for location in locations:
             location.save()
 
-        # Make two offerings with different timestamps for each location
+        # Make two offerings with different timestamps, for each location
         offerings_now = [
             create_offering(
                 timestamp=timezone.now() - datetime.timedelta(minutes=30),
@@ -141,6 +141,64 @@ class OfferingsViewTests(TestCase):
         for offering in offerings_now:
             offering.delete()
         for offering in offerings_before:
+            offering.delete()
+
+
+    def test_offerings_timestamp_constraints(self):
+        '''
+        Requests the most recent offerings and checks that they meet the
+        time constraints we impose: (1) no offering is older than 2 hours;
+        (2) no more than 1 offering per location.
+        '''
+        # Make two locations
+        locations = [
+            create_location(name='Frist Campus Center'),
+            create_location(name='Computer Science Building')
+        ]
+        for location in locations:
+            location.save()
+
+        # Make two offerings with different timestamps, for each location
+        now = timezone.now()
+        offerings_good = [
+            create_offering(
+                timestamp=now - datetime.timedelta(minutes=118),  # under 2 hours
+                location=locations[i],
+                thread_id='%16d' % i      # thread_id must be unique
+            ) for i in range(0, len(locations))
+        ]
+        for offering in offerings_good:
+            offering.save()
+
+        offerings_bad = [
+            create_offering(
+                timestamp=now - datetime.timedelta(minutes=121),  # over 2 hours
+                location=offering.location,
+                thread_id='%16s' % (100 - int(offering.thread_id))  # thread_id must be unique
+            ) for offering in offerings_good
+        ]
+        for offering in offerings_bad:
+            offering.save()
+
+        # Make the request
+        response = self.client.get(reverse('foodmap_app:offerings'))
+        test_offerings = json.loads(response.content)  # array of JSON objects, as specified in views.py
+
+        # Check that no offering is older than 2 hours (approximately)
+        epsilon = 2  # some leeway in the timestamp to account for delay between request and response
+        for offering in test_offerings:
+            self.assertTrue(offering['minutes'] < 120 + epsilon)
+
+        # Check that no location has more than 1 offering
+        locations_with_offerings = []
+        for offering in test_offerings:
+            self.assertNotIn(offering['location'], locations_with_offerings)
+            locations_with_offerings.append(offering['location'])
+
+        # Clean up database
+        for offering in offerings_good:
+            offering.delete()
+        for offering in offerings_bad:
             offering.delete()
 
 
