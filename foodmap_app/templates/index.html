@@ -20,6 +20,7 @@
     <!-- Custom styles for this template -->
     <link href="{% static 'css/styles.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="https://www.domoritz.de/leaflet-locatecontrol/dist/L.Control.Locate.min.css" />
+    <link href="{% static 'css/L.Control.Sidebar.css' %}" rel="stylesheet">
   </head>
 
   <body>
@@ -38,6 +39,8 @@
     </div> <!-- /container -->
     <div id="map"></div>
     <div class="map-container"></div>
+    
+    <div id="sidebar" style="width:30vw; height:100vh"></div>
 
     <!-- JavaScript libraries
     ================================================== -->
@@ -51,6 +54,7 @@
     </script>
 
     <!-- jquery -->
+    <script src="{% static 'js/L.Control.Sidebar.js' %}"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
 

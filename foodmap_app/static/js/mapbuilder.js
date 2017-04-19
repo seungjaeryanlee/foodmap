@@ -110,6 +110,12 @@
         this.closePopup();
     }
 
+  var sidebar = L.control.sidebar('sidebar', {
+        closeButton: true,
+        position: 'left'
+    });
+  map.addControl(sidebar);
+          
     // Place markers on map
     function placeMarkers() {
         layers.offerings = L.geoJSON(offerings, {
@@ -126,8 +132,8 @@
                 layer.on({
                     'mouseover': onSetHover,
                     'mouseout': onRemoveHover,
-                    'click': function(){alert('<h1>' + feature.properties.popupContent + '<br>' + feature.properties.extra + '</h1>');}
-                });
+                    'click': function() { sidebar.setContent('<h1>' + feature.properties.popupContent + '<br>' + feature.properties.extra + '</h1>'); sidebar.show(); }
+                 });
             },
 
             pointToLayer: function (feature, latlng) {
