@@ -197,3 +197,13 @@ div.container a.navbar-brand:active  {
 span.fa.fa-map-marker:before {
   content: '\f041';
 }
+
+/* Sidebar styles */
+
+.leaflet-sidebar {
+  z-index: 2000;
+}
+
+.leaflet-sidebar .close {
+  z-index: 2000;
+}
