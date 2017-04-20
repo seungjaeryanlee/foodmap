@@ -150,7 +150,7 @@ class OfferingsViewTests(TestCase):
         # Compare test offerings vs actual offerings
         for i in range(0, len(actual_offerings)):
             # Has correct attributes
-            self.assertEqual(sorted(test_offerings[i].keys()), ['description', 'location', 'minutes', 'title'])
+            self.assertEqual(sorted(test_offerings[i].keys()), ['description', 'location', 'minutes', 'tags', 'title'])
 
             # Has correct title and description
             self.assertEqual(test_offerings[i]['title'], actual_offerings[i].title)
@@ -168,6 +168,40 @@ class OfferingsViewTests(TestCase):
             self.assertEqual(test_location['name'], actual_location.name)
             self.assertEqual(float(test_location['lat']), actual_location.lat)
             self.assertEqual(float(test_location['lng']), actual_location.lng)
+
+            # Has correct tags (none)
+            self.assertEqual(test_offerings[i]['tags'], '')
+
+
+    def test_offerings_with_tags(self):
+        '''
+        Requests the most recent offerings, where the offerings have tags,
+        and checks that the response has all of those tags in a comma-separated
+        list. (Assumes the rest of the response is correct, as this is
+        validated by another test.)
+        '''
+        # Add tags to each offering
+        actual_tags = ['kosher', 'gluten-free', 'peanut-free']
+        actual_offerings = [self.offering1A, self.offering1B]
+        for offering in actual_offerings:
+            for tag in actual_tags:
+                create_offering_tag(offering=offering, tag=tag).save()
+
+        # Make request
+        response = self.client.get(reverse('foodmap_app:offerings'))
+        try:
+            parsed_response = json.loads(response.content)  # array of JSON objects, as specified in views.py
+        except:
+            self.fail('JSON response could not be parsed')
+
+        # Verify that response has exactly the same tags
+        test_offerings = parsed_response
+        test_offerings = sorted(test_offerings, cmp=lambda x, y: cmp(x['location']['name'], y['location']['name']))
+        actual_offerings = sorted(actual_offerings, cmp=lambda x, y: cmp(x.location.name, y.location.name))
+        for i in range(0, len(actual_offerings)):
+            test_tags = sorted(test_offerings[i]['tags'].split(','))
+            actual_tags = sorted(actual_tags)
+            self.assertEqual(test_tags, actual_tags)
 
 
     def test_offerings_timestamp_constraints(self):

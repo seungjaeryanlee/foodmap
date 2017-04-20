@@ -3,7 +3,7 @@ import json
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
-from .models import Location, Offering
+from .models import Location, Offering, OfferingTag
 
 # Create your views here.
 
@@ -23,7 +23,8 @@ def offerings(request):
             "location": {"name": "Frist Campus Center", "lat": "12.3456789", "lng": "12.3456789"},
             "title": "Pizza!",
             "description": "Come eat!",
-            "minutes": 15
+            "minutes": 15,
+            "tags": "kosher,gluten-free,peanut-free"
         },
         ...
     ]
@@ -42,6 +43,10 @@ def offerings(request):
         if offering.location in locations_with_offerings:
            continue  # newest offering is already in most_recent_offerings
 
+        # Get this offering's tags, format into comma-separated list
+        tags = OfferingTag.objects.filter(offering=offering)
+        tags_str = ','.join([str(tag) for tag in tags])
+
         most_recent_offerings.append({
             'location': {
                 'name': offering.location.name,
@@ -50,7 +55,8 @@ def offerings(request):
             },
             'title': offering.title,
             'description': offering.description,
-            'minutes': int((now - offering.timestamp).seconds / 60)
+            'minutes': int((now - offering.timestamp).seconds / 60),
+            'tags': tags_str
         })
         locations_with_offerings.append(offering.location)
 
