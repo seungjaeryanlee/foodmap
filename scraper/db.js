@@ -11,7 +11,7 @@
 var sqlite3_lib = require('sqlite3').verbose();
 var pg = require('pg');
 
-var sqlite3 = new sqlite3_lib.Database(__dirname + '/../db.sqlite3');
+var sqlite3 = new sqlite3_lib.Database(__dirname + '/../foodmap_proj/db.sqlite3');
 
 // https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-node-js
 pg.defaults.ssl = true;
@@ -54,8 +54,8 @@ var db = {
          */
         insert: function(entry) {
             // FIXME: Not run if no location found?
-            db.serialize(function() {
-                db.each("SELECT " + LOCATIONS.COLUMNS.ID + " FROM " + LOCATIONS.NAME + " WHERE " + LOCATIONS.COLUMNS.NAME + " = ?",
+            sqlite3.serialize(function() {
+                sqlite3.each("SELECT " + LOCATIONS.COLUMNS.ID + " FROM " + LOCATIONS.NAME + " WHERE " + LOCATIONS.COLUMNS.NAME + " = ?",
                     [entry.location], function(err, row) {
 
                     if(err) {
@@ -63,19 +63,19 @@ var db = {
                     }
                     var locationId = row.id;
 
-                    db.serialize(function() {
+                    sqlite3.serialize(function() {
                         if(typeof entry.image === 'undefined') {
                             // FIXME: Temporarily don't have thread_id
                             var columns = "(" + OFFERINGS.COLUMNS.TIMESTAMP + ", " + OFFERINGS.COLUMNS.LOCATION_ID + ", " + OFFERINGS.COLUMNS.TITLE + ", "
                                 + OFFERINGS.COLUMNS.DESCRIPTION + ")";
-                            var stmt = db.prepare("INSERT INTO " + OFFERINGS.NAME + " " + columns + " VALUES (?, ?, ?, ?)");
+                            var stmt = sqlite3.prepare("INSERT INTO " + OFFERINGS.NAME + " " + columns + " VALUES (?, ?, ?, ?)");
                             stmt.run(entry.timestamp, locationId, entry.food.join('. '), entry.body);
                             stmt.finalize();
                         }
                         else {
                             var columns = "(" + OFFERINGS.COLUMNS.TIMESTAMP + ", " + OFFERINGS.COLUMNS.LOCATION_ID + ", " + OFFERINGS.COLUMNS.TITLE + ", "
                                 + OFFERINGS.COLUMNS.DESCRIPTION + ", " + OFFERINGS.COLUMNS.IMAGE + ")";
-                            var stmt = db.prepare("INSERT INTO " + OFFERINGS.NAME + " " + columns + " VALUES (?, ?, ?, ?, ?)");
+                            var stmt = sqlite3.prepare("INSERT INTO " + OFFERINGS.NAME + " " + columns + " VALUES (?, ?, ?, ?, ?)");
                             stmt.run(entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.image.name);
                             stmt.finalize();
                         }

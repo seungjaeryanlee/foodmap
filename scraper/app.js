@@ -16,9 +16,9 @@ var db_module = require('./db');
 // PROJECT_MODE
 var db;
 if (process.env.PROJECT_MODE === 'development') {
-  db = db_module.sqlite;
+  db = db_module.db.sqlite;
 } else if (process.env.PROJECT_MODE === 'production') {
-  db = db_module.postgres;
+  db = db_module.db.postgres;
 } else {
   console.error('Error: PROJECT_MODE not set. Cannot set up database. Did you activate the virtual environment in the Django project?');
   process.exit(1);
