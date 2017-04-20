@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 from foodmap_proj.settings.common import MEDIA_ROOT
-from .models import Location, Offering
+from foodmap_app.models import Location, Offering, OfferingTag
 
 # Create your tests here.
 
@@ -40,6 +40,17 @@ def create_offering(timestamp=timezone.now(), location=0, title='Fresh pizza!',
     return Offering(timestamp=timestamp, location=location, title=title,
         description=description, image=image, thread_id=thread_id)
 
+def create_offering_tag(offering=0, tag='kosher'):
+    '''
+    Helper method for tests. Returns a valid OfferingTag, but does not place it
+    in the table.
+    '''
+    # Set default values
+    if offering == 0:
+        offering = create_offering()
+        offering.save()
+    return OfferingTag(offering=offering, tag=tag)
+
 #-------------------------------------------------------------------------------
 
 ### View tests
@@ -62,40 +73,61 @@ class OfferingsViewTests(TestCase):
     Tests for retrieving all of the most recent offerings in JSON.
     '''
 
+    def setUp(self):
+        '''
+        Create two sample locations and two sample offerings for use during
+        each test.
+        '''
+        # Make two locations
+        self.locationA = create_location(name='Frist Campus Center')
+        self.locationB = create_location(name='Computer Science Building')
+        locations = [self.locationA, self.locationB]
+        for location in locations:
+            location.save()
+
+        # Make two offerings per location with different timestamps. (Any of the
+        # attributes can be changed for the specific purposes of the tests, but
+        # remember to call save() after changing any attributes.)
+        now = timezone.now()
+        self.offering1A, self.offering1B = [
+            create_offering(
+                timestamp=now,
+                location=location,
+                thread_id='%16d' % locations.index(location)  # thread_id must be unique
+            ) for location in locations
+        ]
+
+        before = now - datetime.timedelta(minutes=30)
+        self.offering2A, self.offering2B = [
+            create_offering(
+                timestamp=before,
+                location=location,
+                thread_id='x%15d' % locations.index(location)  # thread_id must be unique
+            ) for location in locations
+        ]
+
+        offerings = [self.offering1A, self.offering1B, self.offering2A, self.offering2B]
+        for offering in offerings:
+            offering.save()
+
+    def tearDown(self):
+        '''
+        Delete the entries made during set-up.
+        '''
+        offerings = [self.offering1A, self.offering1B, self.offering2A, self.offering2B]
+        for offering in offerings:
+            offering.delete()
+
+        locations = [self.locationA, self.locationB]
+        for location in locations:
+            location.delete()
+
+
     def test_offerings_valid(self):
         '''
         Requests all of the most recent offerings (from each location with
         an offering), and checks that we get back correctly formatted JSON.
         '''
-        # Make two locations
-        locations = [
-            create_location(name='Frist Campus Center'),
-            create_location(name='Computer Science Building')
-        ]
-        for location in locations:
-            location.save()
-
-        # Make two offerings with different timestamps, for each location
-        offerings_now = [
-            create_offering(
-                timestamp=timezone.now() - datetime.timedelta(minutes=30),
-                location=locations[i],
-                thread_id='%16d' % i      # thread_id must be unique
-            ) for i in range(0, len(locations))
-        ]
-        for offering in offerings_now:
-            offering.save()
-
-        offerings_before = [
-            create_offering(
-                timestamp=offering.timestamp - datetime.timedelta(days=1),
-                location=offering.location,
-                thread_id='%16s' % (100 - int(offering.thread_id))  # thread_id must be unique
-            ) for offering in offerings_now
-        ]
-        for offering in offerings_before:
-            offering.save()
-
         # Make the request
         response = self.client.get(reverse('foodmap_app:offerings'))
         try:
@@ -105,7 +137,7 @@ class OfferingsViewTests(TestCase):
 
         # Verify the response is correct
         test_offerings = parsed_response
-        actual_offerings = offerings_now
+        actual_offerings = [self.offering1A, self.offering1B]  # only most recent offerings should be returned
         self.assertEqual(len(test_offerings), len(actual_offerings))  # has correct number of offerings
 
         # Sort test and actual offerings so they can be compared side-by-side
@@ -137,12 +169,6 @@ class OfferingsViewTests(TestCase):
             self.assertEqual(float(test_location['lat']), actual_location.lat)
             self.assertEqual(float(test_location['lng']), actual_location.lng)
 
-        # Clean up database
-        for offering in offerings_now:
-            offering.delete()
-        for offering in offerings_before:
-            offering.delete()
-
 
     def test_offerings_timestamp_constraints(self):
         '''
@@ -150,34 +176,17 @@ class OfferingsViewTests(TestCase):
         time constraints we impose: (1) no offering is older than 2 hours;
         (2) no more than 1 offering per location.
         '''
-        # Make two locations
-        locations = [
-            create_location(name='Frist Campus Center'),
-            create_location(name='Computer Science Building')
-        ]
-        for location in locations:
-            location.save()
+        # Set timestamps of the offerings to just before and just after
+        # 2-hour mark
+        offerings_good = [self.offering1A, self.offering1B]
+        offerings_bad  = [self.offering2A, self.offering2B]
 
-        # Make two offerings with different timestamps, for each location
         now = timezone.now()
-        offerings_good = [
-            create_offering(
-                timestamp=now - datetime.timedelta(minutes=118),  # under 2 hours
-                location=locations[i],
-                thread_id='%16d' % i      # thread_id must be unique
-            ) for i in range(0, len(locations))
-        ]
         for offering in offerings_good:
+            offering.timestamp = now - datetime.timedelta(minutes=118) # under 2 hours
             offering.save()
-
-        offerings_bad = [
-            create_offering(
-                timestamp=now - datetime.timedelta(minutes=121),  # over 2 hours
-                location=offering.location,
-                thread_id='%16s' % (100 - int(offering.thread_id))  # thread_id must be unique
-            ) for offering in offerings_good
-        ]
         for offering in offerings_bad:
+            offering.timestamp = now - datetime.timedelta(minutes=121) # over 2 hours
             offering.save()
 
         # Make the request
@@ -195,18 +204,16 @@ class OfferingsViewTests(TestCase):
             self.assertNotIn(offering['location'], locations_with_offerings)
             locations_with_offerings.append(offering['location'])
 
-        # Clean up database
-        for offering in offerings_good:
-            offering.delete()
-        for offering in offerings_bad:
-            offering.delete()
-
 
     def test_offerings_with_empty_database(self):
         '''
         Requests all of the most recent offerings when there are no offerings
         to show. Checks that we get back an empty JSON object.
         '''
+        # Clear entries from database
+        self.tearDown()
+
+        # Make request
         response = self.client.get(reverse('foodmap_app:offerings'))
         try:
             parsed_response = json.loads(response.content)
@@ -215,6 +222,9 @@ class OfferingsViewTests(TestCase):
 
         # Verify that response is correct
         self.assertEqual(parsed_response, {})
+
+        # Restore setup so that when tearDown() is called, we don't get errors
+        self.setUp()
 
 #-------------------------------------------------------------------------------
 
@@ -414,3 +424,74 @@ class LocationsTableTests(TestCase):
 
         location2 = Location(name='White House', lat=90.0, lng=180.0)
         self.assertRaises(IntegrityError, location2.save)
+
+
+class OfferingTagsTableTests(TestCase):
+    '''
+    Tests that we can put/get things into/from the Offering Tags table, and that
+    it only accepts valid entries.
+    '''
+
+    @classmethod
+    def setUpClass(self):
+        '''
+        Create an offering to use during tests
+        '''
+        self.location = create_location(name='White House')
+        self.location.save()
+        self.offering = create_offering(location=self.location)
+        self.offering.save()
+
+    @classmethod
+    def tearDownClass(self):
+        '''
+        Delete the set-up entries
+        '''
+        self.offering.delete()
+        self.location.delete()
+
+    def test_offering_tags_table_insert_with_valid_entry(self):
+        '''
+        Inserts a valid entry and checks that its contents are correct.
+        '''
+        # Insert a test offering tag
+        offering_tag = create_offering_tag(offering=self.offering)
+        offering_tag.save()
+
+        # Get entry back and check its content
+        test_offering_tag = OfferingTag.objects.order_by('-id')[0]
+        self.assertEqual(test_offering_tag.offering, offering_tag.offering)
+        self.assertEqual(test_offering_tag.tag, offering_tag.tag)
+
+    def test_offering_tags_table_insert_with_nonexistent_offering(self):
+        '''
+        Inserts an entry with an offering id value that does not exist in the
+        Offerings table. Checks that it fails to insert.
+        '''
+        offering = create_offering(location=self.location, image=None, thread_id='abcdefghijklmnopq')
+        offering_tag = create_offering_tag(offering=offering) # offering not saved
+        self.assertRaises(ValueError, offering_tag.save)
+
+    def test_offering_tags_table_insert_with_nonaccepted_tag(self):
+        '''
+        Inserts an entry with a tag value that is not one of the accepted
+        values. Checks that it fails to insert.
+        '''
+        offering_tag = create_offering_tag(offering=self.offering, tag='THIS IS NOT ACCEPTED')
+        self.assertRaises(ValueError, offering_tag.save)
+
+    def test_offering_tags_table_insert_with_no_offering(self):
+        '''
+        Inserts an entry with an empty offering value. Checks that it fails to
+        insert.
+        '''
+        offering_tag = create_offering_tag(offering=None)
+        self.assertRaises(IntegrityError, offering_tag.save)
+
+    def test_offering_tags_table_insert_with_no_tag(self):
+        '''
+        Inserts an entry with an empty tag value. Checks that it fails to
+        insert.
+        '''
+        offering_tag = create_offering_tag(offering=self.offering, tag=None)
+        self.assertRaises(IntegrityError, offering_tag.save)
