@@ -37,5 +37,21 @@ describe('getLocation()', function() {
             assert.equal(app.getLocation("Edward\'s Hall"), "Edwards Hall");
         })
     })
-    describe('biggest substring', function(){});
+    describe('regex match', function() {
+        it('getLocation(\"Friend 112\") should equal \"Friend Center\"', function() {
+            assert.equal(app.getLocation("Friend 112"), "Friend Center");
+        })
+        it('getLocation(\"Lewis 123\") should equal \"Lewis Library\"', function() {
+            assert.equal(app.getLocation("Lewis 123"), "Lewis Library");
+        })
+    })
+
+    describe('biggest substring', function(){
+        it('getLocation(\"Ticket holders to Friend Center\") should equal \"Friend Center\"', function() {
+            assert.equal(app.getLocation("Ticket holders to Friend Center"), "Friend Center");
+        })
+        it('getLocation(\"Lewis 123, Bring your spoon!\") should equal \"Lewis Library\"', function() {
+            assert.equal(app.getLocation("Lewis 123, Bring your spoon!"), "Lewis Library");
+        })
+    });
 });

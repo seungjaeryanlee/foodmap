@@ -547,7 +547,6 @@ icahn,Icahn Laboratory
 Studio Lab,Fine Hall
 Bloomberg,Bloomberg Hall
 bendheim,Bendheim Center
-in friend,Friend Center
 Spelman Hall,Spelman Halls
 Spelman,Spelman Halls
 Wendell Hall,Wendell Hall B
@@ -576,3 +575,38 @@ graduate college dining hall,Old Graduate College
 graduate college dh,Old Graduate College
 graduate college dhall,Old Graduate College
 spoon,Witherspoon Hall
+McCosh,McCosh Hall
+Holder,Holder Hall
+in friend,Friend Center
+at friend,Friend Center
+Green lobby,Green Hall
+friend ctr,Friend Center
+friend room,Friend Center
+in lewis,Lewis Library
+at lewis,Lewis Library
+Colonial,Colonial Club
+dodge-osborn,Dodge-Osborn Hall
+hargadon,Hargadon Hall
+mcdonnell,McDonnell Hall
+yoseloff,Yoseloff Hall
+guyot,Guyot Hall
+jadwin,Jadwin Hall
+joline,Joline Hall
+whig,Whig Hall
+clio,Clio Hall
+cap and gown,Cap and Gown Club
+andlinger,Andlinger Center
+bendheim,Bendheim Center
+cuyler,Cuyler Hall
+corwin,Corwin Hall
+foulke,Foulke Hall
+Maeder,Maeder Hall
+stanhope,Stanhope Hall
+scully,Scully Hall
+sayre,Sayre Hall
+wilf,Wilf Hall
+wendell,Wendell Hall B
+lockhart,Lockhart Hall
+bobst,Bobst Hall
+bogle,Bogle Hall
+bowen,Bowen Hall

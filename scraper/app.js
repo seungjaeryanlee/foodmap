@@ -49,6 +49,7 @@ module.exports.INSERT = INSERT;
 // Data files
 var foods = fs.readFileSync(__dirname + '/data/foods.txt').toString().split('\n');
 var locations = fs.readFileSync(__dirname + '/data/locationMap.txt').toString().split('\n');
+var regexes = fs.readFileSync(__dirname + '/data/regexMap.txt').toString().split('\n');
 
 // Extract location map and alias
 var locationMap = {};
@@ -57,6 +58,14 @@ for (location of locations) {
     var tokens = location.split(',');
     locationMap[tokens[0]] = tokens[1];
     aliasList.push(tokens[0]);
+}
+
+var regexMap = {};
+var regexList = [];
+for (regex of regexes) {
+    var tokens = regex.split(',');
+    regexMap[tokens[0]] = tokens[1];
+    regexList.push(tokens[0]);
 }
 
 if(process.env.client_secret) { // FIXME: Better way to detect Heroku?
@@ -418,14 +427,29 @@ function getFood(text) {
 function getLocation(text) {
     // FIXME: There should only be one location per email
     var location = "";
+    var aliasLength = 0;
 
     // FIXME: Better list of punctuations
     text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
     for(loc of aliasList) {
         if(text.indexOf(loc.toLowerCase()) > - 1) { // Substring search
-            location = locationMap[loc];
+            if(aliasLength < loc.length) { // For longest match
+                location = locationMap[loc];
+                aliasLength = loc.length;
+            }
         }
     }
+    for(regex of regexList) {
+        var regexp = new RegExp(regex, 'i');
+        var result = text.match(regexp);
+        if(result) {
+            if(aliasLength < regex.length) { // For longest match
+                location = regexMap[regex];
+                aliasLength = loc.length;
+            }
+        }
+    }
+
     return location;
 }
 
