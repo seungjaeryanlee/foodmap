@@ -89,6 +89,14 @@ body, nav.navbar.navbar-default {
    background-color: #2D2D2D;
 }
 
+#feedback {
+  color: white;
+}
+
+a#feedback:hover {
+  color: gray;
+}
+
 .overlay-control.searchbox.leaflet-control {
     padding: 5px;
 }
