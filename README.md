@@ -25,9 +25,13 @@ Then activate the Python virtual environment with:
 ```
 source venv/bin/activate
 ```
-That's it! You should be all set to work on the project. Read on if you want more in depth information about dependencies and what the `setup` script does.
-
+That's it! You should be all set to work on the project. You can verify that everything is set up properly by running the Django tests:
+```
+python manage.py test
+```
 **Note** that you will need to activate the virtual environment again each time you work on the project.
+
+Read on if you want more in depth information about dependencies and what the `setup` script does.
 
 #### Details of the project configuration
 This project uses Python 2.7, with the following dependencies:
@@ -49,9 +53,9 @@ In development mode, we do not commit the database with the rest of the code. As
 ```
 python setup_database.py
 ```
-should do this configuration for you. This script also has other uses aside from the initial environment setup -- see the script itself for a full description of what it can do.
+should do this configuration for you.
 
-So with all that background, what does `setup` actually do? It automates all of this -- dependency installation, defaulting your environment to "development" mode (for both Django and Node), and the database configuration.
+So with all that background, what does `setup` actually do? It automates all of this -- installing dependencies, defaulting your environment to "development" mode (for both Django and Node), and configuring the database.
 
 We also give credit to the following resources that we used in this project:
 - Bootstrap 3.3.7: CSS framework for web pages
@@ -66,8 +70,7 @@ Here are some common commands for reference. All of them use the `manage.py` mod
 
 - `python manage.py runserver`: Starts a web server for the project at IP address 127.0.0.1 (localhost) on port 8000.
 - `python manage.py shell`: Loads up an interactive Python shell (as if you just typed `python` into your terminal), but auto-configures Django so you can import and run any modules/code in this project.
-- `python manage.py test [app1 app2 ...]`: Runs all the automated tests in this project if no arguments are given, or runs the tests only for the specified apps if you provide any. For instance, specify `foodmap_app` to run the tests in `foodmap_app/tests.py`.
-
+- `python manage.py test app`: Runs all the automated tests in this project if no arguments are given, or runs the tests only for the specified app if you provide one. For instance, provide `foodmap_app` to run the tests in `foodmap_app/tests.py`. Alternatively, you can provide the name of a specific class or method within `foodmap_app/tests.py` to run by passing the argument `foodmap_app.tests.classname` or `foodmap_app.tests.classname.methodname`, respectively.
 
 
 ## Git Rules

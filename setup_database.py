@@ -2,11 +2,10 @@
 # setup_database.py
 # Author: Michael Friedman
 #
-# Runs the necessary Django commands to intialize/update the project's database.
-# You can also rerun it each time the models for the database are updated as a
-# shortcut for makemigrations + migrate. Optionally takes the -p argument to
-# auto-populate with either sample data or real data. If you choose to import
-# real data, you must also have the locations.json file in the same directory.
+# Runs the necessary Django commands to intialize the database, or to update
+# it after a change to the schema. Then autopopulates the locations from
+# locations.json into the database (locations.json must be in the same
+# directory).
 #-------------------------------------------------------------------------------
 
 # Some setup before we can interact with Django
@@ -20,9 +19,12 @@ def populate_locations_table():
     from django.db import IntegrityError
     from foodmap_app.models import Location
     import json
+    import sys
 
     # Read in entries from locations.json, load into Location table
-    locations = json.loads(open('locations.json', 'r').read())
+    file = open('locations.json', 'r')
+    locations = json.loads(file.read())
+    file.close()
     for location in locations:
         try:
             Location(
@@ -35,42 +37,16 @@ def populate_locations_table():
 
 #-------------------------------------------------------------------------------
 
-def populate_sample_data():
-    princeton = Location(name='Princeton University', lat=40.343, lng=-74.653)
-    harvard = Location(name='Harvard University', lat=42.377, lng=-71.118)
-    yale = Location(name='Yale University', lat=41.316, lng=-72.924)
-    for l in [princeton, harvard, yale]:
-        l.save()
-
-    offerings = [
-        Offering(timestamp=timezone.now(), location=princeton, title='The BEST food',
-            description='I mean really, the BEST.'),
-        Offering(timestamp=timezone.now(), location=harvard, title='Cold breakfast',
-            description='And I mean ONLY cold. No hot food at all. Not even eggs.'),
-        Offering(timestamp=timezone.now(), location=yale, title='Decent food',
-            description='')
-    ]
-    for o in offerings:
-        o.save()
-
-#-------------------------------------------------------------------------------
-
 ### Main script
 
 from django.utils import timezone
-from foodmap_app.models import Location, Offering
+from foodmap_app.models import Location
 
 # Initialize database
-print 'Initializing/updating database...'
+print 'Initializing database...'
 os.system('python manage.py makemigrations foodmap_app')
 os.system('python manage.py migrate')
 print 'Done!'
 
-# Handle -p arg
-if populate:
-    print '\nPopulating database...'
-    if populate == 'sample':
-        populate_sample_data()
-    else:
-        populate_locations_table()
-    print 'Done!'
+print 'Populating locations into database...'
+populate_locations_table()
