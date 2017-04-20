@@ -28,6 +28,7 @@ if (process.env.PROJECT_MODE === 'development') {
 var SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
 var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
         process.env.USERPROFILE) + '/.credentials/';
+console.log(TOKEN_DIR);
 var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-foodmap.json';
 
 // Constants
@@ -98,14 +99,25 @@ function authorize(credentials, callback) {
     var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
     // Check if we have previously stored a token.
-    fs.readFile(TOKEN_PATH, function(err, token) {
-        if (err) {
-            getNewToken(oauth2Client, callback);
-        } else {
-            oauth2Client.credentials = JSON.parse(token);
-            callback(oauth2Client);
-        }
-    });
+    if (process.env.PROJECT_MODE === 'development') {
+        fs.readFile(TOKEN_PATH, function(err, token) {
+            if (err) {
+                getNewToken(oauth2Client, callback);
+            } else {
+                oauth2Client.credentials = JSON.parse(token);
+                callback(oauth2Client);
+            }
+        });
+    }
+    // Use JSON given from process environment
+    else if (process.env.PROJECT_MODE === 'production') {
+        oauth2Client.credentials = JSON.parse(process.env.CREDENTIALS);
+        callback(oauth2Client);        
+    } 
+    else {
+      console.error('Error: PROJECT_MODE not set. Cannot authorize API');
+      process.exit(1);
+    }
 }
 
 /**
