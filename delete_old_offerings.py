@@ -9,7 +9,6 @@
 # Some setup before we can interact with Django
 import os
 import django
-os.environ['DJANGO_SETTINGS_MODULE'] = 'foodmap_proj.settings.development'
 django.setup()
 
 #-------------------------------------------------------------------------------

@@ -1,7 +1,6 @@
 #-------------------------------------------------------------------------------
 # setup_database.py
 # Author: Michael Friedman
-# Usage: python setup_database.py [-p sample|real]
 #
 # Runs the necessary Django commands to intialize/update the project's database.
 # You can also rerun it each time the models for the database are updated as a
@@ -10,27 +9,9 @@
 # real data, you must also have the locations.json file in the same directory.
 #-------------------------------------------------------------------------------
 
-# Check usage
-import sys
-usage = 'usage: python setup_database.py [-p sample|real]'
-if len(sys.argv) != 1 and len(sys.argv) != 3:
-    print usage
-    exit(1)
-elif len(sys.argv) == 3 and sys.argv[1] != '-p':
-    print usage
-    exit(1)
-elif len(sys.argv) == 3 and not sys.argv[2] in ['sample', 'real']:
-    print usage
-    exit(1)
-
-populate = None if len(sys.argv) != 3 else sys.argv[2]
-
-#-------------------------------------------------------------------------------
-
 # Some setup before we can interact with Django
 import os
 import django
-os.environ['DJANGO_SETTINGS_MODULE'] = 'foodmap_proj.settings.development'
 django.setup()
 
 #-------------------------------------------------------------------------------
