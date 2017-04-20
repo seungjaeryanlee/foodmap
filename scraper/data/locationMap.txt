@@ -575,3 +575,4 @@ graduate college dining,Old Graduate College
 graduate college dining hall,Old Graduate College
 graduate college dh,Old Graduate College
 graduate college dhall,Old Graduate College
+spoon,Witherspoon Hall
