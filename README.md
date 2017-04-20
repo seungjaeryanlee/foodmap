@@ -32,11 +32,16 @@ That's it! You should be all set to work on the project. Read on if you want mor
 #### Details
 This project uses Python 2.7, with the following dependencies:
 
+Common (for development and production):
 - Django 1.10.6 (the as-of-now latest version): web framework
 - Pillow 4.0.0 (the as-of-now latest version): required for the database to be able to store images
 - Selenium 3.3.1 (the as-of-now latest version): required for browser automation to obtain latitude/longitude coordinates of locations
+
+Production only:
 - Whitenoise 3.3.0
 - Gunicorn 19.7.1
+- dj-database-url 0.4.2
+- psycopg2 2.5.3
 
 Also, since the database itself is not committed with the code, there is some extra configuration required to set up the database. This is handled by the Python script `setup_database.py`. It also has other uses aside from the initial environment setup -- see the script itself for a full description of what it does.
 
