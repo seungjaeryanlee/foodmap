@@ -8,15 +8,15 @@
  $(document).ready(function() {
 
     // Initialize the map
-    var map = L.map('map').setView([40.345129502014764, -74.65826869010927], 17);
+    var map = L.map('map');
     map.setMaxZoom(17).setMinZoom(16);
+    map.setView([40.345129502014764, -74.65826869010927], 17);
     //map.setMaxBounds([[40.33761, -74.67769], [40.350697, -74.64053]]);
 
     L.control.locate({options:{
-        setView: 'untilPan',
-        icon: 'icon-location'
+        setView: 'untilPan'
     }}).addTo(map);
-    // L.Control.extend();
+
 
 
     // Load a tile layer
