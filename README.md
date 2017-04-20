@@ -21,7 +21,13 @@ If you just need to get the environment set up from scratch for the first time, 
 ```
 ./setup
 ```
-That's it! You should be all set to work on the project. Read on if you want more in depth information about dependencies and what the setup script does.
+Then activate the Python virtual environment with:
+```
+source venv/bin/activate
+```
+That's it! You should be all set to work on the project. Read on if you want more in depth information about dependencies and what the `setup` script does.
+
+**Note** that you will need to activate the virtual environment again each time you work on the project.
 
 #### Details
 This project uses Python 2.7, with the following dependencies:

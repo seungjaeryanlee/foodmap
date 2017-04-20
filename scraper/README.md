@@ -30,6 +30,7 @@ Because the app uses Gmail API, it is necessary to get authorization from the ac
   8. Move this file to your working directory and rename it client_secret.json.
   
 ## Running
+Before running, first *make sure you've set up the database and activated the virtual environment in the Django project*. See the Django project README for instructions on that. Then, you can run the scraper with:
 ```
 npm start
 ```

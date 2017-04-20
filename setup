@@ -19,9 +19,13 @@ if [ ! -d "venv" ]; then
   echo "Setting up Python virutal environment..."
   virtualenv venv
 
+  # Arrange for 'activate' script in the virtual environment to also set
+  # DJANGO_SETTINGS_MODULE and PROJECT_MODE environment variables. These tell
+  # the Django project and the scraper whether to use development settings or
+  # production settings. *Set to development settings by default.*
   cd venv/bin/
-  echo '# Set DJANGO_SETTINGS_MODULE so Django knows where to find project settings' >> activate
   echo 'export DJANGO_SETTINGS_MODULE="foodmap_proj.settings.development"' >> activate
+  echo 'export PROJECT_MODE="development"' >> activate
   cd ../..
 
   echo "Done!"

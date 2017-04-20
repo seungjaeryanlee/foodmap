@@ -2,7 +2,7 @@
 /* db.js                                                                      */
 /* Author: Michael Friedman                                                   */
 /*                                                                            */
-/* Library for database operations required in app.js. Implements two         */
+/* Module for database operations required in app.js. Implements two          */
 /* operations, 'insert' and 'delete', for both the sqlite version of the      */
 /* database (for use during development) and the postgres version of the      */
 /* database (for use in the deployed production version).                     */
@@ -42,119 +42,127 @@ var LOCATIONS = {
 };
 
 
-// Sqlite implementation
-var db_sqlite = {
-    /**
-     * Insert given entry to the database
-     *
-     * @param {Object} entry The entry to be inserted to the database
-     */
-    insertToDB: function(entry) {
-        // FIXME: Not run if no location found?
-        db.serialize(function() {
-            db.each("SELECT " + LOCATIONS.COLUMNS.ID + " FROM " + LOCATIONS.NAME + " WHERE " + LOCATIONS.COLUMNS.NAME + " = ?",
-                [entry.location], function(err, row) {
+// Database operations
+var db = {
 
-                if(err) {
-                    console.log(err);
-                }
-                var locationId = row.id;
+    // Sqlite implementation
+    sqlite: {
+        /**
+         * Insert given entry to the database
+         *
+         * @param {Object} entry The entry to be inserted to the database
+         */
+        insert: function(entry) {
+            // FIXME: Not run if no location found?
+            db.serialize(function() {
+                db.each("SELECT " + LOCATIONS.COLUMNS.ID + " FROM " + LOCATIONS.NAME + " WHERE " + LOCATIONS.COLUMNS.NAME + " = ?",
+                    [entry.location], function(err, row) {
 
-                db.serialize(function() {
+                    if(err) {
+                        console.log(err);
+                    }
+                    var locationId = row.id;
+
+                    db.serialize(function() {
+                        if(typeof entry.image === 'undefined') {
+                            // FIXME: Temporarily don't have thread_id
+                            var columns = "(" + OFFERINGS.COLUMNS.TIMESTAMP + ", " + OFFERINGS.COLUMNS.LOCATION_ID + ", " + OFFERINGS.COLUMNS.TITLE + ", "
+                                + OFFERINGS.COLUMNS.DESCRIPTION + ")";
+                            var stmt = db.prepare("INSERT INTO " + OFFERINGS.NAME + " " + columns + " VALUES (?, ?, ?, ?)");
+                            stmt.run(entry.timestamp, locationId, entry.food.join('. '), entry.body);
+                            stmt.finalize();
+                        }
+                        else {
+                            var columns = "(" + OFFERINGS.COLUMNS.TIMESTAMP + ", " + OFFERINGS.COLUMNS.LOCATION_ID + ", " + OFFERINGS.COLUMNS.TITLE + ", "
+                                + OFFERINGS.COLUMNS.DESCRIPTION + ", " + OFFERINGS.COLUMNS.IMAGE + ")";
+                            var stmt = db.prepare("INSERT INTO " + OFFERINGS.NAME + " " + columns + " VALUES (?, ?, ?, ?, ?)");
+                            stmt.run(entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.image.name);
+                            stmt.finalize();
+                        }
+                    });
+                    console.log("Entry inserted to database.");
+                });
+            });
+        },
+
+
+        /**
+         * Delete given entry from the database
+         *
+         * @param {Object} entry The entry to be deleted from the database
+         */
+        delete: function(entry) {
+            // If there is an entry with the given ThreadID, Delete
+            db.serialize(function() {
+                db.run("DELETE FROM " + OFFERINGS.NAME + " WHERE " + OFFERINGS.COLUMNS.THREAD_ID + "=(?)", entry.threadId);
+            });
+            console.log("Entry deleted from database.");
+
+            // FIXME: False positive?
+        }
+    },
+
+
+    // Postgres implementation
+    postgres: {
+        /**
+         * Insert given entry to the database
+         *
+         * @param {Object} entry The entry to be inserted to the database
+         */
+        insert: function(entry) {
+            pg.connect(process.env.DATABASE_URL, function(err, client) {
+                if (err) throw err;
+                console.log('Connected to postgres! Getting schemas...');
+
+                client.query('SELECT ' + LOCATIONS.COLUMNS.ID + ' FROM ' + LOCATIONS.NAME + ' WHERE ' + LOCATIONS.COLUMNS.NAME + ' = $1',
+                    [entry.location], function(err, result) {
+
+                    if (err) throw err;
+
+                    console.log(entry.location);
+                    console.log(result);
+                    if(!result || !result.rows || !result.rows[0]) { return; }
+                    var locationId = result.rows[0].id;
+
                     if(typeof entry.image === 'undefined') {
-                        // FIXME: Temporarily don't have thread_id
                         var columns = "(" + OFFERINGS.COLUMNS.TIMESTAMP + ", " + OFFERINGS.COLUMNS.LOCATION_ID + ", " + OFFERINGS.COLUMNS.TITLE + ", "
-                            + OFFERINGS.COLUMNS.DESCRIPTION + ")";
-                        var stmt = db.prepare("INSERT INTO " + OFFERINGS.NAME + " " + columns + " VALUES (?, ?, ?, ?)");
-                        stmt.run(entry.timestamp, locationId, entry.food.join('. '), entry.body);
-                        stmt.finalize();
+                                + OFFERINGS.COLUMNS.DESCRIPTION + ", " + OFFERINGS.COLUMNS.THREAD_ID + ")";
+                        client.query('INSERT INTO ' + OFFERINGS.NAME + ' ' + columns + ' VALUES ($1, $2, $3, $4, $5)',
+                            [entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.threadId]);
                     }
                     else {
                         var columns = "(" + OFFERINGS.COLUMNS.TIMESTAMP + ", " + OFFERINGS.COLUMNS.LOCATION_ID + ", " + OFFERINGS.COLUMNS.TITLE + ", "
-                            + OFFERINGS.COLUMNS.DESCRIPTION + ", " + OFFERINGS.COLUMNS.IMAGE + ")";
-                        var stmt = db.prepare("INSERT INTO " + OFFERINGS.NAME + " " + columns + " VALUES (?, ?, ?, ?, ?)");
-                        stmt.run(entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.image.name);
-                        stmt.finalize();
+                                + OFFERINGS.COLUMNS.DESCRIPTION + ", " + OFFERINGS.COLUMNS.THREAD_ID + ", " + OFFERINGS.COLUMNS.IMAGE + ")";
+                        client.query('INSERT INTO ' + OFFERINGS.NAME + ' ' + columns + ' VALUES ($1, $2, $3, $4, $5, $6)',
+                            [entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.threadId, entry.image.name]);
                     }
+
+                    console.log("Entry inserted to database.");
                 });
-                console.log("Entry inserted to database.");
             });
-        });
-    },
+        },
 
 
-    /**
-     * Delete given entry from the database
-     *
-     * @param {Object} entry The entry to be deleted from the database
-     */
-    deleteFromDB: function(entry) {
-        // If there is an entry with the given ThreadID, Delete
-        db.serialize(function() {
-            db.run("DELETE FROM " + OFFERINGS.NAME + " WHERE " + OFFERINGS.COLUMNS.THREAD_ID + "=(?)", entry.threadId);
-        });
-        console.log("Entry deleted from database.");
-
-        // FIXME: False positive?
-    }
-};
-
-
-// Postgres implementation
-var db_pg = {
-    /**
-     * Insert given entry to the database
-     *
-     * @param {Object} entry The entry to be inserted to the database
-     */
-    insertToDB: function(entry) {
-        pg.connect(process.env.DATABASE_URL, function(err, client) {
-            if (err) throw err;
-            console.log('Connected to postgres! Getting schemas...');
-
-            client.query('SELECT ' + LOCATIONS.COLUMNS.ID + ' FROM ' + LOCATIONS.NAME + ' WHERE ' + LOCATIONS.COLUMNS.NAME + ' = $1',
-                [entry.location], function(err, result) {
-
+        /**
+         * Delete given entry from the database
+         *
+         * @param {Object} entry The entry to be deleted from the database
+         */
+        delete: function(entry) {
+            // If there is an entry with the given ThreadID, Delete
+            pg.connect(process.env.DATABASE_URL, function(err, client) {
                 if (err) throw err;
+                console.log('Connected to postgres! Getting schemas...');
 
-                console.log(entry.location);
-                console.log(result);
-                if(!result || !result.rows || !result.rows[0]) { return; }
-                var locationId = result.rows[0].id;
-
-                if(typeof entry.image === 'undefined') {
-                    var columns = "(" + OFFERINGS.COLUMNS.TIMESTAMP + ", " + OFFERINGS.COLUMNS.LOCATION_ID + ", " + OFFERINGS.COLUMNS.TITLE + ", "
-                            + OFFERINGS.COLUMNS.DESCRIPTION + ", " + OFFERINGS.COLUMNS.THREAD_ID + ")";
-                    client.query('INSERT INTO ' + OFFERINGS.NAME + ' ' + columns + ' VALUES ($1, $2, $3, $4, $5)',
-                        [entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.threadId]);
-                }
-                else {
-                    var columns = "(" + OFFERINGS.COLUMNS.TIMESTAMP + ", " + OFFERINGS.COLUMNS.LOCATION_ID + ", " + OFFERINGS.COLUMNS.TITLE + ", "
-                            + OFFERINGS.COLUMNS.DESCRIPTION + ", " + OFFERINGS.COLUMNS.THREAD_ID + ", " + OFFERINGS.COLUMNS.IMAGE + ")";
-                    client.query('INSERT INTO ' + OFFERINGS.NAME + ' ' + columns + ' VALUES ($1, $2, $3, $4, $5, $6)',
-                        [entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.threadId, entry.image.name]);
-                }
-
-                console.log("Entry inserted to database.");
+                client.query('DELETE FROM ' + OFFERINGS.NAME + ' WHERE ' + OFFERINGS.COLUMNS.THREAD_ID + '=($1)', [entry.threadId]);
+                console.log("Entry deleted from database.");
             });
-        });
-    },
-
-
-    /**
-     * Delete given entry from the database
-     *
-     * @param {Object} entry The entry to be deleted from the database
-     */
-    deleteFromDB: function(entry) {
-        // If there is an entry with the given ThreadID, Delete
-        pg.connect(process.env.DATABASE_URL, function(err, client) {
-            if (err) throw err;
-            console.log('Connected to postgres! Getting schemas...');
-
-            client.query('DELETE FROM ' + OFFERINGS.NAME + ' WHERE ' + OFFERINGS.COLUMNS.THREAD_ID + '=($1)', [entry.threadId]);
-            console.log("Entry deleted from database.");
-        });
-        // FIXME: False positive?
+            // FIXME: False positive?
+        }
     }
 };
+
+
+// Make these implementations available to clients
+module.exports.db = db;

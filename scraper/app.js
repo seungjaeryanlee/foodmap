@@ -10,10 +10,19 @@ var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
 var util = require('util');
-var pg = require('pg');
+var db_module = require('./db');
 
-// https://devcenter.heroku.com/articles/heroku-postgresql#connecting-in-node-js
-pg.defaults.ssl = true;
+// Pick database implementation (sqlite/postgres) based on environment variable
+// PROJECT_MODE
+var db;
+if (process.env.PROJECT_MODE === 'development') {
+  db = db_module.sqlite;
+} else if (process.env.PROJECT_MODE === 'production') {
+  db = db_module.postgres;
+} else {
+  console.error('Error: PROJECT_MODE not set. Cannot set up database. Did you activate the virtual environment in the Django project?');
+  process.exit(1);
+}
 
 // read/write access except delete for gmail, and read/write access to calendar
 var SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
@@ -148,7 +157,7 @@ var main = function (auth) {
 
     // set auth as a global default
     google.options({auth: auth});
-    
+
     google.gmail('v1').users.messages.list({ // Get unread message list
         userId: 'me',
         q: 'is:unread',
@@ -158,7 +167,7 @@ var main = function (auth) {
         if (!err && res && res.messages && res.messages.length) {
             for(var i = 0; i < res.messages.length; i++) {
                 (function(index) {
-                    // Timeout to prevent making too many requests at once    
+                    // Timeout to prevent making too many requests at once
                     // setTimeout(parseEmail, 1000+(1000*index), res.messages[index].id, markAsRead)
                     setTimeout(parseEmail, 1000+(1000*index), res.messages[index].id, function(){})
                 })(i);
@@ -185,7 +194,7 @@ function parseEmail(messageId, callback) {
             console.log(err);
             return;
         }
-        
+
         // if(result.payload.headers.find(x => x.name === "To") !== "freefood@princeton.edu")
         if (typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
         || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
@@ -201,10 +210,10 @@ function parseEmail(messageId, callback) {
 
         // INSERT or DELETE entry
         if(getRequestType(entry.title+entry.body) == INSERT) {
-            insertToDB(entry);
+            db.insert(entry);
         }
         else {
-            deleteFromDB(entry);
+            db.delete(entry);
         }
     });
 }
@@ -236,7 +245,7 @@ function formatEmail(mimeMessage, messageId) {
     var timestamp = getTimestampFromMime(mimeMessage);
     var title = getTitleFromMime(mimeMessage);
     var body = getBodyFromMime(mimeMessage);
-    var image = getImageFromMime(mimeMessage);    
+    var image = getImageFromMime(mimeMessage);
     var food = getFood(title+body);
     var location = getLocation(title+body);
     var threadId = mimeMessage.threadId;
@@ -334,7 +343,7 @@ function getBodyFromMime(mimeMessage) {
 
     /* Delete null character 0x00 */
     body = body.replace(/\0/g, '');
-    
+
     return body;
 }
 
@@ -346,7 +355,7 @@ function getBodyFromMime(mimeMessage) {
 function getImageFromMime(mimeMessage) {
     var imageName;
     var imageData;
-    
+
     // FIXME: Other content types?
     // Content-Type: multipart/mixed
     if(mimeMessage.payload.mimeType === 'multipart/mixed') {
@@ -356,7 +365,7 @@ function getImageFromMime(mimeMessage) {
         else {
             imageName = mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/").filename;
             var attachmentId = mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/").body.attachmentId;
-            
+
             // FIXME: Check size?
             // Get Attachment
             google.gmail('v1').users.messages.attachments.get({
@@ -387,7 +396,7 @@ function getImageFromMime(mimeMessage) {
  * @param {Object} text The text to search for food
  */
 function getFood(text) {
-    var matches = [];    
+    var matches = [];
 
     // FIXME: Better list of punctuations
     text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
@@ -421,62 +430,13 @@ function getLocation(text) {
 }
 
 /**
- * Insert given entry to the SQLite database
- *
- * @param {Object} entry The entry to be inserted to the database
- */
-function insertToDB(entry) {
-    pg.connect(process.env.DATABASE_URL, function(err, client) {
-        if (err) throw err;
-        console.log('Connected to postgres! Getting schemas...');
-
-        client.query('SELECT id FROM foodmap_app_location WHERE name = $1', [entry.location], function(err, result) {
-            if (err) throw err;
-
-            console.log(entry.location);
-            console.log(result);
-            if(!result || !result.rows || !result.rows[0]) { return; }
-            var locationId = result.rows[0].id;
-
-            if(typeof entry.image === 'undefined') {
-                client.query('INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, thread_id) VALUES ($1, $2, $3, $4, $5)',
-                    [entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.threadId]);
-            }
-            else {
-                client.query('INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, thread_id, image) VALUES ($1, $2, $3, $4, $5, $6)',
-                    [entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.threadId, entry.image.name]);
-            }
-
-            console.log("Entry inserted to database.");
-        });
-    });
-}
-
-/**
- * Delete given entry from the SQLite database
- *
- * @param {Object} entry The entry to be deleted from the database
- */
-function deleteFromDB(entry) {
-    // If there is an entry with the given ThreadID, Delete
-    pg.connect(process.env.DATABASE_URL, function(err, client) {
-        if (err) throw err;
-        console.log('Connected to postgres! Getting schemas...');
-
-        client.query('DELETE FROM foodmap_app_offering WHERE thread_id=($1)', [entry.threadId]);
-        console.log("Entry deleted from database.");
-    });
-    // FIXME: False positive?
-}
-
-/**
  * Check type of request
  *
  * @param {Object} text The text to be inspected
  */
 function getRequestType(text) {
     // FIXME: Better list of punctuations
-    text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");    
+    text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
     var deleteRequests = ["all gone"];
     for(req of deleteRequests) {
         if(text.indexOf(req) > -1) {
