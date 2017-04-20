@@ -4,7 +4,7 @@ Our project enables Princeton students to take advantage of all the free food in
 
 The app is built using two main components: the Free Food Listserv email scraper (written in NodeJS) and the Django web app. These are documented for developer purposes in the following sections.
 
-If you are a developer who would like to use and/or build on this project, see the **Installation and dependencies** subsections within the following two sections to get yourself set up. **Also read the Git Rules section for the rules and conventions of writing code for this project.**
+If you are a developer who would like to use and/or build on this project, see the **Installation** subsections within the following two sections to get yourself set up. **Also read the Git Rules section for the rules and conventions of writing code for this project.**
 
 
 
@@ -15,7 +15,7 @@ See the README file in the `scraper` directory for details.
 ## Web app (Django)
 This section describes the Django project backing the FoodMap app. It contains all the views, models, and other components of the app, except the free food listserv scraper (as of now, that is kept separate from this project directory).
 
-### Installation and dependencies
+### Installation, dependencies, and other background
 #### Quick start
 If you just need to get the environment set up from scratch for the first time, run `setup`:
 ```
@@ -29,23 +29,29 @@ That's it! You should be all set to work on the project. Read on if you want mor
 
 **Note** that you will need to activate the virtual environment again each time you work on the project.
 
-#### Details
+#### Details of the project configuration
 This project uses Python 2.7, with the following dependencies:
-
-Common (for development and production):
 - Django 1.10.6 (the as-of-now latest version): web framework
 - Pillow 4.0.0 (the as-of-now latest version): required for the database to be able to store images
 - Selenium 3.3.1 (the as-of-now latest version): required for browser automation to obtain latitude/longitude coordinates of locations
 
-Production only:
+We have slightly different configurations for the project for development and production versions. In development, the above dependencies are the only required ones, whereas in production, we require some additional ones:
 - Whitenoise 3.3.0
 - Gunicorn 19.7.1
 - dj-database-url 0.4.2
 - psycopg2 2.5.3
 
-Also, since the database itself is not committed with the code, there is some extra configuration required to set up the database. This is handled by the Python script `setup_database.py`. It also has other uses aside from the initial environment setup -- see the script itself for a full description of what it does.
+To determine whether to use the "development" or "production" configuration, we set two environment variables: one to indicate to Django which configuration to use, and one to indicate to Node. Django uses the `DJANGO_SETTINGS_MODULE` variable, which is set to `foodmap_proj.settings.development` in development mode or `foodmap_proj.settings.production` in production mode. This is built into Django, so it knows how to interpret this variable to use the correct configuration.
 
-The `setup` script automates both the dependency installations and the database setup for you. It installs the dependencies using Python's package manager `pip`, and then runs `setup_database.py`.
+Node (to our knowledge) does not have a corresponding built-in variable, so we created one called `PROJECT_MODE` to serve the same purpose. It is set to `development` in development mode or `production` in production mode. We have programmed the scraper to interpret this variable to use the correct configuration in each mode.
+
+In development mode, we do not commit the database with the rest of the code. As a result, just downloading/cloning the repository does not set you up with a functional database to work with, so there is some extra configuration required yourself to set it up. This is handled by a Python script we wrote called `setup_database.py`. Running this with: 
+```
+python setup_database.py
+```
+should do this configuration for you. This script also has other uses aside from the initial environment setup -- see the script itself for a full description of what it can do.
+
+So with all that background, what does `setup` actually do? It automates all of this -- dependency installation, defaulting your environment to "development" mode (for both Django and Node), and the database configuration.
 
 We also give credit to the following resources that we used in this project:
 - Bootstrap 3.3.7: CSS framework for web pages
