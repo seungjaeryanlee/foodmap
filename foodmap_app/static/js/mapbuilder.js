@@ -132,7 +132,7 @@
                 layer.on({
                     'mouseover': onSetHover,
                     'mouseout': onRemoveHover,
-                    'click': function() { sidebar.setContent('<h1>' + feature.properties.popupContent + '<br>' + feature.properties.extra + '</h1>'); sidebar.show(); }
+                    'click': function() { sidebar.setContent(feature.properties.popupContent + '<br>' + feature.properties.extra); sidebar.show(); }
                  });
             },
 
