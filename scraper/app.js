@@ -269,7 +269,7 @@ function formatEmail(mimeMessage, messageId) {
     var threadId = mimeMessage.threadId;
     var requestType = getRequestType(body);
 
-    return {timestamp: timestamp, location: location, title: title, body: body, food: food, image: image, threadId: threadId, requestType: requestType};
+    return {timestamp: timestamp, location: location, title: title, body: (title + '\n' + body), food: food, image: image, threadId: threadId, requestType: requestType};
 }
 
 /**
