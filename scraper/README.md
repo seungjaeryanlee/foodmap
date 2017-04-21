@@ -16,7 +16,7 @@ For unit testing, run the following command:
 ```
 npm test
 ```
-All 44 tests should be passed.
+All 51 tests should be passed.
 
 ## API Setup
 Because the app uses Gmail API, it is necessary to get authorization from the account to read and modify emails. Here are the steps to setup the API from [API Quickstart](https://developers.google.com/gmail/api/quickstart/nodejs):

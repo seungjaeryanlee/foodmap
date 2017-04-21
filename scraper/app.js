@@ -419,9 +419,14 @@ function getFood(text) {
     // FIXME: Better list of punctuations
     text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
     for(food of foods) {
-        if(text.indexOf(food.toLowerCase()) > - 1) { // Substring search
-            food = food.charAt(0).toUpperCase() + food.slice(1);
-            matches.push(food);
+        var index = text.indexOf(food.toLowerCase());
+        if(index > -1) { // Substring search
+            // make sure it's a word by checking the left and right is alphanumeric character
+            if ((index == 0 || !/\w/.test(text[index-1]))
+             && (text.length <= index + food.length || !/\w/.test(text[index + food.length]))) { 
+                food = food.charAt(0).toUpperCase() + food.slice(1);
+                matches.push(food);
+            }
         }
     }
 

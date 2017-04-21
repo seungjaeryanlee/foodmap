@@ -48,6 +48,17 @@ describe('getFood()', function() {
             assert.deepEqual(app.getFood("Food from Olive\'s"), ["Olives"]);
         })
     })
+    describe('words not substrings', function() {
+        it('getFood(\"population\") should equal []', function() {
+            assert.deepEqual(app.getFood("population"), []);
+        })
+        it('getFood(\"veggie!\") should equal [\"Veggie\"] not [\"Egg\", \"Veggie\"]', function() {
+            assert.deepEqual(app.getFood("veggie!"), ["Veggie"]);
+        })
+        it('getFood(\"asdf popcorn\tasdf juice asdf") should equal [\"Juice\", \"Popcorn\"] not [ \"Ice\", \"Juice\", \"Pop\", \"Popcorn\"]', function() {
+            assert.deepEqual(app.getFood("asdf popcorn\tasdf juice asdf"), ["Juice", "Popcorn"]);
+        })
+    })
     describe('biggest substring', function(){});
     describe('fuzzy matching', function(){});
 });
