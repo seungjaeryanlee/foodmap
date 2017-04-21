@@ -12,14 +12,14 @@
     right: 0;
     top: 0;
     bottom: 0;
-    margin-top: 0px;
+    margin-top: 40px;
     z-index: 1
 }
 
 
 @media(min-width:1200px) {
     #map {
-        margin-top: 0px;
+        margin-top: 50px;
     }
 }
 
