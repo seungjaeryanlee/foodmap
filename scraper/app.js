@@ -188,8 +188,9 @@ var main = function (auth) {
             for(var i = 0; i < res.messages.length; i++) {
                 (function(index) {
                     // Timeout to prevent making too many requests at once
-                    // setTimeout(parseEmail, 1000+(1000*index), res.messages[index].id, markAsRead)
-                    setTimeout(parseEmail, 1000+(1000*index), res.messages[index].id, function(){})
+                    setTimeout(parseEmail, 1000+(1000*index), res.messages[index].id, markAsRead);
+                    // replace with below for debugging:
+                    // setTimeout(parseEmail, 1000+(1000*index), res.messages[index].id, function(){})
                 })(i);
             }
         } else {
@@ -221,11 +222,6 @@ function parseEmail(messageId, callback) {
             return;
         }
 
-        // Log used for debugging
-        // fs.appendFile('debug.json', JSON.stringify(result, null, 4), function(err) {
-        //     if(err) { console.log(err); }
-        // })
-
         entry = formatEmail(result, messageId);
 
         // INSERT or DELETE entry
@@ -235,6 +231,8 @@ function parseEmail(messageId, callback) {
         else {
             db.delete(entry);
         }
+
+        callback(messageId);
     });
 }
 
