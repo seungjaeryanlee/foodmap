@@ -69,14 +69,14 @@ var db = {
                             var columns = "(" + OFFERINGS.COLUMNS.TIMESTAMP + ", " + OFFERINGS.COLUMNS.LOCATION_ID + ", " + OFFERINGS.COLUMNS.TITLE + ", "
                                 + OFFERINGS.COLUMNS.DESCRIPTION + ")";
                             var stmt = sqlite3.prepare("INSERT INTO " + OFFERINGS.NAME + " " + columns + " VALUES (?, ?, ?, ?)");
-                            stmt.run(entry.timestamp, locationId, entry.food.join('. '), entry.body);
+                            stmt.run(entry.timestamp, locationId, entry.food.join(', '), entry.body);
                             stmt.finalize();
                         }
                         else {
                             var columns = "(" + OFFERINGS.COLUMNS.TIMESTAMP + ", " + OFFERINGS.COLUMNS.LOCATION_ID + ", " + OFFERINGS.COLUMNS.TITLE + ", "
                                 + OFFERINGS.COLUMNS.DESCRIPTION + ", " + OFFERINGS.COLUMNS.IMAGE + ")";
                             var stmt = sqlite3.prepare("INSERT INTO " + OFFERINGS.NAME + " " + columns + " VALUES (?, ?, ?, ?, ?)");
-                            stmt.run(entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.image.name);
+                            stmt.run(entry.timestamp, locationId, entry.food.join(', '), entry.body, entry.image.name);
                             stmt.finalize();
                         }
                     });
@@ -120,8 +120,8 @@ var db = {
 
                     if (err) throw err;
 
-                    console.log(entry.location);
-                    console.log(result);
+                    // console.log(entry.location);
+                    // console.log(result);
                     if(!result || !result.rows || !result.rows[0]) { return; }
                     var locationId = result.rows[0].id;
 
@@ -129,13 +129,13 @@ var db = {
                         var columns = "(" + OFFERINGS.COLUMNS.TIMESTAMP + ", " + OFFERINGS.COLUMNS.LOCATION_ID + ", " + OFFERINGS.COLUMNS.TITLE + ", "
                                 + OFFERINGS.COLUMNS.DESCRIPTION + ", " + OFFERINGS.COLUMNS.THREAD_ID + ")";
                         client.query('INSERT INTO ' + OFFERINGS.NAME + ' ' + columns + ' VALUES ($1, $2, $3, $4, $5)',
-                            [entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.threadId]);
+                            [entry.timestamp, locationId, entry.food.join(', '), entry.body, entry.threadId], function(c,e){ client.end(); });
                     }
                     else {
                         var columns = "(" + OFFERINGS.COLUMNS.TIMESTAMP + ", " + OFFERINGS.COLUMNS.LOCATION_ID + ", " + OFFERINGS.COLUMNS.TITLE + ", "
                                 + OFFERINGS.COLUMNS.DESCRIPTION + ", " + OFFERINGS.COLUMNS.THREAD_ID + ", " + OFFERINGS.COLUMNS.IMAGE + ")";
                         client.query('INSERT INTO ' + OFFERINGS.NAME + ' ' + columns + ' VALUES ($1, $2, $3, $4, $5, $6)',
-                            [entry.timestamp, locationId, entry.food.join('. '), entry.body, entry.threadId, entry.image.name]);
+                            [entry.timestamp, locationId, entry.food.join(', '), entry.body, entry.threadId, entry.image.name], function(c,e){ client.end(); });
                     }
 
                     console.log("Entry inserted to database.");
@@ -155,7 +155,7 @@ var db = {
                 if (err) throw err;
                 console.log('Connected to postgres! Getting schemas...');
 
-                client.query('DELETE FROM ' + OFFERINGS.NAME + ' WHERE ' + OFFERINGS.COLUMNS.THREAD_ID + '=($1)', [entry.threadId]);
+                client.query('DELETE FROM ' + OFFERINGS.NAME + ' WHERE ' + OFFERINGS.COLUMNS.THREAD_ID + '=($1)', [entry.threadId], function(c,e){ client.end(); });
                 console.log("Entry deleted from database.");
             });
             // FIXME: False positive?

@@ -28,7 +28,6 @@ if (process.env.PROJECT_MODE === 'development') {
 var SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
 var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
         process.env.USERPROFILE) + '/.credentials/';
-console.log(TOKEN_DIR);
 var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-foodmap.json';
 
 // Constants
