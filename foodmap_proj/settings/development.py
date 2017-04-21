@@ -30,3 +30,5 @@ DATABASES = {
     }
 }
 
+# Localhost should not use HTTPS
+SECURE_SSL_REDIRECT = False
