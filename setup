@@ -8,20 +8,26 @@
 # update this script to install them.
 
 # Validate usage
-usage="usage: ./setup [ubuntu|mac]"
-if [ $# -ne 1 ]; then
-  echo $usage
-  exit
-elif ! [ "$1" == "ubuntu" ] || [ "$1" == "mac" ]; then
+usage="usage: ./setup"
+if [ $# -ne 0 ]; then
   echo $usage
   exit
 fi
-os="$1"
 
 # Set up python virtual environment
 if [ ! -d "venv" ]; then
   echo "Setting up Python virutal environment..."
   virtualenv venv
+
+  # Arrange for 'activate' script in the virtual environment to also set
+  # DJANGO_SETTINGS_MODULE and PROJECT_MODE environment variables. These tell
+  # the Django project and the scraper whether to use development settings or
+  # production settings. *Set to development settings by default.*
+  cd venv/bin/
+  echo 'export DJANGO_SETTINGS_MODULE="foodmap_proj.settings.development"' >> activate
+  echo 'export PROJECT_MODE="development"' >> activate
+  cd ../..
+
   echo "Done!"
   echo
 fi
@@ -32,22 +38,12 @@ echo "Downloading dependencies..."
 pip install Django==1.10.6
 pip install Pillow==4.0.0
 pip install selenium==3.3.1
-# if [ "$os" == "ubuntu" ]; then
-#   echo "--------------------------------------------------"
-#   echo "The following packages require root permission."
-#   echo "You will be prompted for a password:"
-#   echo "sudo apt-get install -y phantomjs" # PASTE THE COMMAND BEING RUN AS ROOT HERE AS WELL
-#   echo "--------------------------------------------------"
-#   sudo apt-get install -y phantomjs # list all packages to be installed in this one line
-# elif [ "$os" == "mac" ]; then
-#   brew install phantomjs
-# fi
 echo "Done!"
 echo
 
 # Set up database
 echo "Setting up database..."
-python setup_database.py -p real
+python setup_database.py
 echo "Done!"
 echo
 

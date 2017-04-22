@@ -165,7 +165,6 @@ panera
 papa john's
 papa johns
 pasta
-pasta
 peach
 pear
 pene
@@ -176,6 +175,7 @@ pineapple
 pizza
 plum
 pop
+popcorn
 popsicle
 potato
 punch
@@ -223,7 +223,7 @@ tuna
 tuna roll
 vegetable
 veggie plate
-veggies
+veggie
 vinegar
 waffle
 wings

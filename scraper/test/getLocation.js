@@ -3,41 +3,55 @@ var app = require('../app.js');
 
 describe('getLocation()', function() {
     describe('no match', function() {
-        it('getLocation(\"\") should equal []', function() {
-            assert.deepEqual(app.getLocation(""), []);
+        it('getLocation(\"\") should equal \"\"', function() {
+            assert.equal(app.getLocation(""), "");
         })
-        it('getLocation(\"qqq\") should equal []', function() {
-            assert.deepEqual(app.getLocation("xyz"), []);
+        it('getLocation(\"qqq\") should equal \"\"', function() {
+            assert.equal(app.getLocation("xyz"), "");
         })
     })
     describe('one match', function() {
-        it('getLocation(\"clapp\") should equal [\"clapp\"]', function() {
-            assert.deepEqual(app.getLocation("clapp"), ["clapp"]);
+        it('getLocation(\"clapp\") should equal \"1927 - Clapp Hall\"', function() {
+            assert.equal(app.getLocation("clapp"), "1927 - Clapp Hall");
         })
-        it('getLocation(\"come to dod!\") should equal [\"dod\"]', function() {
-            assert.deepEqual(app.getLocation("come to dod!"), ["dod"]);
+        it('getLocation(\"come to dod hall!\") should equal \"Dod Hall\"', function() {
+            assert.equal(app.getLocation("come to dod hall!"), "Dod Hall");
         })
     })
-    describe('multiple matches', function() {})
     describe('case-insensitive match', function() {
-        it('getLocation(\"EQuad has food\") should equal [\"equad\"]', function() {
-            assert.deepEqual(app.getLocation("EQuad has food"), ["equad"]);
+        it('getLocation(\"EQuad has food\") should equal \"Enginerring QUAD\"', function() {
+            assert.equal(app.getLocation("EQuad has food"), "Enginerring QUAD");
         })
-        it('getLocation(\"FRIST HAS FOOD\") should equal [\"frist\"]', function() {
-            assert.deepEqual(app.getLocation("FRIST HAS FOOD"), ["frist"]);
+        it('getLocation(\"FRIST HAS FOOD\") should equal \"Frist Campus Center\"', function() {
+            assert.equal(app.getLocation("FRIST HAS FOOD"), "Frist Campus Center");
         })
-        it('getLocation(\"Pizza at CoLoNiAl\") should equal [\"colonial\"]', function() {
-            assert.deepEqual(app.getLocation("Pizza at CoLoNiAl"), ["colonial"]);
+        it('getLocation(\"Pizza at CoLoNiAl ClUb\") should equal \"Colonial Club\"', function() {
+            assert.equal(app.getLocation("Pizza at CoLoNiAl ClUb"), "Colonial Club");
         })
     })
     describe('punctuation deletion', function() {
-        it('getLocation(\"Come to F,r,i,s,t\") should equal [\"frist\"]', function() {
-            assert.deepEqual(app.getLocation("Come to F,r,i,s,t"), ["frist"]);
+        it('getLocation(\"Come to F,r,i,s,t\") should equal \"Frist Campus Center\"', function() {
+            assert.equal(app.getLocation("Come to F,r,i,s,t"), "Frist Campus Center");
         })
-        it('getLocation(\"Edward\'s\") should equal [\"edwards\"]', function() {
-            assert.deepEqual(app.getLocation("Edward\'s"), ["edwards"]);
+        it('getLocation(\"Edward\'s Hall\") should equal \"Edwards Hall\"', function() {
+            assert.equal(app.getLocation("Edward\'s Hall"), "Edwards Hall");
         })
     })
-    describe('biggest substring', function(){});
-    describe('fuzzy matching', function(){});
+    describe('regex match', function() {
+        it('getLocation(\"Friend 112\") should equal \"Friend Center\"', function() {
+            assert.equal(app.getLocation("Friend 112"), "Friend Center");
+        })
+        it('getLocation(\"Lewis 123\") should equal \"Lewis Library\"', function() {
+            assert.equal(app.getLocation("Lewis 123"), "Lewis Library");
+        })
+    })
+
+    describe('biggest substring', function(){
+        it('getLocation(\"Ticket holders to Friend Center\") should equal \"Friend Center\"', function() {
+            assert.equal(app.getLocation("Ticket holders to Friend Center"), "Friend Center");
+        })
+        it('getLocation(\"Lewis 123, Bring your spoon!\") should equal \"Lewis Library\"', function() {
+            assert.equal(app.getLocation("Lewis 123, Bring your spoon!"), "Lewis Library");
+        })
+    });
 });

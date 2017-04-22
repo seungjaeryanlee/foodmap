@@ -10,7 +10,19 @@ var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
 var util = require('util');
-var sqlite3 = require('sqlite3').verbose();
+var db_module = require('./db');
+
+// Pick database implementation (sqlite/postgres) based on environment variable
+// PROJECT_MODE
+var db;
+if (process.env.PROJECT_MODE === 'development') {
+  db = db_module.db.sqlite;
+} else if (process.env.PROJECT_MODE === 'production') {
+  db = db_module.db.postgres;
+} else {
+  console.error('Error: PROJECT_MODE not set. Cannot set up database. Did you activate the virtual environment in the Django project?');
+  process.exit(1);
+}
 
 // read/write access except delete for gmail, and read/write access to calendar
 var SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
@@ -35,13 +47,33 @@ module.exports.DELETE = DELETE;
 module.exports.INSERT = INSERT;
 
 // Data files
-var foods = fs.readFileSync('./data/foods.txt').toString().split('\n');
-var locations = fs.readFileSync('./data/locations.txt').toString().split('\n');
-var db = new sqlite3.Database('./data/db.sqlite3');
+var foods = fs.readFileSync(__dirname + '/data/foods.txt').toString().split('\n');
+var locations = fs.readFileSync(__dirname + '/data/locationMap.txt').toString().split('\n');
+var regexes = fs.readFileSync(__dirname + '/data/regexMap.txt').toString().split('\n');
 
+// Extract location map and alias
+var locationMap = {};
+var aliasList = [];
+for (location of locations) {
+    var tokens = location.split(',');
+    locationMap[tokens[0]] = tokens[1];
+    aliasList.push(tokens[0]);
+}
+
+var regexMap = {};
+var regexList = [];
+for (regex of regexes) {
+    var tokens = regex.split(',');
+    regexMap[tokens[0]] = tokens[1];
+    regexList.push(tokens[0]);
+}
+
+if(process.env.client_secret) { // FIXME: Better way to detect Heroku?
+    fs.writeFile(__dirname + '/client_secret.json', process.env.client_secret);
+}
 
 // Load client secrets from a local file.
-fs.readFile('client_secret.json', function processClientSecrets(err, content) {
+fs.readFile(__dirname + '/client_secret.json', function processClientSecrets(err, content) {
     if (err) {
         console.log('Error loading client secret file: ' + err);
         return;
@@ -66,14 +98,25 @@ function authorize(credentials, callback) {
     var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
     // Check if we have previously stored a token.
-    fs.readFile(TOKEN_PATH, function(err, token) {
-        if (err) {
-            getNewToken(oauth2Client, callback);
-        } else {
-            oauth2Client.credentials = JSON.parse(token);
-            callback(oauth2Client);
-        }
-    });
+    if (process.env.PROJECT_MODE === 'development') {
+        fs.readFile(TOKEN_PATH, function(err, token) {
+            if (err) {
+                getNewToken(oauth2Client, callback);
+            } else {
+                oauth2Client.credentials = JSON.parse(token);
+                callback(oauth2Client);
+            }
+        });
+    }
+    // Use JSON given from process environment
+    else if (process.env.PROJECT_MODE === 'production') {
+        oauth2Client.credentials = JSON.parse(process.env.CREDENTIALS);
+        callback(oauth2Client);        
+    } 
+    else {
+      console.error('Error: PROJECT_MODE not set. Cannot authorize API');
+      process.exit(1);
+    }
 }
 
 /**
@@ -134,7 +177,7 @@ var main = function (auth) {
 
     // set auth as a global default
     google.options({auth: auth});
-    
+
     google.gmail('v1').users.messages.list({ // Get unread message list
         userId: 'me',
         q: 'is:unread',
@@ -143,7 +186,12 @@ var main = function (auth) {
         // if unread message exists
         if (!err && res && res.messages && res.messages.length) {
             for(var i = 0; i < res.messages.length; i++) {
-                parseEmail(res.messages[i].id, markAsRead);
+                (function(index) {
+                    // Timeout to prevent making too many requests at once
+                    setTimeout(parseEmail, 1000+(1000*index), res.messages[index].id, markAsRead);
+                    // replace with below for debugging:
+                    // setTimeout(parseEmail, 1000+(1000*index), res.messages[index].id, function(){})
+                })(i);
             }
         } else {
             console.log('No unread message exists');
@@ -167,34 +215,25 @@ function parseEmail(messageId, callback) {
             console.log(err);
             return;
         }
-        
+
         // if(result.payload.headers.find(x => x.name === "To") !== "freefood@princeton.edu")
         if (typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
         || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
             return;
         }
 
-        // Log used for debugging
-        // fs.appendFile('debug.json', JSON.stringify(result, null, 4), function(err) {
-        //     if(err) { console.log(err); }
-        // })
-
         entry = formatEmail(result, messageId);
 
         // INSERT or DELETE entry
         if(getRequestType(entry.title+entry.body) == INSERT) {
-            insertToDB(entry);
-            console.log("Entry inserted to database.");
+            db.insert(entry);
         }
         else {
-            deleteFromDB(entry);
-            console.log("Entry deleted from database.");
+            db.delete(entry);
         }
-    });
 
-    // Disable for testing
-    // Timeout to prevent making too many requests at once    
-    setTimeout(callback, 500, messageId);
+        callback(messageId);
+    });
 }
 
 /**
@@ -224,13 +263,13 @@ function formatEmail(mimeMessage, messageId) {
     var timestamp = getTimestampFromMime(mimeMessage);
     var title = getTitleFromMime(mimeMessage);
     var body = getBodyFromMime(mimeMessage);
-    var image = getImageFromMime(mimeMessage);    
+    var image = getImageFromMime(mimeMessage);
     var food = getFood(title+body);
     var location = getLocation(title+body);
     var threadId = mimeMessage.threadId;
     var requestType = getRequestType(body);
 
-    return {timestamp: timestamp, location: location, title: title, body: body, food: food, image: image, threadId: threadId, requestType: requestType};
+    return {timestamp: timestamp, location: location, title: title, body: (title + '\n' + body), food: food, image: image, threadId: threadId, requestType: requestType};
 }
 
 /**
@@ -317,6 +356,12 @@ function getBodyFromMime(mimeMessage) {
         body = "";
     }
 
+    /* Delete FreeFood footer */
+    body = body.replace('-----\r\nYou are receiving this email because you are subscribed to the Free Food mailing list, operated by the USG. If you have questions or are having difficulties with this listserv, please send an email to usg@princeton.edu.\r\n\r\nIn your message to the freefood listserv, please state what type of food it is, where it is, until when it will be available and how delicious it is.\r\n\r\nTo unsubscribe, please email listserv@princeton.edu the line UNSUBSRIBE FREEFOOD in the body of the message. Please be sure to remove your e-mail signature (if any) before you send that message.\r\n', '');
+
+    /* Delete null character 0x00 */
+    body = body.replace(/\0/g, '');
+
     return body;
 }
 
@@ -328,7 +373,7 @@ function getBodyFromMime(mimeMessage) {
 function getImageFromMime(mimeMessage) {
     var imageName;
     var imageData;
-    
+
     // FIXME: Other content types?
     // Content-Type: multipart/mixed
     if(mimeMessage.payload.mimeType === 'multipart/mixed') {
@@ -338,7 +383,7 @@ function getImageFromMime(mimeMessage) {
         else {
             imageName = mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/").filename;
             var attachmentId = mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/").body.attachmentId;
-            
+
             // FIXME: Check size?
             // Get Attachment
             google.gmail('v1').users.messages.attachments.get({
@@ -351,7 +396,8 @@ function getImageFromMime(mimeMessage) {
 
                 // Create file
                 // FIXME: Should use different file name in case of conflict!
-                fs.writeFile(imageName, imageData, function(err) {});
+                // FIXME: Temporarily disable for speed
+                //fs.writeFile(__dirname + '/' + imageName, imageData, function(err) {});
             });
 
             return {name: imageName, data: imageData};
@@ -368,13 +414,19 @@ function getImageFromMime(mimeMessage) {
  * @param {Object} text The text to search for food
  */
 function getFood(text) {
-    var matches = [];    
+    var matches = [];
 
     // FIXME: Better list of punctuations
     text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
     for(food of foods) {
-        if(text.indexOf(food.toLowerCase()) > - 1) { // Substring search
-            matches.push(food);
+        var index = text.indexOf(food.toLowerCase());
+        if(index > -1) { // Substring search
+            // make sure it's a word by checking the left and right is alphanumeric character
+            if ((index == 0 || !/\w/.test(text[index-1]))
+             && (text.length <= index + food.length || !/\w/.test(text[index + food.length]))) { 
+                food = food.charAt(0).toUpperCase() + food.slice(1);
+                matches.push(food);
+            }
         }
     }
 
@@ -388,53 +440,31 @@ function getFood(text) {
  */
 function getLocation(text) {
     // FIXME: There should only be one location per email
-    var matches = [];    
+    var location = "";
+    var aliasLength = 0;
 
     // FIXME: Better list of punctuations
     text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
-    for(location of locations) {
-        if(text.indexOf(location.toLowerCase()) > - 1) { // Substring search
-            matches.push(location);
+    for(loc of aliasList) {
+        if(text.indexOf(loc.toLowerCase()) > - 1) { // Substring search
+            if(aliasLength < loc.length) { // For longest match
+                location = locationMap[loc];
+                aliasLength = loc.length;
+            }
+        }
+    }
+    for(regex of regexList) {
+        var regexp = new RegExp(regex, 'i');
+        var result = text.match(regexp);
+        if(result) {
+            if(aliasLength < regex.length) { // For longest match
+                location = regexMap[regex];
+                aliasLength = loc.length;
+            }
         }
     }
 
-    return matches;
-}
-
-/**
- * Insert given entry to the SQLite database
- *
- * @param {Object} entry The entry to be inserted to the database
- */
-function insertToDB(entry) {
-    db.serialize(function() {
-        // FIXME: Dummy Database
-        db.run("CREATE TABLE if not exists foodmap_app_offering (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TEXT, location_id TEXT, title TEXT, description TEXT, thread_id TEXT, image TEXT)");
-        if(typeof entry.image === 'undefined') {
-            var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, thread_id) VALUES (?, ?, ?, ?, ?)");
-            stmt.run(entry.timestamp, entry.location.toString(), entry.food.toString(), entry.body, entry.threadId);
-            stmt.finalize();
-        }
-        else {
-            var stmt = db.prepare("INSERT INTO foodmap_app_offering (timestamp, location_id, title, description, thread_id, image) VALUES (?, ?, ?, ?, ?, ?)");
-            stmt.run(entry.timestamp, entry.location.toString(), entry.food.toString(), entry.body, entry.threadId, entry.image.name);
-            stmt.finalize();
-        }
-    });
-}
-
-/**
- * Delete given entry from the SQLite database
- *
- * @param {Object} entry The entry to be deleted from the database
- */
-function deleteFromDB(entry) {
-    // If there is an entry with the given ThreadID, Delete
-    db.serialize(function() {
-        db.run("DELETE FROM foodmap_app_offering WHERE thread_id=(?)", entry.threadId);
-    });
-
-    // FIXME: False positive?
+    return location;
 }
 
 /**
@@ -444,7 +474,7 @@ function deleteFromDB(entry) {
  */
 function getRequestType(text) {
     // FIXME: Better list of punctuations
-    text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");    
+    text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
     var deleteRequests = ["all gone"];
     for(req of deleteRequests) {
         if(text.indexOf(req) > -1) {

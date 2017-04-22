@@ -1,0 +1,1 @@
+web: gunicorn foodmap_proj.wsgi
