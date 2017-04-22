@@ -124,6 +124,10 @@ div.navbar-right ul.nav li a:hover{
   color: gray;
 }
 
+.navbar-header {
+  padding-left: 30px;
+}
+
 /* Searchbox */
   
 .overlay-control.searchbox.leaflet-control {
