@@ -93,8 +93,8 @@ var db = {
          */
         delete: function(entry) {
             // If there is an entry with the given ThreadID, Delete
-            db.serialize(function() {
-                db.run("DELETE FROM " + OFFERINGS.NAME + " WHERE " + OFFERINGS.COLUMNS.THREAD_ID + "=(?)", entry.threadId);
+            sqlite3.serialize(function() {
+                sqlite3.run("DELETE FROM " + OFFERINGS.NAME + " WHERE " + OFFERINGS.COLUMNS.THREAD_ID + "=(?)", entry.threadId);
             });
             console.log("Entry deleted from database.");
 
