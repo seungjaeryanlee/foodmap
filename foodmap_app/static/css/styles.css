@@ -61,7 +61,6 @@ a:hover {
     color: #0078A8;
 }
 
-
 /* Navbar */
 
 /* prevent navbar collapse and force horiontal scroll*/
@@ -70,6 +69,14 @@ body, nav.navbar.navbar-default {
 
 }
 
+.navbar-nav {
+  float: right;
+}
+
+.navbar-nav a:visited {
+  background-color:transparent !important;
+  text-decoration: none;
+}
 .navbar-brand {
     margin-left: -15px;
 }
@@ -89,14 +96,36 @@ body, nav.navbar.navbar-default {
    background-color: #2D2D2D;
 }
 
-#feedback {
+div.container a.navbar-brand {
+  color: #FFFFFF;
+}
+
+div.container a.navbar-brand:hover {
+  color: #FFFFFF;
+}
+
+div.container a.navbar-brand:visited {
+  color: #FFFFFF;
+}
+
+div.container a.navbar-brand:active  {
+  color: #FFFFFF;
+}
+
+div.navbar-right ul.nav li a {
   color: white;
 }
 
-a#feedback:hover {
+div.navbar-right ul.nav li a:visited {
+  color: white;
+}
+
+div.navbar-right ul.nav li a:hover{
   color: gray;
 }
 
+/* Searchbox */
+  
 .overlay-control.searchbox.leaflet-control {
     padding: 5px;
 }
@@ -186,22 +215,6 @@ a#feedback:hover {
     background-color: #FFA726 !important;
 }
 
-div.container a.navbar-brand {
-  color: #FFFFFF;
-}
-
-div.container a.navbar-brand:hover {
-  color: #FFFFFF;
-}
-
-div.container a.navbar-brand:visited {
-  color: #FFFFFF;
-}
-
-div.container a.navbar-brand:active  {
-  color: #FFFFFF;
-}
-
 span.fa.fa-map-marker:before {
   content: '\f041';
 }
@@ -215,3 +228,5 @@ span.fa.fa-map-marker:before {
 .leaflet-sidebar .close {
   z-index: 2000;
 }
+
+
