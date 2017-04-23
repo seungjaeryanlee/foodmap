@@ -71,6 +71,8 @@ dinner
 doba
 domino's
 dominos
+donut
+doughnut
 dressing
 dried fruit
 egg
@@ -161,6 +163,7 @@ olives
 on the border
 orange
 orange juice
+orzo
 panera
 papa john's
 papa johns
@@ -178,6 +181,7 @@ pop
 popcorn
 popsicle
 potato
+princeton pi
 punch
 qdoba
 quinoa
