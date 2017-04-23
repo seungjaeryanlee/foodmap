@@ -9,7 +9,7 @@
 
     // Initialize the map
     var map = L.map('map');
-    map.setMaxZoom(17).setMinZoom(16);
+    map.setMaxZoom(18).setMinZoom(14);
     map.setView([40.345129502014764, -74.65826869010927], 17);
     //map.setMaxBounds([[40.33761, -74.67769], [40.350697, -74.64053]]);
 
@@ -26,8 +26,8 @@
       accessToken:'pk.eyJ1IjoiYm5wcmtzIiwiYSI6ImNqMHVpaHBndjA2NG0zMnFheG5kbG5wa3AifQ.Cypl8hCriRSkA4XF-4GgMQ',
       attribution: 'Tiles by <a href="http://mapc.org">MAPC</a>, Data by <a href="http://mass.gov/mgis">MassGIS</a>',
       id: 'bnprks.9754e7af',
-      maxZoom: 17,
-      minZoom: 9
+      maxZoom: 18,
+      minZoom: 14
   }).addTo(map);
 
     /*------------------------------------------------------------------------*/
