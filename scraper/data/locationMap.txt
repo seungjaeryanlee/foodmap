@@ -610,3 +610,7 @@ lockhart,Lockhart Hall
 bobst,Bobst Hall
 bogle,Bogle Hall
 bowen,Bowen Hall
+robertson,Robertson Hall
+quadrangle,Quadrangle Club
+pyne,Pyne Hall
+peyton,Peyton Hall

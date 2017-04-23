@@ -32,10 +32,6 @@ marx
 moffett
 nassau
 patton
-peyton
-pyne
-quadrangle
-robertson
 terrace
 tower
 von neumann
