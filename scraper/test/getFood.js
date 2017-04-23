@@ -59,6 +59,17 @@ describe('getFood()', function() {
             assert.deepEqual(app.getFood("asdf popcorn\tasdf juice asdf"), ["Juice", "Popcorn"]);
         })
     })
+    describe('plural forms', function(){
+        it('getFood(\"donuts\") should equal [\"Donut\"]', function() {
+            assert.deepEqual(app.getFood("donuts"), ["Donut"]);
+        })
+        it('getFood(\"Doughnuts!\") should equal [\"Doughnut\"]', function() {
+            assert.deepEqual(app.getFood("Doughnuts!"), ["Doughnut"]);
+        })
+        it('getFood(\"Bobas,fries") should equal [\"Boba\", \"Fries\"]', function() {
+            assert.deepEqual(app.getFood("Bobas,fries"), ["Boba", "Fries"]);
+        })
+    });
     describe('biggest substring', function(){});
     describe('fuzzy matching', function(){});
 });
