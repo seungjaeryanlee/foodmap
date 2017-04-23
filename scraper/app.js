@@ -417,13 +417,15 @@ function getFood(text) {
     var matches = [];
 
     // FIXME: Better list of punctuations
-    text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
+    text = text.toLowerCase().replace(/[.\/#!$%\^&\*;:{}=\-_`~()']/g,"");
     for(food of foods) {
         var index = text.indexOf(food.toLowerCase());
         if(index > -1) { // Substring search
             // make sure it's a word by checking the left and right is alphanumeric character
-            if ((index == 0 || !/\w/.test(text[index-1]))
-             && (text.length <= index + food.length || !/\w/.test(text[index + food.length]))) { 
+            if ( (index == 0 || !/\w/.test(text[index-1]))
+             && (text.length <= index + food.length || // no more letter
+                !/\w/.test(text[index + food.length]) || // followed by word break
+                text[index + food.length] == 's') ) { // followed by 's' (plural)
                 food = food.charAt(0).toUpperCase() + food.slice(1);
                 matches.push(food);
             }

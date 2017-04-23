@@ -66,7 +66,7 @@ describe('getFood()', function() {
         it('getFood(\"Doughnuts!\") should equal [\"Doughnut\"]', function() {
             assert.deepEqual(app.getFood("Doughnuts!"), ["Doughnut"]);
         })
-        it('getFood(\"Bobas,fries") should equal [\"Boba\", \"Fries\"]', function() {
+        it('getFood(\"Bobas,fries\") should equal [\"Boba\", \"Fries\"]', function() {
             assert.deepEqual(app.getFood("Bobas,fries"), ["Boba", "Fries"]);
         })
     });
