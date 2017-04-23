@@ -203,6 +203,7 @@ Baker Rink,Baker Rink
 Bendheim Center,Bendheim Center
 Bendheim Hall,Bendheim Hall
 Berlind Theatre,Berlind Theatre
+Berlind Theater,Berlind Theatre
 Blair Hall,Blair Hall
 Bloomberg Hall,Bloomberg Hall
 Bobst Hall,Bobst Hall
@@ -303,6 +304,7 @@ Garage #5 Ferris Thompson,Garage #5 Ferris Thompson
 Garage #5 Springdale Faculty,Garage #5 Springdale Faculty
 Garage #6 Ferris Thompson,Garage #6 Ferris Thompson
 Garden Theatre,Garden Theatre
+Garden Theater,Garden Theatre
 Gas Dynamics Laboratory,Gas Dynamics Laboratory
 Gauss Hall,Gauss Hall
 Graduate Students Lakeside Garage,Graduate Students Lakeside Garage
@@ -347,6 +349,7 @@ Madison Hall,Madison Hall
 Maeder Hall,Maeder Hall
 Marx Hall,Marx Hall
 McCarter Theatre,McCarter Theatre
+McCarter Theater,McCarter Theatre
 McCormick Hall,McCormick Hall
 McCosh Hall,McCosh Hall
 McCosh Health Center,McCosh Health Center
@@ -360,6 +363,7 @@ Mudd Library,Mudd Library
 Mullet Building,Mullet Building
 Murley-Pivirotto Family Tower,Murley-Pivirotto Family Tower
 Murray Theater,Murray Theater
+Murray Theatre,Murray Theater
 Nassau Court,Nassau Court
 Nassau Hall,Nassau Hall
 New Graduate College,New Graduate College
@@ -438,10 +442,15 @@ Wyman House,Wyman House
 Yoseloff Hall,Yoseloff Hall
 betts auditorium,Architecture Building
 class of 1970 theatre,1981 Hall
+class of 1970 theater,1981 Hall
 dodds auditorium,Robertson Halls
 forbes college black box,Forbes Main
+forbes college blackbox,Forbes Main
+forbes black box,Forbes Main
+forbes blackbox,Forbes Main
 richardson auditorium,Alexander Hall
 rocky/mathey theater,Madison Hall
+rocky/mathey theatre,Madison Hall
 1901 hall,1901-Laughlin Hall
 laughlin hall,1901-Laughlin Hall
 1927 Hall,1927 - Clapp Hall
@@ -551,6 +560,7 @@ Spelman Hall,Spelman Halls
 Spelman,Spelman Halls
 Wendell Hall,Wendell Hall B
 Theatre Intime,Murray Theater
+Theater Intime,Murray Theater
 Taplin Auditorium,Fine Hall
 taylor auditorium,Frick Chemistry Laboratory
 davis ic,Louis A. Simpson International Building
@@ -614,3 +624,43 @@ robertson,Robertson Hall
 quadrangle,Quadrangle Club
 pyne,Pyne Hall
 peyton,Peyton Hall
+tower,Tower Club
+terrace,Terrace Club
+charter,Charter Club
+cannon,Cannon Club
+roma,Madison Hall
+roma theater,Madison Hall
+roma theatre,Madison Hall
+roma classroom,Madison Hall
+ivy,Ivy Club
+jones,Jones Hall
+hamilton,Hamilton Hall
+marx,Marx Hall
+madison,Madison Hall
+patton,Patton Hall
+von neumann,Von Neumann Hall
+moffett,Moffett Laboratory
+forrestal,Forrestal Campus Data Center
+fisher,Fisher Hall
+fields,Fields Center
+eno,Eno Hall
+edwards,Edwards Hall
+gauss,Gauss Hall
+dodge,Dodge Hall
+dod,Dod Hall
+dickinson,Dickinson Hall
+cottage,Cottage Club
+bloomberg,Bloomberg Hall
+alexander,Alexander Hall
+baker,Baker Hall
+blair,Blair Hall
+burr,Burr Hall
+brown,Brown Hall
+buyers,Buyers Hall
+campbell,Campbell Hall
+henry,Henry Hall
+green,Green Hall
+walker,Walker Hall
+wallace,Wallace Hall
+wright,Wright Hall
+nassau,Nassau Hall
