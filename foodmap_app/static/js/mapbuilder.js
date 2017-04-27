@@ -10,7 +10,7 @@
     // Initialize the map
     var map = L.map('map');
     map.setMaxZoom(18).setMinZoom(14);
-    map.setView([40.345129502014764, -74.65826869010927], 17);
+    map.setView([40.345129502014764, -74.65826869010927], 16);
     //map.setMaxBounds([[40.33761, -74.67769], [40.350697, -74.64053]]);
 
     L.control.locate({options:{
@@ -49,6 +49,8 @@
                 // Parse JSON response and fill in places.features with location names
                 // and GPS coordinates
                 var response_offerings = JSON.parse(result);
+                if (response_offerings.length == 0)
+                  alert("There is currently no known free food. Sorry.");
                 for (i = 0; i < response_offerings.length; i++) {
                     // Each feature has mostly standard parameters. We set 'coordinates'
                     // (GPS coordinates), 'popupContent' (text that appears in a
