@@ -34,7 +34,7 @@ def offerings(request):
     min_timestamp = now - datetime.timedelta(hours=2)
     offerings = Offering.objects.filter(timestamp__gte=min_timestamp).order_by('-timestamp')
     if len(offerings) == 0:
-        return HttpResponse(json.dumps({}))
+        return HttpResponse(json.dumps([]))
 
     # If any location has more than one offering, filter out the older ones
     most_recent_offerings = []

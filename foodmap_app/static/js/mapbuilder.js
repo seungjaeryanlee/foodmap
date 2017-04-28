@@ -49,8 +49,6 @@
                 // Parse JSON response and fill in places.features with location names
                 // and GPS coordinates
                 var response_offerings = JSON.parse(result);
-                if (response_offerings.length == 0)
-                  alert("There is currently no known free food. Sorry.");
                 for (i = 0; i < response_offerings.length; i++) {
                     // Each feature has mostly standard parameters. We set 'coordinates'
                     // (GPS coordinates), 'popupContent' (text that appears in a
@@ -83,9 +81,12 @@
     }
 
     var offerings = pullOfferings();
+    // TODO: Make nicer looking alert messages built into the UI
     if (offerings.error) {
-        // TODO: Make a nicer looking error message built into the UI
         alert('Oops! We could not get the free food offerings!');
+    }
+    if (offerings.features.length == 0) {
+        alert("There is currently no free food available. Sorry!");
     }
 
     /*------------------------------------------------------------------------*/
@@ -117,7 +118,7 @@
         position: 'left'
     });
   map.addControl(sidebar);
-          
+
     // Place markers on map
     function placeMarkers() {
         layers.offerings = L.geoJSON(offerings, {

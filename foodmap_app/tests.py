@@ -255,7 +255,7 @@ class OfferingsViewTests(TestCase):
             self.fail('JSON response could not be parsed')
 
         # Verify that response is correct
-        self.assertEqual(parsed_response, {})
+        self.assertEqual(parsed_response, [])
 
         # Restore setup so that when tearDown() is called, we don't get errors
         self.setUp()
