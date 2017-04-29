@@ -19,19 +19,19 @@ describe('getFood()', function() {
         })
     })
     describe('multiple matches', function() {
-        it('getFood(\"burrito taco\") should equal [\"Burrito\", \"Taco\"]', function() {
-            assert.deepEqual(app.getFood("burrito taco"), ["Burrito", "Taco"]);
+        it('getFood(\"burrito taco\") should order-ignored equal [\"Burrito\", \"Taco\"]', function() {
+            assert.deepEqual(app.getFood("burrito taco").sort(), ["Burrito", "Taco"].sort());
         })
-        it('getFood(\"taco burrito\") should equal [\"Burrito\", \"Taco\"]', function() {
-            assert.deepEqual(app.getFood("taco burrito"), ["Burrito", "Taco"]);
+        it('getFood(\"taco burrito\") should order-ignored equal [\"Burrito\", \"Taco\"]', function() {
+            assert.deepEqual(app.getFood("taco burrito").sort(), ["Burrito", "Taco"].sort());
         })
-        it('getFood(\"come and get bagel and muffin\") should equal [\"Bagel\", \"Muffin\"]', function() {
-            assert.deepEqual(app.getFood("come and get bagel and muffin"), ["Bagel", "Muffin"]);
+        it('getFood(\"come and get bagel and muffin\") should order-ignored equal [\"Bagel\", \"Muffin\"]', function() {
+            assert.deepEqual(app.getFood("come and get bagel and muffin").sort(), ["Bagel", "Muffin"].sort());
         })
     })
     describe('case-insensitive match', function() {
-        it('getFood(\"Mehek with milk\") should equal [\"Mehek\", \"Milk\"]', function() {
-            assert.deepEqual(app.getFood("Mehek with milk"), ["Mehek", "Milk"]);
+        it('getFood(\"Mehek with milk\") should order-ignored equal [\"Mehek\", \"Milk\"]', function() {
+            assert.deepEqual(app.getFood("Mehek with milk").sort(), ["Mehek", "Milk"].sort());
         })
         it('getFood(\"PAPA JOHNS\") should equal [\"Papa johns\"]', function() {
             assert.deepEqual(app.getFood("PAPA JOHNS"), ["Papa johns"]);
@@ -55,8 +55,8 @@ describe('getFood()', function() {
         it('getFood(\"veggie!\") should equal [\"Veggie\"] not [\"Egg\", \"Veggie\"]', function() {
             assert.deepEqual(app.getFood("veggie!"), ["Veggie"]);
         })
-        it('getFood(\"asdf popcorn\tasdf juice asdf") should equal [\"Juice\", \"Popcorn\"] not [ \"Ice\", \"Juice\", \"Pop\", \"Popcorn\"]', function() {
-            assert.deepEqual(app.getFood("asdf popcorn\tasdf juice asdf"), ["Juice", "Popcorn"]);
+        it('getFood(\"asdf popcorn\tasdf juice asdf") should order-ignored equal [\"Juice\", \"Popcorn\"] not [ \"Ice\", \"Juice\", \"Pop\", \"Popcorn\"]', function() {
+            assert.deepEqual(app.getFood("asdf popcorn\tasdf juice asdf").sort(), ["Juice", "Popcorn"].sort());
         })
     })
     describe('plural forms', function(){
@@ -66,8 +66,16 @@ describe('getFood()', function() {
         it('getFood(\"Doughnuts!\") should equal [\"Doughnuts\"]', function() {
             assert.deepEqual(app.getFood("Doughnuts!"), ["Doughnuts"]);
         })
-        it('getFood(\"Bobas,fries\") should equal [\"Bobas\", \"Fries\"]', function() {
-            assert.deepEqual(app.getFood("Bobas,fries"), ["Bobas", "Fries"]);
+    });
+    describe('comma-separated list of food', function(){
+        it('getFood(\"Bobas,fries\") should order-ignored equal [\"Bobas\", \"Fries\"]', function() {
+            assert.deepEqual(app.getFood("Bobas,fries").sort(), ["Bobas", "Fries"].sort());
+        })
+        it('getFood(\"Ziti, qdoba\") should order-ignored equal [\"Ziti\", \"Qdoba\"]', function() {
+            assert.deepEqual(app.getFood("Ziti, qdoba").sort(), ["Ziti", "Qdoba"].sort());
+        })
+        it('getFood(\"PANERA , quinoa\") should order-ignored equal [\"Panera\", \"Quinoa\"]', function() {
+            assert.deepEqual(app.getFood("PANERA , quinoa").sort(), ["Panera", "Quinoa"].sort());
         })
     });
     describe('biggest substring', function(){});
