@@ -78,6 +78,12 @@ describe('getFood()', function() {
             assert.deepEqual(app.getFood("PANERA , quinoa").sort(), ["Panera", "Quinoa"].sort());
         })
     });
+    describe('multi-word foods', function(){
+        it('getFood(\"ice cream\") should equal [\"Ice cream\"]', function() {
+            assert.deepEqual(app.getFood("ice cream"), ["Ice cream"]);
+        })
+    });
+
     describe('biggest substring', function(){});
     describe('fuzzy matching', function(){});
 });

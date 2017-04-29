@@ -415,14 +415,37 @@ function getImageFromMime(mimeMessage) {
  */
 function getFood(text) {
     // Clean text and separate by whitespace
-    // FIXmE: magic string should be avoided
+    // FIXME: magic string should be avoided
     text = text.toLowerCase().replace(/[.\/#!$%\^&\*;:{}=\-_`~()']/g,"");
     words = text.split(/[\s,]+/g);
 
     var matches = [];
 
-    for(word of words) {
-        // FIXME: Check if the word is part of a phrase
+    for(var i=0; i<words.length; i++) {
+        word = words[i];
+        // Check if the word is part of a phrase
+        for(food of foods) {
+            splitFood = food.split(" ");
+            // FIXME: Check for Plural?
+            if(splitFood.length > 1 && splitFood.indexOf(word) > -1) {
+                // Check boundary
+                if(i + splitFood.length > words.length) { continue; }
+
+                // Check phrase
+                phrase = [word];
+                for(var j=1; j<splitFood.length; j++) {
+                    phrase.push(words[i+j]);
+                }
+
+                // FIXME: Check for Plural forms
+                phraseString = phrase.join(" ");
+                if(foods.indexOf(phraseString) > -1) {
+                    phraseString = phraseString.charAt(0).toUpperCase() + phraseString.slice(1);
+                    matches.push(phraseString);
+                   break;
+                }
+            }
+        }
 
         // The word is in the food list
         if(foods.indexOf(word) > -1) {
@@ -441,22 +464,6 @@ function getFood(text) {
     }
 
     return matches;
-
-    // // FIXME: Better list of punctuations
-    // text = text.toLowerCase().replace(/[.\/#!$%\^&\*;:{}=\-_`~()']/g,"");
-    // for(food of foods) {
-    //     var index = text.indexOf(food.toLowerCase());
-    //     if(index > -1) { // Substring search
-    //         // make sure it's a word by checking the left and right is alphanumeric character
-    //         if ( (index == 0 || !/\w/.test(text[index-1]))
-    //          && (text.length <= index + food.length || // no more letter
-    //             !/\w/.test(text[index + food.length]) || // followed by word break
-    //             text[index + food.length] == 's') ) { // followed by 's' (plural)
-    //             food = food.charAt(0).toUpperCase() + food.slice(1);
-    //             matches.push(food);
-    //         }
-    //     }
-    // }    
 }
 
 /**
