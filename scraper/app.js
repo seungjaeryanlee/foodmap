@@ -414,25 +414,49 @@ function getImageFromMime(mimeMessage) {
  * @param {Object} text The text to search for food
  */
 function getFood(text) {
+    // Clean text and separate by whitespace
+    // FIXmE: magic string should be avoided
+    text = text.toLowerCase().replace(/[.\/#!$%\^&\*;:{}=\-_`~()']/g,"");
+    words = text.split(/[\s,]+/g);
+
     var matches = [];
 
-    // FIXME: Better list of punctuations
-    text = text.toLowerCase().replace(/[.\/#!$%\^&\*;:{}=\-_`~()']/g,"");
-    for(food of foods) {
-        var index = text.indexOf(food.toLowerCase());
-        if(index > -1) { // Substring search
-            // make sure it's a word by checking the left and right is alphanumeric character
-            if ( (index == 0 || !/\w/.test(text[index-1]))
-             && (text.length <= index + food.length || // no more letter
-                !/\w/.test(text[index + food.length]) || // followed by word break
-                text[index + food.length] == 's') ) { // followed by 's' (plural)
-                food = food.charAt(0).toUpperCase() + food.slice(1);
-                matches.push(food);
-            }
+    for(word of words) {
+        // FIXME: Check if the word is part of a phrase
+
+        // The word is in the food list
+        if(foods.indexOf(word) > -1) {
+            word = word.charAt(0).toUpperCase() + word.slice(1);
+            matches.push(word);
+        }
+        // Check for Plural forms
+        else if(word.slice(-1) == 's' && foods.indexOf(word.slice(0, -1)) > -1) {
+            word = word.charAt(0).toUpperCase() + word.slice(1);
+            matches.push(word);
+        }
+        else if(word.slice(-2) == 'es' && foods.indexOf(word.slice(0, -2)) > -1) {
+            word = word.charAt(0).toUpperCase() + word.slice(1);
+            matches.push(word);
         }
     }
 
     return matches;
+
+    // // FIXME: Better list of punctuations
+    // text = text.toLowerCase().replace(/[.\/#!$%\^&\*;:{}=\-_`~()']/g,"");
+    // for(food of foods) {
+    //     var index = text.indexOf(food.toLowerCase());
+    //     if(index > -1) { // Substring search
+    //         // make sure it's a word by checking the left and right is alphanumeric character
+    //         if ( (index == 0 || !/\w/.test(text[index-1]))
+    //          && (text.length <= index + food.length || // no more letter
+    //             !/\w/.test(text[index + food.length]) || // followed by word break
+    //             text[index + food.length] == 's') ) { // followed by 's' (plural)
+    //             food = food.charAt(0).toUpperCase() + food.slice(1);
+    //             matches.push(food);
+    //         }
+    //     }
+    // }    
 }
 
 /**

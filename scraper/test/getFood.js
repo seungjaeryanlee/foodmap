@@ -60,14 +60,14 @@ describe('getFood()', function() {
         })
     })
     describe('plural forms', function(){
-        it('getFood(\"donuts\") should equal [\"Donut\"]', function() {
-            assert.deepEqual(app.getFood("donuts"), ["Donut"]);
+        it('getFood(\"donuts\") should equal [\"Donuts\"]', function() {
+            assert.deepEqual(app.getFood("donuts"), ["Donuts"]);
         })
-        it('getFood(\"Doughnuts!\") should equal [\"Doughnut\"]', function() {
-            assert.deepEqual(app.getFood("Doughnuts!"), ["Doughnut"]);
+        it('getFood(\"Doughnuts!\") should equal [\"Doughnuts\"]', function() {
+            assert.deepEqual(app.getFood("Doughnuts!"), ["Doughnuts"]);
         })
-        it('getFood(\"Bobas,fries\") should equal [\"Boba\", \"Fries\"]', function() {
-            assert.deepEqual(app.getFood("Bobas,fries"), ["Boba", "Fries"]);
+        it('getFood(\"Bobas,fries\") should equal [\"Bobas\", \"Fries\"]', function() {
+            assert.deepEqual(app.getFood("Bobas,fries"), ["Bobas", "Fries"]);
         })
     });
     describe('biggest substring', function(){});
