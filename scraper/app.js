@@ -41,6 +41,7 @@ module.exports.getTitleFromMime = getTitleFromMime;
 module.exports.getBodyFromMime = getBodyFromMime;
 module.exports.getImageFromMime = getImageFromMime;
 module.exports.getFood = getFood;
+module.exports.getReply = getReply;
 module.exports.getLocation = getLocation;
 module.exports.getRequestType = getRequestType;
 module.exports.DELETE = DELETE;
@@ -223,6 +224,10 @@ function parseEmail(messageId, callback) {
         }
 
         entry = formatEmail(result, messageId);
+
+        if (process.env.PROJECT_MODE === 'development') {
+            fs.appendFileSync('emails.log', JSON.stringify(result, null, 4));
+        }
 
         // INSERT or DELETE entry
         if(getRequestType(entry.title+entry.body) == INSERT) {
@@ -409,6 +414,26 @@ function getImageFromMime(mimeMessage) {
 }
 
 /**
+ * Get only the latest reply in the MIME body
+ *
+ * @param {Object} text The MIME body
+ */
+
+function getReply(text) {
+    // Use regex to get header of the previous email
+    // FIXME: Check Day/Month concatenated format
+    var headerRegex = new RegExp("On (Sun|Mon|Tues|Wed|Thurs|Fri|Sat), (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\\d|\\d\\d), \\d\\d\\d\\d at \\d\\d:\\d\\d .* <.*@princeton.edu> wrote:", "g");
+
+    var match = headerRegex.exec(text);
+    if(match != null) {
+        return text.slice(0, match.index);
+    }
+    
+    return text;
+}
+
+
+/**
  * Get all foods that are in the text
  *
  * @param {Object} text The text to search for food
@@ -483,5 +508,6 @@ function getRequestType(text) {
             return DELETE;
         }
     }
+
     return INSERT;
 }
