@@ -24,4 +24,15 @@ describe('getRequestType()', function() {
             assert.equal(app.getRequestType("food at frist"), app.INSERT);
         })
     })
+    describe('simple gone email', function() {
+        it('getRequestType(\"Gone\") should equal DELETE', function() {
+            assert.equal(app.getRequestType("Gone"), app.DELETE);
+        })
+        it('getRequestType(\"Gone!!!\") should equal DELETE', function() {
+            assert.equal(app.getRequestType("Gone!!!"), app.DELETE);
+        })
+        it('getRequestType(\"Gone \\r\\n\\r\\n\") should equal DELETE', function() {
+            assert.equal(app.getRequestType("Gone \r\n\r\n"), app.DELETE);
+        })
+    })
 });

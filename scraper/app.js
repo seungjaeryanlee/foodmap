@@ -428,7 +428,7 @@ function getReply(text) {
     if(match != null) {
         return text.slice(0, match.index);
     }
-    
+
     return text;
 }
 
@@ -508,6 +508,14 @@ function getRequestType(text) {
             return DELETE;
         }
     }
+
+    // If it is a simple email that just says "Gone"
+    if(text == "gone" || text.trim() == "gone") {
+        return DELETE;
+    }
+
+    // FIXME: Check for partial delete
+    if(text.indexOf("gone") > -1) {}
 
     return INSERT;
 }
