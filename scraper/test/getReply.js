@@ -12,7 +12,7 @@ describe('getReply()', function() {
     })
 
     it('Two previous emails', function() {
-        var text = "Re: [FreeFood] There is Food!\nGone!\r\nOn Sun, Apr 30, 2017 at 14:47 Ryan <seungjl@princeton.edu> wrote:\r\n\r\n> Even more food !!\r\n>\r\n> On Sun, Apr 30, 2017 at 14:42 Ryan <seungjl@princeton.edu> wrote:\r\n>\r\n>> So much food!\r\n>\r\n>\r\n\r\n";
+        var text = "Re: [FreeFood] There is Food!\nGone!\r\nOn Sun, Apr 9, 2017 at 1:47 Ryan <seungjl@princeton.edu> wrote:\r\n\r\n> Even more food!!\r\n>\r\n> On Sun, Apr 9, 2017 at 1:42 Ryan <seungjl@princeton.edu> wrote:\r\n>\r\n>> So much food!\r\n>\r\n>\r\n\r\n";
         assert.equal(app.getReply(text), "Re: [FreeFood] There is Food!\nGone!\r\n");
     })
 });

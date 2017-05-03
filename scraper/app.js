@@ -226,7 +226,8 @@ function parseEmail(messageId, callback) {
         entry = formatEmail(result, messageId);
 
         if (process.env.PROJECT_MODE === 'development') {
-            fs.appendFileSync('emails.log', JSON.stringify(result, null, 4));
+            //fs.appendFileSync('emails.log', JSON.stringify(result, null, 4));
+            fs.appendFileSync('emails.log', JSON.stringify(getReply(entry.body)) + "\n");
         }
 
         // INSERT or DELETE entry
@@ -272,7 +273,7 @@ function formatEmail(mimeMessage, messageId) {
     var food = getFood(title+body);
     var location = getLocation(title+body);
     var threadId = mimeMessage.threadId;
-    var requestType = getRequestType(body);
+    var requestType = getRequestType(getReply(body));
 
     return {timestamp: timestamp, location: location, title: title, body: (title + '\n' + body), food: food, image: image, threadId: threadId, requestType: requestType};
 }
@@ -422,7 +423,7 @@ function getImageFromMime(mimeMessage) {
 function getReply(text) {
     // Use regex to get header of the previous email
     // FIXME: Check Day/Month concatenated format
-    var headerRegex = new RegExp("On (Sun|Mon|Tues|Wed|Thurs|Fri|Sat), (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\\d|\\d\\d), \\d\\d\\d\\d at \\d\\d:\\d\\d .* <.*@princeton.edu> wrote:", "g");
+    var headerRegex = new RegExp("On (Sun|Mon|Tues|Wed|Thurs|Fri|Sat), (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\\d|\\d\\d), \\d\\d\\d\\d at (\\d|\\d\\d):\\d\\d .* <.*@princeton.edu> wrote:", "g");
 
     var match = headerRegex.exec(text);
     if(match != null) {
