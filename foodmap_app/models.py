@@ -46,8 +46,6 @@ class Offering(models.Model):
         Overrides default save method to validate attributes in greater depth
         than Django does by default.
         '''
-        if isinstance(self.timestamp, datetime.datetime) and self.timestamp > timezone.now():
-            raise ValueError('\'timestamp\' attribute of the Offering is in the future')
         if self.thread_id and len(self.thread_id) < Offering.THREAD_ID_MAX_LENGTH:
             raise ValueError('\'thread_id\' attribute of the Offering is too short (not %d chars)'
                 % (Offering.THREAD_ID_MAX_LENGTH))

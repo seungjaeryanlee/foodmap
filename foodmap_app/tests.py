@@ -210,11 +210,11 @@ class OfferingsViewTests(TestCase):
     def test_offerings_timestamp_constraints(self):
         '''
         Requests the most recent offerings and checks that they meet the
-        time constraints we impose: (1) no offering is older than 2 hours;
-        (2) no more than 1 offering per location.
+        time constraints we impose: (1) all offerings are from 2 hours ago to
+        now; (2) no more than 1 offering per location.
         '''
-        # Set timestamps of the offerings to just before and just after
-        # 2-hour mark
+        # Set timestamps of the offerings to just before, just after 2-hours
+        # mark, and in future
         offerings_good = [self.offering1A, self.offering1B]
         offerings_bad  = [self.offering2A, self.offering2B]
 
@@ -222,18 +222,20 @@ class OfferingsViewTests(TestCase):
         for offering in offerings_good:
             offering.timestamp = now - datetime.timedelta(minutes=118) # under 2 hours
             offering.save()
-        for offering in offerings_bad:
-            offering.timestamp = now - datetime.timedelta(minutes=121) # over 2 hours
-            offering.save()
+        offerings_bad[0].timestamp = now - datetime.timedelta(minutes=121) # over 2 hours
+        offerings_bad[0].save()
+        offerings_bad[1].timestamp = now + datetime.timedelta(days=1) # future
+        offerings_bad[1].save()
 
         # Make the request
         response = self.client.get(reverse('foodmap_app:offerings'))
         test_offerings = json.loads(response.content)  # array of JSON objects, as specified in views.py
 
-        # Check that no offering is older than 2 hours (approximately)
+        # Check that no offering outside time range (approximately)
         epsilon = 2  # some leeway in the timestamp to account for delay between request and response
         for offering in test_offerings:
             self.assertTrue(offering['minutes'] < 120 + epsilon)
+            self.assertTrue(offering['minutes'] >= 0)
 
         # Check that no location has more than 1 offering
         locations_with_offerings = []
@@ -292,10 +294,15 @@ class OfferingsTableTests(TestCase):
     def test_offerings_table_insert_with_timestamp_in_the_future(self):
         '''
         Inserts an entry with a timestamp in the future, and checks that it
-        fails to insert.
+        succeeds. (Timestamps are allowed to be in the future, so users can
+        enter future offerings. )
         '''
         offering = create_offering(timestamp=timezone.now() + datetime.timedelta(days=10))
-        self.assertRaises(ValueError, offering.save)
+        offering.save()
+
+        test_offering = Offering.objects.order_by('-pk')[0]
+        self.assertEqual(test_offering, offering)
+        test_offering.delete()
 
     def test_offerings_table_insert_with_nonexistent_location(self):
         '''
@@ -591,7 +598,7 @@ class OfferingFormTests(TestCase):
         location = create_location(name='Frist Campus Center')
         location.save()
         description = 'Come get some pizza and pasta at Frist!'
-        data = {'timestamp': now, 'location': [location], 'description': description}
+        data = {'timestamp': now, 'location': location.id, 'description': description}
         form = OfferingForm(data)
 
         self.assertTrue(form.is_valid(), 'Invalid form: ' + str(form.errors.as_json))
@@ -607,7 +614,7 @@ class OfferingFormTests(TestCase):
         location.save()
         description = 'Come get some pizza and pasta at Frist!'
         title = scraper.get_food(description)
-        data = {'timestamp': now, 'location': [location], 'description': description}
+        data = {'timestamp': now, 'location': location.id, 'description': description}
         form = OfferingForm(data)
         self.assertTrue(form.is_valid(), 'Invalid form: ' + str(form.errors.as_json))
 
@@ -637,7 +644,7 @@ class OfferingFormTests(TestCase):
         location = create_location(name='Frist Campus Center')
         location.save()
         description = 'We have nothing here.'
-        data = {'timestamp': now, 'location': [location], 'description': description}
+        data = {'timestamp': now, 'location': location.id, 'description': description}
         form = OfferingForm(data)
 
         self.assertFalse(form.is_valid())

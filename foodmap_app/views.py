@@ -80,7 +80,7 @@ def offerings(request):
     # Pull all offerings under 2 hours old
     now = timezone.now()
     min_timestamp = now - datetime.timedelta(hours=2)
-    offerings = Offering.objects.filter(timestamp__gte=min_timestamp).order_by('-timestamp')
+    offerings = Offering.objects.filter(timestamp__gte=min_timestamp, timestamp__lte=now).order_by('-timestamp')
     if len(offerings) == 0:
         return HttpResponse(json.dumps([]))
 
