@@ -7,7 +7,10 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 from foodmap_proj.settings.common import MEDIA_ROOT
+from foodmap_app import scraper
+from foodmap_app.forms import OfferingForm
 from foodmap_app.models import Location, Offering, OfferingTag
+from unittest import skipIf
 
 # Create your tests here.
 
@@ -529,3 +532,128 @@ class OfferingTagsTableTests(TestCase):
         '''
         offering_tag = create_offering_tag(offering=self.offering, tag=None)
         self.assertRaises(IntegrityError, offering_tag.save)
+
+
+#-------------------------------------------------------------------------------
+
+### Scraper interface tests
+
+class ScraperInterfaceTests(TestCase):
+    '''
+    Tests to make sure the scraper interface module works properly.
+    '''
+
+    @skipIf(True, 'Scraper interface module not yet implemented')
+    def test_scraper_interface_get_food_from_text(self):
+        '''
+        Test that the get_food() method of the scraper interface gets all foods
+        in a given text and returns them in comma-separated format.
+        '''
+        text1 = 'Eat bagels here.'
+        foods1 = 'Bagels'
+        test_foods1 = scraper.get_food(text1)
+        self.assertEqual(test_foods1, text1)
+
+        text2 = 'Come get some pizza and pasta at Frist!'
+        foods2 = 'Pizza, pasta'
+        test_foods2 = scraper.get_food(text2)
+        self.assertEqual(test_foods2, foods2)
+
+        text3 = 'Pizza and pasta at Frist! Also we have bagels, cream cheese, and butter with orange juice. Don\'t miss out!'
+        foods3 = 'Pizza, pasta, bagels, cream cheese, butter, orange juice'
+        test_foods3 = scraper.get_food(text3)
+        self.assertEqual(test_foods3, foods3)
+
+#-------------------------------------------------------------------------------
+
+### Form tests
+
+class OfferingFormTests(TestCase):
+    '''
+    Tests for the form for entering Offerings
+    '''
+
+    def tearDown(self):
+        '''
+        Clean out the database after each test.
+        '''
+        for offering in Offering.objects.all():
+            offering.delete()
+        for location in Location.objects.all():
+            location.delete()
+
+    def test_offering_form_create_form_with_valid_entry(self):
+        '''
+        Create a form with valid entries and check that the form is in fact
+        determined valid.
+        '''
+        now = timezone.now()
+        location = create_location(name='Frist Campus Center')
+        location.save()
+        description = 'Come get some pizza and pasta at Frist!'
+        data = {'timestamp': now, 'location': [location], 'description': description}
+        form = OfferingForm(data)
+
+        self.assertTrue(form.is_valid(), 'Invalid form: ' + str(form.errors.as_json))
+
+    def test_offering_form_submit_valid_entry(self):
+        '''
+        Create a form with a valid entry and attempt to save its info to the
+        database. Check that the database contains the correct info.
+        '''
+        # Create form
+        now = timezone.now()
+        location = create_location(name='Frist Campus Center')
+        location.save()
+        description = 'Come get some pizza and pasta at Frist!'
+        title = scraper.get_food(description)
+        data = {'timestamp': now, 'location': [location], 'description': description}
+        form = OfferingForm(data)
+        self.assertTrue(form.is_valid(), 'Invalid form: ' + str(form.errors.as_json))
+
+        # Save data
+        Offering(
+            timestamp=form.cleaned_data['timestamp'],
+            location=form.cleaned_data['location'],
+            title=form.cleaned_data['title'],
+            description=form.cleaned_data['description']
+        ).save()
+
+        # Retrieve offering from database
+        test_offering = Offering.objects.order_by('-timestamp')[0]
+        self.assertEqual(test_offering.timestamp, now)
+        self.assertEqual(test_offering.location, location)
+        self.assertEqual(test_offering.title, title)
+        self.assertEqual(test_offering.description, description)
+
+    @skipIf(True, 'Have not yet implemented scraper interface, so we cannot determine that a description is invalid because there is no food in it')
+    def test_offering_form_submit_description_without_food(self):
+        '''
+        Attempt to submit a form with an invalid description, namely one
+        without any food in it. Check that it comes back invalid.
+        '''
+        # Create form
+        now = timezone.now()
+        location = create_location(name='Frist Campus Center')
+        location.save()
+        description = 'We have nothing here.'
+        data = {'timestamp': now, 'location': [location], 'description': description}
+        form = OfferingForm(data)
+
+        self.assertFalse(form.is_valid())
+
+    @skipIf(True, 'Test not yet implemented')
+    def test_offering_form_redirects_to_submitted_page(self):
+        '''
+        Fill out a form in the browser and check that submitting it sends you
+        to the /submitted/ page.
+        '''
+        pass
+
+    def test_offering_form_cannot_reach_submitted_page_without_submitting_a_form(self):
+        '''
+        Attempts to load the /submitted/ page without submitting a form. Checks
+        that the page is not found.
+        '''
+        response = self.client.get(reverse('foodmap_app:submitted'))
+        self.assertEqual(response.status_code, 404)

@@ -37,7 +37,7 @@ class Offering(models.Model):
     timestamp = models.DateTimeField()
     location = models.ForeignKey(Location, on_delete=models.CASCADE) # TODO: What does CASCADE mean? This is advised in the django tutorial
     title = models.CharField(max_length=TITLE_MAX_LENGTH)
-    description = models.CharField(max_length=DESCRIPTION_MAX_LENGTH, blank=True, default='')
+    description = models.CharField(max_length=DESCRIPTION_MAX_LENGTH, default='')
     image = models.ImageField(upload_to='offerings', null=True, blank=True)
     thread_id = models.CharField(max_length=THREAD_ID_MAX_LENGTH, blank=True, null=True, unique=True)
 

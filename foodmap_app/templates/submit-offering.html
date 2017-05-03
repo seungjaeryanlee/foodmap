@@ -1,0 +1,5 @@
+<form action="/submit-offering/" method="post">
+  {% csrf_token %} <!-- protects against cross site request forgeries -->
+  {{ form }}
+  <input type="submit" value="Submit" />
+</form>
