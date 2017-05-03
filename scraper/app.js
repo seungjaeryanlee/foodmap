@@ -423,12 +423,19 @@ function getImageFromMime(mimeMessage) {
 function getReply(text) {
     // Use regex to get header of the previous email
     // FIXME: Check Day/Month concatenated format
+    // FIXME: Other reply formats?
     var headerRegex = new RegExp("On (Sun|Mon|Tues|Wed|Thurs|Fri|Sat), (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\\d|\\d\\d), \\d\\d\\d\\d at (\\d|\\d\\d):\\d\\d .* <.*@princeton.edu> wrote:", "g");
+    var headerRegex2 = new RegExp("> On (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\\d|\\d\\d), \\d\\d\\d\\d, at (\\d|\\d\\d):\\d\\d .* <.*@princeton.edu> wrote:", "g");
 
     var match = headerRegex.exec(text);
     if(match != null) {
         return text.slice(0, match.index);
     }
+    var match2 = headerRegex2.exec(text);
+    if(match2 != null) {
+        return text.slice(0, match2.index);
+    }
+    
 
     return text;
 }
