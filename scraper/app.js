@@ -408,6 +408,20 @@ function getImageFromMime(mimeMessage) {
     }
 }
 
+// FIXME: Add Documentation
+function isValidFood(text) {
+    // Exact Match
+    if(foods.indexOf(text) > -1) { return true; }
+
+    // Plural Form
+    else if(text.slice(-1) == 's' && foods.indexOf(text.slice(0, -1)) > -1) { return true; }
+    else if(text.slice(-2) == 'es' && foods.indexOf(text.slice(0, -2)) > -1) { return true; }
+
+    // FIXME: Fuzzy Matching
+
+    return false;
+}
+
 /**
  * Get all foods that are in the text
  *
@@ -423,6 +437,7 @@ function getFood(text) {
 
     for(var i=0; i<words.length; i++) {
         word = words[i];
+        
         // Check if the word is part of a phrase
         for(food of foods) {
             splitFood = food.split(" ");
@@ -431,15 +446,14 @@ function getFood(text) {
                 // Check boundary
                 if(i + splitFood.length > words.length) { continue; }
 
-                // Check phrase
+                // Create phrase
                 phrase = [word];
                 for(var j=1; j<splitFood.length; j++) {
                     phrase.push(words[i+j]);
                 }
-
-                // FIXME: Check for Plural forms
                 phraseString = phrase.join(" ");
-                if(foods.indexOf(phraseString) > -1) {
+
+                if(isValidFood(phraseString)) {
                     phraseString = phraseString.charAt(0).toUpperCase() + phraseString.slice(1);
                     matches.push(phraseString);
                    break;
@@ -448,16 +462,7 @@ function getFood(text) {
         }
 
         // The word is in the food list
-        if(foods.indexOf(word) > -1) {
-            word = word.charAt(0).toUpperCase() + word.slice(1);
-            matches.push(word);
-        }
-        // Check for Plural forms
-        else if(word.slice(-1) == 's' && foods.indexOf(word.slice(0, -1)) > -1) {
-            word = word.charAt(0).toUpperCase() + word.slice(1);
-            matches.push(word);
-        }
-        else if(word.slice(-2) == 'es' && foods.indexOf(word.slice(0, -2)) > -1) {
+        if(isValidFood(word)) {
             word = word.charAt(0).toUpperCase() + word.slice(1);
             matches.push(word);
         }
