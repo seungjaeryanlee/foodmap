@@ -422,6 +422,11 @@ function isValidFood(text) {
     return false;
 }
 
+// FIXME: Add Documentation
+function capitalize(text) {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 /**
  * Get all foods that are in the text
  *
@@ -436,6 +441,7 @@ function getFood(text) {
     var matches = [];
 
     for(var i=0; i<words.length; i++) {
+        var phraseFound = false;
         word = words[i];
         
         // Check if the word is part of a phrase
@@ -453,18 +459,20 @@ function getFood(text) {
                 }
                 phraseString = phrase.join(" ");
 
-                if(isValidFood(phraseString)) {
-                    phraseString = phraseString.charAt(0).toUpperCase() + phraseString.slice(1);
-                    matches.push(phraseString);
-                   break;
+                if(isValidFood(phraseString)) {                    
+                    matches.push(capitalize(phraseString));
+                    i += splitFood.length - 1; // Increment index to skip over the phrase
+                    phraseFound = true;
+                    break;
                 }
             }
         }
+        if(phraseFound) { continue; }
+
 
         // The word is in the food list
         if(isValidFood(word)) {
-            word = word.charAt(0).toUpperCase() + word.slice(1);
-            matches.push(word);
+            matches.push(capitalize(word));
         }
     }
 
