@@ -68,7 +68,7 @@ for (regex of regexes) {
     regexList.push(tokens[0]);
 }
 
-if(process.env.client_secret) { // FIXME: Better way to detect Heroku?
+if(process.env.PROJECT_MODE === 'production') {
     fs.writeFile(__dirname + '/client_secret.json', process.env.client_secret);
 }
 
@@ -114,8 +114,8 @@ function authorize(credentials, callback) {
         callback(oauth2Client);        
     } 
     else {
-      console.error('Error: PROJECT_MODE not set. Cannot authorize API');
-      process.exit(1);
+        console.error('Error: PROJECT_MODE not set. Cannot authorize API');
+        process.exit(1);
     }
 }
 
@@ -166,6 +166,15 @@ function storeToken(token) {
     }
     fs.writeFile(TOKEN_PATH, JSON.stringify(token));
     console.log('Token stored to ' + TOKEN_PATH);
+}
+
+/**
+ * Prepares text to be parsed by lowercasing and deleting punctuations
+ *
+ * @param {Object} text The text to be cleaned
+ */
+function prepareText(text) {
+    return text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
 }
 
 /**
@@ -408,7 +417,11 @@ function getImageFromMime(mimeMessage) {
     }
 }
 
-// FIXME: Add Documentation
+/**
+ * Check if the given text is a valid food word/phrase
+ *
+ * @param {Object} text The text to be checked
+ */
 function isValidFood(text) {
     // Exact Match
     if(foods.indexOf(text) > -1) { return true; }
@@ -422,7 +435,11 @@ function isValidFood(text) {
     return false;
 }
 
-// FIXME: Add Documentation
+/**
+ * Capitalize the first letter of the text
+ *
+ * @param {Object} text The text to be changed
+ */
 function capitalize(text) {
     return text.charAt(0).toUpperCase() + text.slice(1);
 }
@@ -488,7 +505,7 @@ function getLocation(text) {
     var aliasLength = 0;
 
     // FIXME: Better list of punctuations
-    text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
+    text = prepareText(text);
     for(loc of aliasList) {
         if(text.indexOf(loc.toLowerCase()) > - 1) { // Substring search
             if(aliasLength < loc.length) { // For longest match
@@ -517,8 +534,7 @@ function getLocation(text) {
  * @param {Object} text The text to be inspected
  */
 function getRequestType(text) {
-    // FIXME: Better list of punctuations
-    text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
+    text = prepareText(text);
     var deleteRequests = ["all gone"];
     for(req of deleteRequests) {
         if(text.indexOf(req) > -1) {
