@@ -266,7 +266,6 @@ function getFood(text) {
             matches.push(capitalize(word));
         }
     }
-
     return matches;
 }
 

@@ -224,7 +224,15 @@ function markAsRead(messageId) {
     });
 }
 
+/**
+ * Save attached image to filesystem / database
+ *
+ * @param {Object} imageId The attachmentId of the image
+ * @param {Object} messageId The id of a message with the image
+ */
 function saveImage(imageId, messageId) {
+   // FIXME: Divide by PROJECT_MODE
+
     // FIXME: Check size?
     // Get Attachment
     google.gmail('v1').users.messages.attachments.get({
