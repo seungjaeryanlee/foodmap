@@ -408,27 +408,69 @@ function getImageFromMime(mimeMessage) {
     }
 }
 
+// FIXME: Add Documentation
+function isValidFood(text) {
+    // Exact Match
+    if(foods.indexOf(text) > -1) { return true; }
+
+    // Plural Form
+    if(text.slice(-1) == 's' && foods.indexOf(text.slice(0, -1)) > -1) { return true; }
+    if(text.slice(-2) == 'es' && foods.indexOf(text.slice(0, -2)) > -1) { return true; }
+
+    // FIXME: Fuzzy Matching
+
+    return false;
+}
+
+// FIXME: Add Documentation
+function capitalize(text) {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 /**
  * Get all foods that are in the text
  *
  * @param {Object} text The text to search for food
  */
 function getFood(text) {
+    // Clean text and separate by whitespace
+    // FIXME: magic string should be avoided
+    text = text.toLowerCase().replace(/[.\/#!$%\^&\*;:{}=\-_`~()']/g,"");
+    words = text.split(/[\s,]+/g);
+
     var matches = [];
 
-    // FIXME: Better list of punctuations
-    text = text.toLowerCase().replace(/[.\/#!$%\^&\*;:{}=\-_`~()']/g,"");
-    for(food of foods) {
-        var index = text.indexOf(food.toLowerCase());
-        if(index > -1) { // Substring search
-            // make sure it's a word by checking the left and right is alphanumeric character
-            if ( (index == 0 || !/\w/.test(text[index-1]))
-             && (text.length <= index + food.length || // no more letter
-                !/\w/.test(text[index + food.length]) || // followed by word break
-                text[index + food.length] == 's') ) { // followed by 's' (plural)
-                food = food.charAt(0).toUpperCase() + food.slice(1);
-                matches.push(food);
+    for(var i = 0; i < words.length; i++) {
+        var phraseFound = false;
+        word = words[i];
+        
+        // Check if the word is part of a phrase
+        for(food of foods) {
+            splitFood = food.split(" ");
+            // FIXME: Check for Plural?
+            if(splitFood.length > 1 && splitFood.indexOf(word) > -1) {
+                // Check boundary
+                if(i + splitFood.length > words.length) { continue; }
+
+                // Create phrase
+                phrase = [word];
+                for(var j = 1; j < splitFood.length; j++) {
+                    phrase.push(words[i+j]);
+                }
+                phraseString = phrase.join(" ");
+
+                if(isValidFood(phraseString)) {                    
+                    matches.push(capitalize(phraseString));
+                    i += splitFood.length - 1; // Increment index to skip over the phrase
+                    phraseFound = true;
+                    break;
+                }
             }
+        }
+        if(phraseFound) { continue; }
+
+        if(isValidFood(word)) {
+            matches.push(capitalize(word));
         }
     }
 
