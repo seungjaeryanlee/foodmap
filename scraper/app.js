@@ -24,7 +24,7 @@ if (process.env.PROJECT_MODE === 'development') {
     process.exit(1);
 }
 
-// read/write access except delete for gmail
+// read/write access except delete for gmailAutho
 var SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
 var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
         process.env.USERPROFILE) + '/.credentials/';
@@ -46,6 +46,10 @@ else if(process.env.PROJECT_MODE === 'development') {
         authorize(JSON.parse(content), main);
     });
 }
+else {
+    console.error('Error: PROJECT_MODE not set. Cannot set up database. Did you activate the virtual environment in the Django project?');
+    process.exit(1);
+}
 
 /**
  * Create an OAuth2 client with the given credentials, and then execute the
@@ -61,10 +65,11 @@ function authorize(credentials, callback) {
     var auth = new googleAuth();
     var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
-
     // Use JSON given from process environment
     if (process.env.PROJECT_MODE === 'production') {
         oauth2Client.credentials = JSON.parse(process.env.CREDENTIALS);
+        console.log(callback);
+        console.log(typeof callback);
         callback(oauth2Client);
     }
     // Check if we have previously stored a token.
