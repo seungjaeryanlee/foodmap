@@ -414,8 +414,8 @@ function isValidFood(text) {
     if(foods.indexOf(text) > -1) { return true; }
 
     // Plural Form
-    else if(text.slice(-1) == 's' && foods.indexOf(text.slice(0, -1)) > -1) { return true; }
-    else if(text.slice(-2) == 'es' && foods.indexOf(text.slice(0, -2)) > -1) { return true; }
+    if(text.slice(-1) == 's' && foods.indexOf(text.slice(0, -1)) > -1) { return true; }
+    if(text.slice(-2) == 'es' && foods.indexOf(text.slice(0, -2)) > -1) { return true; }
 
     // FIXME: Fuzzy Matching
 
@@ -440,7 +440,7 @@ function getFood(text) {
 
     var matches = [];
 
-    for(var i=0; i<words.length; i++) {
+    for(var i = 0; i < words.length; i++) {
         var phraseFound = false;
         word = words[i];
         
@@ -454,7 +454,7 @@ function getFood(text) {
 
                 // Create phrase
                 phrase = [word];
-                for(var j=1; j<splitFood.length; j++) {
+                for(var j = 1; j < splitFood.length; j++) {
                     phrase.push(words[i+j]);
                 }
                 phraseString = phrase.join(" ");
@@ -469,8 +469,6 @@ function getFood(text) {
         }
         if(phraseFound) { continue; }
 
-
-        // The word is in the food list
         if(isValidFood(word)) {
             matches.push(capitalize(word));
         }
