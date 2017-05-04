@@ -30,10 +30,6 @@ var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
         process.env.USERPROFILE) + '/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-foodmap.json';
 
-// For testing in Mocha
-module.exports.formatEmail = formatEmail;
-module.exports.getImageFromMime = getImageFromMime;
-
 
 if(process.env.PROJECT_MODE === 'production') {
     authorize(JSON.parse(process.env.client_secret), main);
@@ -192,7 +188,8 @@ function parseEmail(messageId, callback) {
             return;
         }
 
-        entry = formatEmail(result, messageId);
+        entry = scraper.formatEmail(result, messageId);
+        // saveImage(entry.image.id, messageId);
 
         // INSERT or DELETE entry
         if(scraper.getRequestType(entry.title+entry.body) == scraper.INSERT) {
@@ -224,63 +221,19 @@ function markAsRead(messageId) {
     });
 }
 
-/**
- * Formats a MIME message from the API to fit the database specification.
- *
- * @param {Object} mimeMessage The MIME message to reformat.
- */
-function formatEmail(mimeMessage, messageId) {
-    var timestamp = scraper.getTimestampFromMime(mimeMessage);
-    var title = scraper.getTitleFromMime(mimeMessage);
-    var body = scraper.getBodyFromMime(mimeMessage);
-    var image = getImageFromMime(mimeMessage);
-    var food = scraper.getFood(title+body);
-    var location = scraper.getLocation(title+body);
-    var threadId = mimeMessage.threadId;
-    var requestType = scraper.getRequestType(body);
+function saveImage(imageId, messageId) {
+    // FIXME: Check size?
+    // Get Attachment
+    google.gmail('v1').users.messages.attachments.get({
+        userId: 'me',
+        id: imageId,
+        messageId: messageId
+    }, function(err, result) {
+        var encodedImage = result.data;
+        imageData = Buffer.from(encodedImage, 'base64');
 
-    return {timestamp: timestamp, location: location, title: title, body: (title + '\n' + body), food: food, image: image, threadId: threadId, requestType: requestType};
-}
-
-/**
- * Get image from a given MIME Message if there is an image, returns undefined if not.
- *
- * @param {Object} mimeMessage The MIME message to parse.
- */
-function getImageFromMime(mimeMessage) {
-    var imageName;
-    var imageData;
-
-    // FIXME: Other content types?
-    // Content-Type: multipart/mixed
-    if(mimeMessage.payload.mimeType === 'multipart/mixed') {
-        if(typeof mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/") === 'undefined') {
-            return undefined;
-        }
-        else {
-            imageName = mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/").filename;
-            var attachmentId = mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/").body.attachmentId;
-
-            // FIXME: Check size?
-            // Get Attachment
-            google.gmail('v1').users.messages.attachments.get({
-                userId: 'me',
-                id: attachmentId,
-                messageId: mimeMessage.id
-            }, function(err, result) {
-                var encodedImage = result.data;
-                imageData = Buffer.from(encodedImage, 'base64');
-
-                // Create file
-                // FIXME: Should use different file name in case of conflict!
-                // FIXME: Temporarily disable for speed
-                //fs.writeFile(__dirname + '/' + imageName, imageData, function(err) {});
-            });
-
-            return {name: imageName, data: imageData};
-        }
-    }
-    else {
-        return undefined;
-    }
+        // Create file
+        // FIXME: Should use different file name in case of conflict!
+        //fs.writeFile(__dirname + '/' + imageName, imageData, function(err) {});
+    });
 }

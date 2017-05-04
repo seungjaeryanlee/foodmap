@@ -15,6 +15,8 @@ const DELETE = 0;
 const INSERT = 1;
 
 // For testing in Mocha
+module.exports.formatEmail = formatEmail;
+module.exports.getImageFromMime = getImageFromMime;
 module.exports.getTimestampFromMime = getTimestampFromMime;
 module.exports.getTitleFromMime = getTitleFromMime;
 module.exports.getBodyFromMime = getBodyFromMime;
@@ -44,6 +46,49 @@ for (regex of regexes) {
     var tokens = regex.split(',');
     regexMap[tokens[0]] = tokens[1];
     regexList.push(tokens[0]);
+}
+
+/**
+ * Formats a MIME message from the API to fit the database specification.
+ *
+ * @param {Object} mimeMessage The MIME message to reformat.
+ */
+function formatEmail(mimeMessage, messageId) {
+    var timestamp = getTimestampFromMime(mimeMessage);
+    var title = getTitleFromMime(mimeMessage);
+    var body = getBodyFromMime(mimeMessage);
+    var image = getImageFromMime(mimeMessage);
+    var food = getFood(title+body);
+    var location = getLocation(title+body);
+    var threadId = mimeMessage.threadId;
+    var requestType = getRequestType(body);
+
+    return {timestamp: timestamp, location: location, title: title, body: (title + '\n' + body), food: food, image: image, threadId: threadId, requestType: requestType};
+}
+
+/**
+ * Get image from a given MIME Message if there is an image, returns undefined if not.
+ *
+ * @param {Object} mimeMessage The MIME message to parse.
+ */
+function getImageFromMime(mimeMessage) {
+    // FIXME: Other content types?
+    // Content-Type: multipart/mixed
+    if(mimeMessage.payload.mimeType === 'multipart/mixed') {
+        if(typeof mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/") === 'undefined') {
+            return undefined;
+        }
+        else {
+            var imageName = mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/").filename;
+            var imageId = mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/").body.attachmentId;
+            
+            // FIXME: Name not needed?
+            return {name: imageName, id: imageId};
+        }
+    }
+    else {
+        return undefined;
+    }
 }
 
 /**
