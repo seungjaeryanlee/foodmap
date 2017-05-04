@@ -16,15 +16,15 @@ var db_module = require('./db');
 // PROJECT_MODE
 var db;
 if (process.env.PROJECT_MODE === 'development') {
-  db = db_module.db.sqlite;
+    db = db_module.db.sqlite;
 } else if (process.env.PROJECT_MODE === 'production') {
-  db = db_module.db.postgres;
+    db = db_module.db.postgres;
 } else {
-  console.error('Error: PROJECT_MODE not set. Cannot set up database. Did you activate the virtual environment in the Django project?');
-  process.exit(1);
+    console.error('Error: PROJECT_MODE not set. Cannot set up database. Did you activate the virtual environment in the Django project?');
+    process.exit(1);
 }
 
-// read/write access except delete for gmail, and read/write access to calendar
+// read/write access except delete for gmail
 var SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
 var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
         process.env.USERPROFILE) + '/.credentials/';
@@ -51,7 +51,7 @@ var foods = fs.readFileSync(__dirname + '/data/foods.txt').toString().split('\n'
 var locations = fs.readFileSync(__dirname + '/data/locationMap.txt').toString().split('\n');
 var regexes = fs.readFileSync(__dirname + '/data/regexMap.txt').toString().split('\n');
 
-// Extract location map and alias
+// Extract data from files
 var locationMap = {};
 var aliasList = [];
 for (location of locations) {
@@ -69,19 +69,20 @@ for (regex of regexes) {
 }
 
 if(process.env.PROJECT_MODE === 'production') {
-    fs.writeFile(__dirname + '/client_secret.json', process.env.client_secret);
+    authorize(JSON.parse(process.env.client_secret), main);
 }
-
-// Load client secrets from a local file.
-fs.readFile(__dirname + '/client_secret.json', function processClientSecrets(err, content) {
-    if (err) {
-        console.log('Error loading client secret file: ' + err);
-        return;
-    }
-    // Authorize a client with the loaded credentials, then call the
-    // main program.
-    authorize(JSON.parse(content), main);
-});
+else if(process.env.PROJECT_MODE === 'development') {
+    // Load client secrets from a local file.
+    fs.readFile(__dirname + '/client_secret.json', function processClientSecrets(err, content) {
+        if (err) {
+            console.log('Error loading client secret file: ' + err);
+            return;
+        }
+        // Authorize a client with the loaded credentials, then call the
+        // main program.
+        authorize(JSON.parse(content), main);
+    });
+}
 
 /**
  * Create an OAuth2 client with the given credentials, and then execute the
@@ -97,8 +98,14 @@ function authorize(credentials, callback) {
     var auth = new googleAuth();
     var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
+
+    // Use JSON given from process environment
+    if (process.env.PROJECT_MODE === 'production') {
+        oauth2Client.credentials = JSON.parse(process.env.CREDENTIALS);
+        callback(oauth2Client);
+    }
     // Check if we have previously stored a token.
-    if (process.env.PROJECT_MODE === 'development') {
+    else if (process.env.PROJECT_MODE === 'development') {
         fs.readFile(TOKEN_PATH, function(err, token) {
             if (err) {
                 getNewToken(oauth2Client, callback);
@@ -108,11 +115,6 @@ function authorize(credentials, callback) {
             }
         });
     }
-    // Use JSON given from process environment
-    else if (process.env.PROJECT_MODE === 'production') {
-        oauth2Client.credentials = JSON.parse(process.env.CREDENTIALS);
-        callback(oauth2Client);        
-    } 
     else {
         console.error('Error: PROJECT_MODE not set. Cannot authorize API');
         process.exit(1);
@@ -225,6 +227,7 @@ function parseEmail(messageId, callback) {
             return;
         }
 
+        // Check if the sender is Free Food Listserv
         // if(result.payload.headers.find(x => x.name === "To") !== "freefood@princeton.edu")
         if (typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
         || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
@@ -495,9 +498,9 @@ function getFood(text) {
 }
 
 /**
- * Get all locations that are in the text
+ * Parse location from text and return official location name
  *
- * @param {Object} text The text to search for locations
+ * @param {Object} text The text to search for location
  */
 function getLocation(text) {
     // FIXME: There should only be one location per email
