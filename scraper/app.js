@@ -68,8 +68,6 @@ function authorize(credentials, callback) {
     // Use JSON given from process environment
     if (process.env.PROJECT_MODE === 'production') {
         oauth2Client.credentials = JSON.parse(process.env.CREDENTIALS);
-        console.log(callback);
-        console.log(typeof callback);
         callback(oauth2Client);
     }
     // Check if we have previously stored a token.
@@ -143,7 +141,7 @@ function storeToken(token) {
  *
  * @param {Object} auth Authorization credentials for Google APIs.
  */
-var main = function (auth) {
+function main (auth) {
 
     // set auth as a global default
     google.options({auth: auth});
