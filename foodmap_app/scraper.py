@@ -15,7 +15,7 @@ def get_food(text):
     '''
     # Start new process for NodeJS scraper. Pipe stdin/stdout between this
     # process and the NodeJS process to send data between them.
-    node_program_name = ['node', 'PROGRAM_NAME'] # TODO: insert program name
+    node_program_name = ['node', 'scrapeFood.js']
     node_process = Popen(node_program_name, shell=True, stdin=PIPE, stdout=PIPE)
     node_process.stdin.write(text)
     node_process.stdin.close()
