@@ -26,7 +26,7 @@ class OfferingForm(forms.Form):
         foods = scraper.get_food(self.cleaned_data['description'])
         if foods == '':
             raise ValidationError(
-                _('We did not find any foods in your description.'),
+                'We did not find any foods in your description.',
                 code='invalid'
             )
         self.cleaned_data['title'] = foods

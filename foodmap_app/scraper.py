@@ -6,6 +6,7 @@ This is a Python interface into the NodeJS scraper, for the purpose of using
 Python to request that something be scraped.
 '''
 
+from foodmap_proj.settings.common import BASE_DIR
 from subprocess import Popen, PIPE
 
 def get_food(text):
@@ -15,7 +16,7 @@ def get_food(text):
     '''
     # Start new process for NodeJS scraper. Pipe stdin/stdout between this
     # process and the NodeJS process to send data between them.
-    node_program_name = ['node', 'scrapeFood.js']
+    node_program_name = ['node', BASE_DIR + 'scraper/scrapeFood.js']
     node_process = Popen(node_program_name, shell=True, stdin=PIPE, stdout=PIPE)
     node_process.stdin.write(text)
     node_process.stdin.close()

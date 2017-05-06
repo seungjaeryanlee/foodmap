@@ -550,7 +550,6 @@ class ScraperInterfaceTests(TestCase):
     Tests to make sure the scraper interface module works properly.
     '''
 
-    @skipIf(True, 'Scraper interface module not yet implemented')
     def test_scraper_interface_get_food_from_text(self):
         '''
         Test that the get_food() method of the scraper interface gets all foods
@@ -559,7 +558,7 @@ class ScraperInterfaceTests(TestCase):
         text1 = 'Eat bagels here.'
         foods1 = 'Bagels'
         test_foods1 = scraper.get_food(text1)
-        self.assertEqual(test_foods1, text1)
+        self.assertEqual(test_foods1, foods1)
 
         text2 = 'Come get some pizza and pasta at Frist!'
         foods2 = 'Pizza, pasta'
@@ -633,7 +632,6 @@ class OfferingFormTests(TestCase):
         self.assertEqual(test_offering.title, title)
         self.assertEqual(test_offering.description, description)
 
-    @skipIf(True, 'Have not yet implemented scraper interface, so we cannot determine that a description is invalid because there is no food in it')
     def test_offering_form_submit_description_without_food(self):
         '''
         Attempt to submit a form with an invalid description, namely one
