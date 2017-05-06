@@ -64,6 +64,7 @@ We also give credit to the following resources that we used in this project:
 - Leaflet Locate Control https://github.com/domoritz/leaflet-locatecontrol: Leaflet CSS/JSplugin for finding a user's geolocation
 - Maps Icons Collection https://mapicons.mapsmarker.com: provides icons for map markers
 - PhantomJS: virtual browser for web scraping (used to scrape data in `locations.json`)
+- jQuery UI and jQuery Timepicker Addon 1.6.3: Provides a widget for selecting date and time in a form.
 
 ### Basic usage
 Here are some common commands for reference. All of them use the `manage.py` module located in the root of this project. See the official django tutorial and/or documentation (https://docs.djangoproject.com/en/1.10/) for more details:
