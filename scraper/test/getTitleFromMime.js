@@ -1,5 +1,5 @@
 var assert = require("assert");
-var app = require('../app.js');
+var scraper = require('../scraper.js');
 
 describe('getTitleFromMime()', function() {
     it('getTitleFromMime() should return empty string from email with no title', function() {
@@ -95,7 +95,7 @@ describe('getTitleFromMime()', function() {
             },
             "sizeEstimate": 662
         };
-        var title = app.getTitleFromMime(message);
+        var title = scraper.getTitleFromMime(message);
         assert.equal(title, "");
     })
     it('getTitleFromMime() should return title from email with a title', function() {
@@ -191,7 +191,7 @@ describe('getTitleFromMime()', function() {
             },
             "sizeEstimate": 649
         };
-        var title = app.getTitleFromMime(message);
+        var title = scraper.getTitleFromMime(message);
         assert.equal(title, "This is the title");
     })
 });

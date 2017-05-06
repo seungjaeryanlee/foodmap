@@ -1,5 +1,5 @@
 var assert = require("assert");
-var app = require('../app.js');
+var scraper = require('../scraper.js');
 
 describe('getImageFromMime()', function() {
     describe('no attachment in message', function() {
@@ -96,7 +96,7 @@ describe('getImageFromMime()', function() {
                 },
                 "sizeEstimate": 645
             };
-            var image = app.getImageFromMime(message);
+            var image = scraper.getImageFromMime(message);
             assert.equal(image, undefined);
         })
     })
@@ -236,7 +236,7 @@ describe('getImageFromMime()', function() {
                 },
                 "sizeEstimate": 1016
             };
-            var image = app.getImageFromMime(message);
+            var image = scraper.getImageFromMime(message);
             assert.equal(image, undefined);
         })
     })
@@ -376,7 +376,7 @@ describe('getImageFromMime()', function() {
                 },
                 "sizeEstimate": 3030
             };
-            var image = app.getImageFromMime(message);
+            var image = scraper.getImageFromMime(message);
             assert.equal(image.name, "sample.jpg");
         })
     })
@@ -516,7 +516,7 @@ describe('getImageFromMime()', function() {
                 },
                 "sizeEstimate": 2155
             };
-            var image = app.getImageFromMime(message);
+            var image = scraper.getImageFromMime(message);
             assert.equal(image.name, "sample.gif");
         })
     })
@@ -656,7 +656,7 @@ describe('getImageFromMime()', function() {
                 },
                 "sizeEstimate": 1193
             };
-            var image = app.getImageFromMime(message);
+            var image = scraper.getImageFromMime(message);
             assert.equal(image.name, "sample.png");
         })
     })
@@ -796,7 +796,7 @@ describe('getImageFromMime()', function() {
                 },
                 "sizeEstimate": 3034
             };
-            var image = app.getImageFromMime(message);
+            var image = scraper.getImageFromMime(message);
             assert.equal(image.name, "sample.tif");
         })
     })
@@ -936,7 +936,7 @@ describe('getImageFromMime()', function() {
                 },
                 "sizeEstimate": 5257
             };
-            var image = app.getImageFromMime(message);
+            var image = scraper.getImageFromMime(message);
             assert.equal(image.name, "sample.bmp");
         })
     })

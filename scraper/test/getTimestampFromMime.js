@@ -1,5 +1,5 @@
 var assert = require("assert");
-var app = require('../app.js');
+var scraper = require('../scraper.js');
 
 describe('getTimestampFromMime()', function() {
     it('getTimestampFromMime() should return email was sent in datetime format', function() {
@@ -95,7 +95,7 @@ describe('getTimestampFromMime()', function() {
 		    },
 		    "sizeEstimate": 676
 		};
-        var timestamp = app.getTimestampFromMime(message);
+        var timestamp = scraper.getTimestampFromMime(message);
         assert.equal(timestamp, "2017-03-25 12:52:13");
     })
 });

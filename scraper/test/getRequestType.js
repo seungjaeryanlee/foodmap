@@ -1,27 +1,27 @@
 var assert = require("assert");
-var app = require('../app.js');
+var scraper = require('../scraper.js');
 
 describe('getRequestType()', function() {
     describe('delete request', function() {
         it('getRequestType(\"all gone\") should equal DELETE', function() {
-            assert.equal(app.getRequestType("all gone"), app.DELETE);
+            assert.equal(scraper.getRequestType("all gone"), scraper.DELETE);
         })
         it('getRequestType(\"ALL Gone\") should equal DELETE', function() {
-            assert.equal(app.getRequestType("ALL Gone"), app.DELETE);
+            assert.equal(scraper.getRequestType("ALL Gone"), scraper.DELETE);
         })
         it('getRequestType(\"They\'re all gone\") should equal DELETE', function() {
-            assert.equal(app.getRequestType("They're all gone"), app.DELETE);
+            assert.equal(scraper.getRequestType("They're all gone"), scraper.DELETE);
         })
         it('getRequestType(\"all\' gone\") should equal DELETE', function() {
-            assert.equal(app.getRequestType("all' gone"), app.DELETE);
+            assert.equal(scraper.getRequestType("all' gone"), scraper.DELETE);
         })
     })
     describe('insert request', function() {
         it('getRequestType(\"\") should equal INSERT', function() {
-            assert.equal(app.getRequestType(""), app.INSERT);
+            assert.equal(scraper.getRequestType(""), scraper.INSERT);
         })
         it('getRequestType(\"food at frist\") should equal INSERT', function() {
-            assert.equal(app.getRequestType("food at frist"), app.INSERT);
+            assert.equal(scraper.getRequestType("food at frist"), scraper.INSERT);
         })
     })
 });
