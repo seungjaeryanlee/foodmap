@@ -25,7 +25,7 @@ def create_location(name, lat=0.0, lng=0.0):
     return Location(name=name, lat=lat, lng=lng)
 
 def create_offering(timestamp=timezone.now(), location=0, title='Fresh pizza!',
-    description='We have plain and vegetable pizza!', image=0, thread_id='1234567890123456'):
+    description='We have plain and vegetable pizza!', image=0, thread_id='1234567890123456', recur=None, recur_end_datetime=None):
     '''
     Helper method for tests. Returns a valid Offering, but does not place it
     in the table.
@@ -41,7 +41,8 @@ def create_offering(timestamp=timezone.now(), location=0, title='Fresh pizza!',
             content_type='image/png'
         )
     return Offering(timestamp=timestamp, location=location, title=title,
-        description=description, image=image, thread_id=thread_id)
+        description=description, image=image, thread_id=thread_id,
+        recur=recur, recur_end_datetime=recur_end_datetime)
 
 def create_offering_tag(offering=0, tag='kosher'):
     '''
@@ -273,6 +274,11 @@ class OfferingsTableTests(TestCase):
     '''
     Tests that we can put/get things into/from the Offerings table, and that
     it only accepts valid entries.
+
+    NOTE: You must manually delete any offerings saved to the table in these
+    tests. If you don't, the images corresponding to those offerings will be
+    left behind even after the offering is automatically deleted, later tests
+    will not be able to overwrite that image, and they will fail.
     '''
 
     def test_offerings_table_insert_with_valid_entry(self):
@@ -319,6 +325,47 @@ class OfferingsTableTests(TestCase):
         '''
         offering = create_offering(thread_id='123456789012345')
         self.assertRaises(ValueError, offering.save)
+
+    def test_offerings_table_insert_valid_recurring_offering(self):
+        '''
+        Inserts a recurring entry to the table. Checks that its attributes
+        are correct.
+        '''
+        now = timezone.now()
+        end_datetime = now + datetime.timedelta(weeks=10)
+        offering = create_offering(recur='D', recur_end_datetime=end_datetime)
+        offering.save()
+        test_offering = Offering.objects.order_by('-id')[0]
+        self.assertEqual(test_offering, offering)
+        test_offering.delete()
+
+    def test_offerings_table_insert_inconsistent_recurring_offering(self):
+        '''
+        Attempts to insert recurring entries into the table with inconsistent
+        values 'recur', 'recur_end_datetime', and 'timestamp' attributes. Checks
+        that they fail to insert.
+        '''
+        now = timezone.now()
+        end_datetime = now + datetime.timedelta(weeks=10)
+
+        # Not recurring but has an end datetime
+        location1 = create_location(name='Princeton University')
+        location1.save()
+        offering1 = create_offering(location=location1, recur=None, recur_end_datetime=end_datetime)
+        self.assertRaises(IntegrityError, offering1.save)
+
+        # Recurring but has no end datetime
+        location2 = create_location(name='Harvard University')
+        location2.save()
+        offering2 = create_offering(location=location2, recur='D', recur_end_datetime=None)
+        self.assertRaises(IntegrityError, offering2.save)
+
+        # Recurring with an end datetime earlier than the timestamp
+        location3 = create_location(name='Yale University')
+        location3.save()
+        offering3 = create_offering(timestamp=now, location=location3, recur='D',
+            recur_end_datetime=now-datetime.timedelta(days=1))
+        self.assertRaises(IntegrityError, offering3.save)
 
     def test_offerings_table_insert_with_no_timestamp(self):
         '''
