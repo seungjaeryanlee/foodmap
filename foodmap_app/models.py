@@ -62,8 +62,6 @@ class Offering(models.Model):
 
         # Enforce consistency between 'recur', 'recur_end_datetime', and
         # 'timestamp'  attributes
-        if self.recur != None and self.recur_end_datetime == None:
-            raise IntegrityError('\'recur_end_datetime\' attribute not set when event is recurring')
         if self.recur == None and self.recur_end_datetime != None:
             raise IntegrityError('\'recur\' attribute not set when there is an end date set for recurrence')
         if self.recur_end_datetime and self.timestamp and self.recur_end_datetime < self.timestamp:

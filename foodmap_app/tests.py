@@ -354,18 +354,12 @@ class OfferingsTableTests(TestCase):
         offering1 = create_offering(location=location1, recur=None, recur_end_datetime=end_datetime)
         self.assertRaises(IntegrityError, offering1.save)
 
-        # Recurring but has no end datetime
-        location2 = create_location(name='Harvard University')
-        location2.save()
-        offering2 = create_offering(location=location2, recur='D', recur_end_datetime=None)
-        self.assertRaises(IntegrityError, offering2.save)
-
         # Recurring with an end datetime earlier than the timestamp
-        location3 = create_location(name='Yale University')
-        location3.save()
-        offering3 = create_offering(timestamp=now, location=location3, recur='D',
+        location2 = create_location(name='Yale University')
+        location2.save()
+        offering2 = create_offering(timestamp=now, location=location2, recur='D',
             recur_end_datetime=now-datetime.timedelta(days=1))
-        self.assertRaises(IntegrityError, offering3.save)
+        self.assertRaises(IntegrityError, offering2.save)
 
     def test_offerings_table_insert_with_no_timestamp(self):
         '''
@@ -635,7 +629,7 @@ class OfferingFormTests(TestCase):
         for location in Location.objects.all():
             location.delete()
 
-    def test_offering_form_create_form_with_valid_entry(self):
+    def test_offering_form_create_form_with_valid_nonrecurring_entry(self):
         '''
         Create a form with valid entries and check that the form is in fact
         determined valid.
@@ -649,7 +643,24 @@ class OfferingFormTests(TestCase):
 
         self.assertTrue(form.is_valid(), 'Invalid form: ' + str(form.errors.as_json))
 
-    def test_offering_form_submit_valid_entry(self):
+    def test_offering_form_create_form_with_valid_recurring_entry(self):
+        '''
+        Create a form with valid entries, including making the offering recur,
+        and check that the form is determined valid.
+        '''
+        now = timezone.now()
+        location = create_location(name='Wilcox Hall')
+        location.save()
+        description = 'Coffee in the commons!'
+        recur = 'D'
+        recur_end_datetime = None
+        data = {'timestamp': now, 'location': location.id, 'description': description, 'recur': recur, 'recur_end_datetime': recur_end_datetime}
+        form = OfferingForm(data)
+
+        self.assertTrue(form.is_valid(), 'Invalid form: ' + str(form.errors.as_json))
+
+
+    def test_offering_form_submit_valid_nonrecurring_entry(self):
         '''
         Create a form with a valid entry and attempt to save its info to the
         database. Check that the database contains the correct info.
@@ -678,6 +689,45 @@ class OfferingFormTests(TestCase):
         self.assertEqual(test_offering.location, location)
         self.assertEqual(test_offering.title, title)
         self.assertEqual(test_offering.description, description)
+
+
+    def test_offering_form_submit_valid_recurring_entry(self):
+        '''
+        Create a form with a valid recurring entry and attempt to save its
+        info to the database. Check that the database contains the correct info.
+        '''
+        # Create form
+        now = timezone.now()
+        location = create_location(name='Wilcox Hall')
+        location.save()
+        description = 'Coffee in the commons!'
+        title = scraper.get_food(description)
+        recur = 'D'
+        recur_end_datetime = now + datetime.timedelta(weeks=10)
+        data = {'timestamp': now, 'location': location.id, 'description': description, 'recur': recur, 'recur_end_datetime': recur_end_datetime}
+        form = OfferingForm(data)
+
+        self.assertTrue(form.is_valid(), 'Invalid form: ' + str(form.errors.as_json))
+
+        # Save data
+        Offering(
+            timestamp=form.cleaned_data['timestamp'],
+            location=form.cleaned_data['location'],
+            title=form.cleaned_data['title'],
+            description=form.cleaned_data['description'],
+            recur=form.cleaned_data['recur'],
+            recur_end_datetime=form.cleaned_data['recur_end_datetime']
+        ).save()
+
+        # Retrieve offering from database
+        test_offering = Offering.objects.order_by('-timestamp')[0]
+        self.assertEqual(test_offering.timestamp, now)
+        self.assertEqual(test_offering.location, location)
+        self.assertEqual(test_offering.title, title)
+        self.assertEqual(test_offering.description, description)
+        self.assertEqual(test_offering.recur, recur)
+        self.assertEqual(test_offering.recur_end_datetime, recur_end_datetime)
+
 
     def test_offering_form_submit_description_without_food(self):
         '''

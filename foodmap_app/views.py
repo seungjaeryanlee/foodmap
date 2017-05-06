@@ -37,7 +37,9 @@ def submit_offering(request):
                     timestamp=form.cleaned_data['timestamp'],
                     location=form.cleaned_data['location'],
                     title=form.cleaned_data['title'],
-                    description=form.cleaned_data['description']
+                    description=form.cleaned_data['description'],
+                    recur=form.cleaned_data['recur'],
+                    recur_end_datetime=form.cleaned_data['recur_end_datetime']
                 )
                 new_offering.save()
                 request.session[HEADER_SUBMITTED] = True

@@ -22,4 +22,3 @@ def get_food(text):
     node_process.stdin.close()
     node_process.wait()
     return node_process.stdout.read()
-
