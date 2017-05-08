@@ -7,33 +7,58 @@
 # project, and initializes the database. As more dependencies become required,
 # update this script to install them.
 #
-# You will pass two arguments: one to specify which OS you're on (mac/ubuntu
-# require different commands to install some packages), and one to specify
-# which part of the setup process you want to run:
-# Arg 1 (os)
-#   mac: install packages for mac
-#   ubuntu: install packages for ubuntu
+# Run setup with two arguments: one to specify which OS you're on
+# (mac/ubuntu require different commands to install some packages),
+# and one to specify which part of the setup process you want to
+# run:
+# os
+#   mac        install packages for mac
+#   ubuntu     install packages for ubuntu
 #
-# Arg 2 (mode)
-#   all: run everything
-#   python: only install Python packages
-#   node: only install Node JS packages
-#   db: only set up database
+# mode
+#   all        run everything
+#   python     only install Python packages
+#   node       only install Node JS packages
+#   db         only set up database
+
+# Check for help command
+usage="usage:
+./setup os mode
+./setup help"
+if [ $# -eq 1 ] && [ "$1" == "help" ]; then
+  echo "$usage"
+  echo
+  echo "Run setup with two arguments: one to specify which OS you're on
+(mac/ubuntu require different commands to install some packages),
+and one to specify which part of the setup process you want to
+run:
+os
+  mac        install packages for mac
+  ubuntu     install packages for ubuntu
+
+mode
+  all        run everything
+  python     only install Python packages
+  node       only install Node JS packages
+  db         only set up database"
+  exit
+fi
 
 # Validate usage
-usage="usage: ./setup os mode"
 if [ $# -ne 2 ]; then
-  echo $usage
+  echo "$usage"
   exit
 elif [ "$1" != "mac" ] && [ "$1" != "ubuntu" ]; then
-  echo $usage
+  echo "$usage"
   exit
 elif [ "$2" != "all" ] && [ "$2" != "python" ] && [ "$2" != "node" ] && [ "$2" != "db" ]; then
-  echo $usage
+  echo "$usage"
   exit
 fi
 os=$1
 mode=$2
+
+#-------------------------------------------------------------------------------
 
 # Set up python virtual environment
 if [ ! -d "venv" ]; then
@@ -54,7 +79,7 @@ if [ ! -d "venv" ]; then
 fi
 source venv/bin/activate
 
-# Intsall dependencies
+# Install dependencies
 if [ "$mode" == "all" ] || [ "$mode" == "node" ]; then
   echo "Installing Node JS dependencies..."
   if [ "$os" == "mac" ]; then
