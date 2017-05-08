@@ -225,4 +225,14 @@ span.fa.fa-map-marker:before {
   z-index: 2000;
 }
 
+/* Form */
+
+@media (max-width: 767px) {
+  form {
+    padding-left: 50px;
+  }
+}
+
+
+
 

@@ -4,6 +4,7 @@ from django.utils import timezone
 from foodmap_app import scraper
 from foodmap_app.models import Offering, Location
 
+
 class OfferingForm(forms.Form):
     '''
     Form for entering Offerings
@@ -14,8 +15,8 @@ class OfferingForm(forms.Form):
     title = forms.CharField(max_length=Offering.TITLE_MAX_LENGTH, required=False,
         widget=forms.HiddenInput())
     description = forms.CharField(max_length=Offering.DESCRIPTION_MAX_LENGTH,
-        widget=forms.Textarea(attrs={'cols': 60, 'rows': 10}))
-    timestamp = forms.DateTimeField(label='Date/Time (if in the future)', required=False,
+        widget=forms.Textarea(attrs={'cols': 70, 'rows': 5}))
+    timestamp = forms.DateTimeField(label='Future Date/Time (optional)', required=False,
         widget=forms.DateTimeInput(format='%m/%d/%Y %H:%M'))
 
     def clean_description(self):
