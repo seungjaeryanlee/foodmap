@@ -6,13 +6,34 @@
 # Sets up your environment with the necessary dependencies to work on this
 # project, and initializes the database. As more dependencies become required,
 # update this script to install them.
+#
+# You will pass two arguments: one to specify which OS you're on (mac/ubuntu
+# require different commands to install some packages), and one to specify
+# which part of the setup process you want to run:
+# Arg 1 (os)
+#   mac: install packages for mac
+#   ubuntu: install packages for ubuntu
+#
+# Arg 2 (mode)
+#   all: run everything
+#   python: only install Python packages
+#   node: only install Node JS packages
+#   db: only set up database
 
 # Validate usage
-usage="usage: ./setup"
-if [ $# -ne 0 ]; then
+usage="usage: ./setup os mode"
+if [ $# -ne 2 ]; then
+  echo $usage
+  exit
+elif [ "$1" != "mac" ] && [ "$1" != "ubuntu" ]; then
+  echo $usage
+  exit
+elif [ "$2" != "all" ] && [ "$2" != "python" ] && [ "$2" != "node" ] && [ "$2" != "db" ]; then
   echo $usage
   exit
 fi
+os=$1
+mode=$2
 
 # Set up python virtual environment
 if [ ! -d "venv" ]; then
@@ -33,19 +54,44 @@ if [ ! -d "venv" ]; then
 fi
 source venv/bin/activate
 
-# Download dependencies
-echo "Downloading dependencies..."
-pip install Django==1.10.6
-pip install Pillow==4.0.0
-pip install selenium==3.3.1
-echo "Done!"
-echo
+# Intsall dependencies
+if [ "$mode" == "all" ] || [ "$mode" == "node" ]; then
+  echo "Installing Node JS dependencies..."
+  if [ "$os" == "mac" ]; then
+    brew install node
+  else
+    echo "-----------------------------------------------------------------"
+    echo " The following commands require root. Please enter root password "
+    echo " to run them: "
+    echo "   curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -"
+    echo "   sudo apt-get install -y nodejs  "
+    echo "-----------------------------------------------------------------"
+    # Copy all commands requiring sudo into the message above as well.
+    curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+  fi
+  npm install --only=prod
+  npm install --only=dev
+  echo "Done!"
+  echo
+fi
+
+if [ "$mode" == "all" ] || [ "$mode" == "python" ]; then
+  echo "Installing Python dependencies..."
+  pip install Django==1.10.6
+  pip install Pillow==4.0.0
+  pip install selenium==3.3.1
+  echo "Done!"
+  echo
+fi
 
 # Set up database
-echo "Setting up database..."
-python setup_database.py
-echo "Done!"
-echo
+if [ "$mode" == "all" ] || [ "$mode" == "db" ]; then
+  echo "Setting up database..."
+  python setup_database.py
+  echo "Done!"
+  echo
+fi
 
 deactivate
 

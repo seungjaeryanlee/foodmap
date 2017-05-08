@@ -3,6 +3,8 @@
 Simple email scraper using Gmail API
 
 ## Installation
+Note that this installation is automated by our `setup` script in the root of the project (see project README for details on this script). Below we document what dependencies we use, what they are for, and how to use the scraper.
+
 The app uses Node.js. It requires `googleapis`, `google-auth-library`, and `pg` packages to be installed to run. You can install them with the following command:
 ```
 npm install --only=prod
