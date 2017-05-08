@@ -2,10 +2,41 @@
 ## Overview
 Our project enables Princeton students to take advantage of all the free food in their area. The web app gives them a map of nearby food locations generated from the Free Food Listserv and helps them find food they would like to eat.
 
-The app is built using two main components: the Free Food Listserv email scraper (written in NodeJS) and the Django web app. These are documented for developer purposes in the following sections.
+The app is built using two main components: the Free Food Listserv email scraper (written in NodeJS) and the Django web app. These are documented for developer purposes in the two sections **Email Scraper** and **Web App**, respectively.
 
-If you are a developer who would like to use and/or build on this project, see the **Installation** subsections within the following two sections to get yourself set up. **Also read the Git Rules section for the rules and conventions of writing code for this project.**
+If you are a developer who would like to use and/or build on this project, see the following **Set-up for developers and contributers** section to get yourself set up. **Also read the Git Rules section for the rules and conventions of writing code for this project.**
 
+## Set-up for developers and contributers
+We have automated the set-up required for anyone who wishes to work on the project in a script `setup`. This automates installing dependencies, defaulting your environment to "development" mode (for both Django and Node), and configuring the database.
+
+### Quick Start
+If you just need to get the environment set up from scratch for the first time, run `setup` for your OS. For Mac:
+```
+./setup mac all
+```
+or for Ubuntu:
+```
+./setup ubuntu all
+```
+Even if you're only working on one end of the project (Node or Python), because they are so closely intertwined, you should have the Python virtual environment enabled whenever you're working on either end. Activate it with:
+```
+source venv/bin/activate
+```
+That's it! You should be all set to work on the project. You can verify that everything is set up properly by running the Django and Node JS tests:
+```
+python manage.py test
+npm test
+```
+**Note** that you will need to activate the virtual environment again each time you work on the project.
+
+### More Detailed/Refined Set Up
+We recommend you do this quick start if you're getting the project set up for the first time. However, you can also choose to set up only the components you know you'll be working on.
+
+`setup` takes two arguments: OS and mode. You can use the mode to specify what part of the set-up you want to do, as documented below (we use `mac` as the OS in all of these, for the sake of example):
+- `./setup mac all`: Does the full set up (as in **Quick Start**)
+- `./setup mac python`: Installs only Python packages
+- `./setup mac node`: Installs only Node JS packages
+- `./setup mac db`: Only initializes/configures/updates the database
 
 
 ## Email scraper (NodeJS)
@@ -13,27 +44,9 @@ See the README file in the `scraper` directory for details.
 
 
 ## Web app (Django)
-This section describes the Django project backing the FoodMap app. It contains all the views, models, and other components of the app, except the free food listserv scraper (as of now, that is kept separate from this project directory).
+This section describes the Django project backing the FoodMap app. This is the part containing all the views, models, and other components of the app, except the free food listserv scraper (that is kept separate from this project directory).
 
-### Installation, dependencies, and other background
-#### Quick start
-If you just need to get the environment set up from scratch for the first time, run `setup`:
-```
-./setup
-```
-Then activate the Python virtual environment with:
-```
-source venv/bin/activate
-```
-That's it! You should be all set to work on the project. You can verify that everything is set up properly by running the Django tests:
-```
-python manage.py test
-```
-**Note** that you will need to activate the virtual environment again each time you work on the project.
-
-Read on if you want more in depth information about dependencies and what the `setup` script does.
-
-#### Details of the project configuration
+### Details of the project configuration
 This project uses Python 2.7, with the following dependencies:
 - Django 1.10.6 (the as-of-now latest version): web framework
 - Pillow 4.0.0 (the as-of-now latest version): required for the database to be able to store images
@@ -53,9 +66,7 @@ In development mode, we do not commit the database with the rest of the code. As
 ```
 python setup_database.py
 ```
-should do this configuration for you.
-
-So with all that background, what does `setup` actually do? It automates all of this -- installing dependencies, defaulting your environment to "development" mode (for both Django and Node), and configuring the database.
+should do this configuration for you. (**Note** that the `setup` script runs this to do database configuration, so you never really need to run this directly. It is documented here for completeness.)
 
 We also give credit to the following resources that we used in this project:
 - Bootstrap 3.3.7: CSS framework for web pages
@@ -64,6 +75,7 @@ We also give credit to the following resources that we used in this project:
 - Leaflet Locate Control https://github.com/domoritz/leaflet-locatecontrol: Leaflet CSS/JSplugin for finding a user's geolocation
 - Maps Icons Collection https://mapicons.mapsmarker.com: provides icons for map markers
 - PhantomJS: virtual browser for web scraping (used to scrape data in `locations.json`)
+- jQuery UI and jQuery Timepicker Addon 1.6.3: Provides a widget for selecting date and time in a form.
 
 ### Basic usage
 Here are some common commands for reference. All of them use the `manage.py` module located in the root of this project. See the official django tutorial and/or documentation (https://docs.djangoproject.com/en/1.10/) for more details:

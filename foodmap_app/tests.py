@@ -7,7 +7,10 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 from foodmap_proj.settings.common import MEDIA_ROOT
+from foodmap_app import scraper
+from foodmap_app.forms import OfferingForm
 from foodmap_app.models import Location, Offering, OfferingTag
+from unittest import skipIf
 
 # Create your tests here.
 
@@ -22,7 +25,7 @@ def create_location(name, lat=0.0, lng=0.0):
     return Location(name=name, lat=lat, lng=lng)
 
 def create_offering(timestamp=timezone.now(), location=0, title='Fresh pizza!',
-    description='We have plain and vegetable pizza!', image=0, thread_id='1234567890123456'):
+    description='We have plain and vegetable pizza!', image=0, thread_id='1234567890123456', recur=None, recur_end_datetime=None):
     '''
     Helper method for tests. Returns a valid Offering, but does not place it
     in the table.
@@ -38,7 +41,8 @@ def create_offering(timestamp=timezone.now(), location=0, title='Fresh pizza!',
             content_type='image/png'
         )
     return Offering(timestamp=timestamp, location=location, title=title,
-        description=description, image=image, thread_id=thread_id)
+        description=description, image=image, thread_id=thread_id,
+        recur=recur, recur_end_datetime=recur_end_datetime)
 
 def create_offering_tag(offering=0, tag='kosher'):
     '''
@@ -207,11 +211,11 @@ class OfferingsViewTests(TestCase):
     def test_offerings_timestamp_constraints(self):
         '''
         Requests the most recent offerings and checks that they meet the
-        time constraints we impose: (1) no offering is older than 2 hours;
-        (2) no more than 1 offering per location.
+        time constraints we impose: (1) all offerings are from 2 hours ago to
+        now; (2) no more than 1 offering per location.
         '''
-        # Set timestamps of the offerings to just before and just after
-        # 2-hour mark
+        # Set timestamps of the offerings to just before, just after 2-hours
+        # mark, and in future
         offerings_good = [self.offering1A, self.offering1B]
         offerings_bad  = [self.offering2A, self.offering2B]
 
@@ -219,18 +223,20 @@ class OfferingsViewTests(TestCase):
         for offering in offerings_good:
             offering.timestamp = now - datetime.timedelta(minutes=118) # under 2 hours
             offering.save()
-        for offering in offerings_bad:
-            offering.timestamp = now - datetime.timedelta(minutes=121) # over 2 hours
-            offering.save()
+        offerings_bad[0].timestamp = now - datetime.timedelta(minutes=121) # over 2 hours
+        offerings_bad[0].save()
+        offerings_bad[1].timestamp = now + datetime.timedelta(days=1) # future
+        offerings_bad[1].save()
 
         # Make the request
         response = self.client.get(reverse('foodmap_app:offerings'))
         test_offerings = json.loads(response.content)  # array of JSON objects, as specified in views.py
 
-        # Check that no offering is older than 2 hours (approximately)
+        # Check that no offering outside time range (approximately)
         epsilon = 2  # some leeway in the timestamp to account for delay between request and response
         for offering in test_offerings:
             self.assertTrue(offering['minutes'] < 120 + epsilon)
+            self.assertTrue(offering['minutes'] >= 0)
 
         # Check that no location has more than 1 offering
         locations_with_offerings = []
@@ -268,6 +274,11 @@ class OfferingsTableTests(TestCase):
     '''
     Tests that we can put/get things into/from the Offerings table, and that
     it only accepts valid entries.
+
+    NOTE: You must manually delete any offerings saved to the table in these
+    tests. If you don't, the images corresponding to those offerings will be
+    left behind even after the offering is automatically deleted, later tests
+    will not be able to overwrite that image, and they will fail.
     '''
 
     def test_offerings_table_insert_with_valid_entry(self):
@@ -289,10 +300,15 @@ class OfferingsTableTests(TestCase):
     def test_offerings_table_insert_with_timestamp_in_the_future(self):
         '''
         Inserts an entry with a timestamp in the future, and checks that it
-        fails to insert.
+        succeeds. (Timestamps are allowed to be in the future, so users can
+        enter future offerings. )
         '''
         offering = create_offering(timestamp=timezone.now() + datetime.timedelta(days=10))
-        self.assertRaises(ValueError, offering.save)
+        offering.save()
+
+        test_offering = Offering.objects.order_by('-pk')[0]
+        self.assertEqual(test_offering, offering)
+        test_offering.delete()
 
     def test_offerings_table_insert_with_nonexistent_location(self):
         '''
@@ -309,6 +325,41 @@ class OfferingsTableTests(TestCase):
         '''
         offering = create_offering(thread_id='123456789012345')
         self.assertRaises(ValueError, offering.save)
+
+    def test_offerings_table_insert_valid_recurring_offering(self):
+        '''
+        Inserts a recurring entry to the table. Checks that its attributes
+        are correct.
+        '''
+        now = timezone.now()
+        end_datetime = now + datetime.timedelta(weeks=10)
+        offering = create_offering(recur='D', recur_end_datetime=end_datetime)
+        offering.save()
+        test_offering = Offering.objects.order_by('-id')[0]
+        self.assertEqual(test_offering, offering)
+        test_offering.delete()
+
+    def test_offerings_table_insert_inconsistent_recurring_offering(self):
+        '''
+        Attempts to insert recurring entries into the table with inconsistent
+        values 'recur', 'recur_end_datetime', and 'timestamp' attributes. Checks
+        that they fail to insert.
+        '''
+        now = timezone.now()
+        end_datetime = now + datetime.timedelta(weeks=10)
+
+        # Not recurring but has an end datetime
+        location1 = create_location(name='Princeton University')
+        location1.save()
+        offering1 = create_offering(location=location1, recur=None, recur_end_datetime=end_datetime)
+        self.assertRaises(IntegrityError, offering1.save)
+
+        # Recurring with an end datetime earlier than the timestamp
+        location2 = create_location(name='Yale University')
+        location2.save()
+        offering2 = create_offering(timestamp=now, location=location2, recur='D',
+            recur_end_datetime=now-datetime.timedelta(days=1))
+        self.assertRaises(IntegrityError, offering2.save)
 
     def test_offerings_table_insert_with_no_timestamp(self):
         '''
@@ -529,3 +580,196 @@ class OfferingTagsTableTests(TestCase):
         '''
         offering_tag = create_offering_tag(offering=self.offering, tag=None)
         self.assertRaises(IntegrityError, offering_tag.save)
+
+
+#-------------------------------------------------------------------------------
+
+### Scraper interface tests
+
+class ScraperInterfaceTests(TestCase):
+    '''
+    Tests to make sure the scraper interface module works properly.
+    '''
+
+    def test_scraper_interface_get_food_with_valid_text(self):
+        '''
+        Test that the get_food() method of the scraper interface gets all foods
+        in a given text and returns them in comma-separated format.
+        '''
+        text = 'Eat bagels here.'
+        foods = 'Bagels'
+        test_foods = scraper.get_food(text)
+        self.assertEqual(test_foods, foods)
+
+        text = 'Come get some pizza and pasta at Frist!'
+        foods = 'Pizza, Pasta'
+        test_foods = scraper.get_food(text)
+        self.assertEqual(test_foods, foods)
+
+        text = 'Pizza and pasta at Frist! Also we have bagels, cream cheese, and butter with orange juice. Don\'t miss out!'
+        foods = 'Pizza, Pasta, Bagels, Cream cheese, Butter, Orange juice'
+        test_foods = scraper.get_food(text)
+        self.assertEqual(test_foods, foods)
+
+    def test_scraper_interface_get_food_with_empty_text(self):
+        '''
+        Boundary test for get_food(). Check that it returns empty string on
+        empty text.
+        '''
+        self.assertEqual(scraper.get_food(''), '')
+
+    def test_scraper_interface_get_food_with_no_foods(self):
+        '''
+        Boundary test for get_food(). Check that it returns empty string on a
+        string with no food.
+        '''
+        self.assertEqual(scraper.get_food('We have nothing here.'), '')
+
+#-------------------------------------------------------------------------------
+
+### Form tests
+
+class OfferingFormTests(TestCase):
+    '''
+    Tests for the form for entering Offerings
+    '''
+
+    def tearDown(self):
+        '''
+        Clean out the database after each test.
+        '''
+        for offering in Offering.objects.all():
+            offering.delete()
+        for location in Location.objects.all():
+            location.delete()
+
+    def test_offering_form_create_form_with_valid_nonrecurring_entry(self):
+        '''
+        Create a form with valid entries and check that the form is in fact
+        determined valid.
+        '''
+        now = timezone.now()
+        location = create_location(name='Frist Campus Center')
+        location.save()
+        description = 'Come get some pizza and pasta at Frist!'
+        data = {'timestamp': now, 'location': location.id, 'description': description}
+        form = OfferingForm(data)
+
+        self.assertTrue(form.is_valid(), 'Invalid form: ' + str(form.errors.as_json))
+
+    def test_offering_form_create_form_with_valid_recurring_entry(self):
+        '''
+        Create a form with valid entries, including making the offering recur,
+        and check that the form is determined valid.
+        '''
+        now = timezone.now()
+        location = create_location(name='Wilcox Hall')
+        location.save()
+        description = 'Coffee in the commons!'
+        recur = 'D'
+        recur_end_datetime = None
+        data = {'timestamp': now, 'location': location.id, 'description': description, 'recur': recur, 'recur_end_datetime': recur_end_datetime}
+        form = OfferingForm(data)
+
+        self.assertTrue(form.is_valid(), 'Invalid form: ' + str(form.errors.as_json))
+
+
+    def test_offering_form_submit_valid_nonrecurring_entry(self):
+        '''
+        Create a form with a valid entry and attempt to save its info to the
+        database. Check that the database contains the correct info.
+        '''
+        # Create form
+        now = timezone.now()
+        location = create_location(name='Frist Campus Center')
+        location.save()
+        description = 'Come get some pizza and pasta at Frist!'
+        title = scraper.get_food(description)
+        data = {'timestamp': now, 'location': location.id, 'description': description}
+        form = OfferingForm(data)
+        self.assertTrue(form.is_valid(), 'Invalid form: ' + str(form.errors.as_json))
+
+        # Save data
+        Offering(
+            timestamp=form.cleaned_data['timestamp'],
+            location=form.cleaned_data['location'],
+            title=form.cleaned_data['title'],
+            description=form.cleaned_data['description']
+        ).save()
+
+        # Retrieve offering from database
+        test_offering = Offering.objects.order_by('-timestamp')[0]
+        self.assertEqual(test_offering.timestamp, now)
+        self.assertEqual(test_offering.location, location)
+        self.assertEqual(test_offering.title, title)
+        self.assertEqual(test_offering.description, description)
+
+
+    def test_offering_form_submit_valid_recurring_entry(self):
+        '''
+        Create a form with a valid recurring entry and attempt to save its
+        info to the database. Check that the database contains the correct info.
+        '''
+        # Create form
+        now = timezone.now()
+        location = create_location(name='Wilcox Hall')
+        location.save()
+        description = 'Coffee in the commons!'
+        title = scraper.get_food(description)
+        recur = 'D'
+        recur_end_datetime = now + datetime.timedelta(weeks=10)
+        data = {'timestamp': now, 'location': location.id, 'description': description, 'recur': recur, 'recur_end_datetime': recur_end_datetime}
+        form = OfferingForm(data)
+
+        self.assertTrue(form.is_valid(), 'Invalid form: ' + str(form.errors.as_json))
+
+        # Save data
+        Offering(
+            timestamp=form.cleaned_data['timestamp'],
+            location=form.cleaned_data['location'],
+            title=form.cleaned_data['title'],
+            description=form.cleaned_data['description'],
+            recur=form.cleaned_data['recur'],
+            recur_end_datetime=form.cleaned_data['recur_end_datetime']
+        ).save()
+
+        # Retrieve offering from database
+        test_offering = Offering.objects.order_by('-timestamp')[0]
+        self.assertEqual(test_offering.timestamp, now)
+        self.assertEqual(test_offering.location, location)
+        self.assertEqual(test_offering.title, title)
+        self.assertEqual(test_offering.description, description)
+        self.assertEqual(test_offering.recur, recur)
+        self.assertEqual(test_offering.recur_end_datetime, recur_end_datetime)
+
+
+    def test_offering_form_submit_description_without_food(self):
+        '''
+        Attempt to submit a form with an invalid description, namely one
+        without any food in it. Check that it comes back invalid.
+        '''
+        # Create form
+        now = timezone.now()
+        location = create_location(name='Frist Campus Center')
+        location.save()
+        description = 'We have nothing here.'
+        data = {'timestamp': now, 'location': location.id, 'description': description}
+        form = OfferingForm(data)
+
+        self.assertFalse(form.is_valid())
+
+    @skipIf(True, 'Test not yet implemented')
+    def test_offering_form_redirects_to_submitted_page(self):
+        '''
+        Fill out a form in the browser and check that submitting it sends you
+        to the /submitted/ page.
+        '''
+        pass
+
+    def test_offering_form_cannot_reach_submitted_page_without_submitting_a_form(self):
+        '''
+        Attempts to load the /submitted/ page without submitting a form. Checks
+        that the page is not found.
+        '''
+        response = self.client.get(reverse('foodmap_app:submitted'))
+        self.assertEqual(response.status_code, 404)

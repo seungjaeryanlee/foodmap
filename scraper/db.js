@@ -69,14 +69,14 @@ var db = {
                             var columns = "(" + OFFERINGS.COLUMNS.TIMESTAMP + ", " + OFFERINGS.COLUMNS.LOCATION_ID + ", " + OFFERINGS.COLUMNS.TITLE + ", "
                                 + OFFERINGS.COLUMNS.DESCRIPTION + ")";
                             var stmt = sqlite3.prepare("INSERT INTO " + OFFERINGS.NAME + " " + columns + " VALUES (?, ?, ?, ?)");
-                            stmt.run(entry.timestamp, locationId, entry.food.join(', '), entry.body);
+                            stmt.run(entry.timestamp, locationId, entry.food, entry.body);
                             stmt.finalize();
                         }
                         else {
                             var columns = "(" + OFFERINGS.COLUMNS.TIMESTAMP + ", " + OFFERINGS.COLUMNS.LOCATION_ID + ", " + OFFERINGS.COLUMNS.TITLE + ", "
                                 + OFFERINGS.COLUMNS.DESCRIPTION + ", " + OFFERINGS.COLUMNS.IMAGE + ")";
                             var stmt = sqlite3.prepare("INSERT INTO " + OFFERINGS.NAME + " " + columns + " VALUES (?, ?, ?, ?, ?)");
-                            stmt.run(entry.timestamp, locationId, entry.food.join(', '), entry.body, entry.image.name);
+                            stmt.run(entry.timestamp, locationId, entry.food, entry.body, entry.image.name);
                             stmt.finalize();
                         }
                     });
@@ -129,13 +129,13 @@ var db = {
                         var columns = "(" + OFFERINGS.COLUMNS.TIMESTAMP + ", " + OFFERINGS.COLUMNS.LOCATION_ID + ", " + OFFERINGS.COLUMNS.TITLE + ", "
                                 + OFFERINGS.COLUMNS.DESCRIPTION + ", " + OFFERINGS.COLUMNS.THREAD_ID + ")";
                         client.query('INSERT INTO ' + OFFERINGS.NAME + ' ' + columns + ' VALUES ($1, $2, $3, $4, $5)',
-                            [entry.timestamp, locationId, entry.food.join(', '), entry.body, entry.threadId], function(c,e){ client.end(); });
+                            [entry.timestamp, locationId, entry.food, entry.body, entry.threadId], function(c,e){ client.end(); });
                     }
                     else {
                         var columns = "(" + OFFERINGS.COLUMNS.TIMESTAMP + ", " + OFFERINGS.COLUMNS.LOCATION_ID + ", " + OFFERINGS.COLUMNS.TITLE + ", "
                                 + OFFERINGS.COLUMNS.DESCRIPTION + ", " + OFFERINGS.COLUMNS.THREAD_ID + ", " + OFFERINGS.COLUMNS.IMAGE + ")";
                         client.query('INSERT INTO ' + OFFERINGS.NAME + ' ' + columns + ' VALUES ($1, $2, $3, $4, $5, $6)',
-                            [entry.timestamp, locationId, entry.food.join(', '), entry.body, entry.threadId, entry.image.name], function(c,e){ client.end(); });
+                            [entry.timestamp, locationId, entry.food, entry.body, entry.threadId, entry.image.name], function(c,e){ client.end(); });
                     }
 
                     console.log("Entry inserted to database.");

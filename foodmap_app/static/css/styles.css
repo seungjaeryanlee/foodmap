@@ -18,7 +18,7 @@
 
 body {
     margin: 0;
-    padding-top: 70px;
+    padding-top: 110px;
 }
 
 .overlay-control {
@@ -225,4 +225,11 @@ span.fa.fa-map-marker:before {
   z-index: 2000;
 }
 
+/* Form */
+
+@media (max-width: 767px) {
+  form {
+    padding-left: 50px;
+  }
+}
 
