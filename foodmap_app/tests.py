@@ -591,25 +591,39 @@ class ScraperInterfaceTests(TestCase):
     Tests to make sure the scraper interface module works properly.
     '''
 
-    def test_scraper_interface_get_food_from_text(self):
+    def test_scraper_interface_get_food_with_valid_text(self):
         '''
         Test that the get_food() method of the scraper interface gets all foods
         in a given text and returns them in comma-separated format.
         '''
-        text1 = 'Eat bagels here.'
-        foods1 = 'Bagels'
-        test_foods1 = scraper.get_food(text1)
-        self.assertEqual(test_foods1, foods1)
+        text = 'Eat bagels here.'
+        foods = 'Bagels'
+        test_foods = scraper.get_food(text)
+        self.assertEqual(test_foods, foods)
 
-        text2 = 'Come get some pizza and pasta at Frist!'
-        foods2 = 'Pizza, pasta'
-        test_foods2 = scraper.get_food(text2)
-        self.assertEqual(test_foods2, foods2)
+        text = 'Come get some pizza and pasta at Frist!'
+        foods = 'Pizza, Pasta'
+        test_foods = scraper.get_food(text)
+        self.assertEqual(test_foods, foods)
 
-        text3 = 'Pizza and pasta at Frist! Also we have bagels, cream cheese, and butter with orange juice. Don\'t miss out!'
-        foods3 = 'Pizza, pasta, bagels, cream cheese, butter, orange juice'
-        test_foods3 = scraper.get_food(text3)
-        self.assertEqual(test_foods3, foods3)
+        text = 'Pizza and pasta at Frist! Also we have bagels, cream cheese, and butter with orange juice. Don\'t miss out!'
+        foods = 'Pizza, Pasta, Bagels, Cream cheese, Butter, Orange juice'
+        test_foods = scraper.get_food(text)
+        self.assertEqual(test_foods, foods)
+
+    def test_scraper_interface_get_food_with_empty_text(self):
+        '''
+        Boundary test for get_food(). Check that it returns empty string on
+        empty text.
+        '''
+        self.assertEqual(scraper.get_food(''), '')
+
+    def test_scraper_interface_get_food_with_no_foods(self):
+        '''
+        Boundary test for get_food(). Check that it returns empty string on a
+        string with no food.
+        '''
+        self.assertEqual(scraper.get_food('We have nothing here.'), '')
 
 #-------------------------------------------------------------------------------
 

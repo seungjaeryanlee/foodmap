@@ -58,7 +58,7 @@ function formatEmail(mimeMessage, messageId) {
     var title = getTitleFromMime(mimeMessage);
     var body = getBodyFromMime(mimeMessage);
     var image = getImageFromMime(mimeMessage);
-    var food = getFood(title+body);
+    var food = getFood(title+body).join(', ');
     var location = getLocation(title+body);
     var threadId = mimeMessage.threadId;
     var requestType = getRequestType(body);
@@ -81,7 +81,7 @@ function getImageFromMime(mimeMessage) {
         else {
             var imageName = mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/").filename;
             var imageId = mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/").body.attachmentId;
-            
+
             // FIXME: Name not needed?
             return {name: imageName, id: imageId};
         }
@@ -236,7 +236,7 @@ function getFood(text) {
     for(var i = 0; i < words.length; i++) {
         var phraseFound = false;
         word = words[i];
-        
+
         // Check if the word is part of a phrase
         for(food of foods) {
             splitFood = food.split(" ");
@@ -252,7 +252,7 @@ function getFood(text) {
                 }
                 phraseString = phrase.join(" ");
 
-                if(isValidFood(phraseString)) {                    
+                if(isValidFood(phraseString)) {
                     matches.push(capitalize(phraseString));
                     i += splitFood.length - 1; // Increment index to skip over the phrase
                     phraseFound = true;
