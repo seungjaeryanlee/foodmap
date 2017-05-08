@@ -18,7 +18,7 @@
 
 body {
     margin: 0;
-    padding-top: 70px;
+    padding-top: 110px;
 }
 
 .overlay-control {
@@ -232,7 +232,4 @@ span.fa.fa-map-marker:before {
     padding-left: 50px;
   }
 }
-
-
-
 
