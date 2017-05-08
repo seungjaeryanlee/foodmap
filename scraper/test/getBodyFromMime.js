@@ -1,5 +1,5 @@
 var assert = require("assert");
-var app = require('../app.js');
+var scraper = require('../scraper.js');
 
 describe('getBodyFromMime()', function() {
     describe('Content-Type: text/plain', function() {
@@ -66,7 +66,7 @@ describe('getBodyFromMime()', function() {
                 },
                 "sizeEstimate": 400
             };
-            var body = app.getBodyFromMime(message).replace(/\r\n/g, "\n");;
+            var body = scraper.getBodyFromMime(message).replace(/\r\n/g, "\n");;
             assert.equal(body, "\n");
         })
         it('getBodyFromMime() should return the body if the email has a body', function() {
@@ -132,7 +132,7 @@ describe('getBodyFromMime()', function() {
                 },
                 "sizeEstimate": 416
             };
-            var body = app.getBodyFromMime(message).replace(/\r\n/g, "\n");;
+            var body = scraper.getBodyFromMime(message).replace(/\r\n/g, "\n");;
             assert.equal(body, "Plain text body\n");
         })
     })
@@ -272,7 +272,7 @@ describe('getBodyFromMime()', function() {
                 },
                 "sizeEstimate": 1192
             };
-            var body = app.getBodyFromMime(message).replace(/\r\n/g, "\n");
+            var body = scraper.getBodyFromMime(message).replace(/\r\n/g, "\n");
             assert.equal(body, "\n");
         })
         it('getBodyFromMime() should return the body if the email has a body', function() {
@@ -402,7 +402,7 @@ describe('getBodyFromMime()', function() {
                                 }
                             ],
                             "body": {
-                                "attachmentId": "ANGjdJ9Ds1TDXJRsJkDA7lD6MwQOG4c5gz0ylE926u3ezV5I_Tm8A8hovPoAPPxP0qXQytUTvmziGe6e30z0G-inSFoeAcWWHe6CgHJwrxPtVC3yqlmpstRajqhpvLtHKZVvU9rfytvGtnvN7pFHuDjtr0s8ts4U8AjKhZR7cwFZszFkQkwaR9AmLKqfp3MqUl6Ylgl-WmjeRbHbZ0T7vS7TLw7sbEjfTZTQb3x8zUHaVwkOI7eSds8qNFOnKH2qXnorsrzQST4eF_tTjCG7u-MRkO_0pweYkb7TJsG-FH4oH_yI1e3ZFDUepe2ZICA",
+                                "attachmentId": "ANGjdJ9Ds1TDXJRsJkDA7lD6MwQOG4c5gz0ylE926u3ezV5I_Tm8A8hovPoscraperxP0qXQytUTvmziGe6e30z0G-inSFoeAcWWHe6CgHJwrxPtVC3yqlmpstRajqhpvLtHKZVvU9rfytvGtnvN7pFHuDjtr0s8ts4U8AjKhZR7cwFZszFkQkwaR9AmLKqfp3MqUl6Ylgl-WmjeRbHbZ0T7vS7TLw7sbEjfTZTQb3x8zUHaVwkOI7eSds8qNFOnKH2qXnorsrzQST4eF_tTjCG7u-MRkO_0pweYkb7TJsG-FH4oH_yI1e3ZFDUepe2ZICA",
                                 "size": 151
                             }
                         }
@@ -410,7 +410,7 @@ describe('getBodyFromMime()', function() {
                 },
                 "sizeEstimate": 1223
             };
-            var body = app.getBodyFromMime(message).replace(/\r\n/g, "\n");
+            var body = scraper.getBodyFromMime(message).replace(/\r\n/g, "\n");
             assert.equal(body, "and this is body\n");
         })
     })
@@ -508,7 +508,7 @@ describe('getBodyFromMime()', function() {
                 },
                 "sizeEstimate": 649
             };
-            var body = app.getBodyFromMime(message).replace(/\r\n/g, "\n"); // Change line ending
+            var body = scraper.getBodyFromMime(message).replace(/\r\n/g, "\n"); // Change line ending
             assert.equal(body, "\n");
         })
         it('getBodyFromMime() should return the body if the email has a body', function() {
@@ -604,7 +604,7 @@ describe('getBodyFromMime()', function() {
                 },
                 "sizeEstimate": 710
             };
-            var body = app.getBodyFromMime(message).replace(/\r\n/g, "\n"); // Change line ending
+            var body = scraper.getBodyFromMime(message).replace(/\r\n/g, "\n"); // Change line ending
             assert.equal(body, "Multipart Alternative Body\n");
         })
     })
@@ -612,7 +612,7 @@ describe('getBodyFromMime()', function() {
         // FIXME: Check if this is possible or not
         // it('getBodyFromMime() should return \"\\n\" if the email has only newline', function() {
         //     var message = {};
-        //     var body = app.getBodyFromMime(message).replace(/\r\n/g, "\n");
+        //     var body = scraper.getBodyFromMime(message).replace(/\r\n/g, "\n");
         //     assert.equal(body, "");
         // })
         it('getBodyFromMime() should return the body if the email has a body', function() {
@@ -754,7 +754,7 @@ describe('getBodyFromMime()', function() {
                 },
                 "sizeEstimate": 1368    
             };
-            var body = app.getBodyFromMime(message).replace(/\r\n/g, "\n");
+            var body = scraper.getBodyFromMime(message).replace(/\r\n/g, "\n");
             // FIXME: Should it not have the [] part?
             assert.equal(body, "Related Body\n[image: Inline image 1]\n"); // Change line ending
         })

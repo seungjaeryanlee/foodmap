@@ -61,8 +61,6 @@ cream cheese
 crepe
 croissant
 cupcake
-d'angelo's
-d'angelo
 dangelos
 dangelo
 dessert
@@ -129,6 +127,7 @@ jules
 korean
 kung fu tea
 lasagna
+lassi
 leftover
 lentils
 linguini
@@ -141,6 +140,8 @@ lunch pack
 lunchables
 mamoun's
 mamouns
+mango
+mango lassi
 mashed potato
 mazorela
 meatballs
@@ -166,7 +167,6 @@ orange
 orange juice
 orzo
 panera
-papa john's
 papa johns
 pasta
 peach

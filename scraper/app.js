@@ -9,79 +9,47 @@ var fs = require('fs');
 var readline = require('readline');
 var google = require('googleapis');
 var googleAuth = require('google-auth-library');
-var util = require('util');
 var db_module = require('./db');
+var scraper = require('./scraper');
 
 // Pick database implementation (sqlite/postgres) based on environment variable
 // PROJECT_MODE
 var db;
 if (process.env.PROJECT_MODE === 'development') {
-  db = db_module.db.sqlite;
+    db = db_module.db.sqlite;
 } else if (process.env.PROJECT_MODE === 'production') {
-  db = db_module.db.postgres;
+    db = db_module.db.postgres;
 } else {
-  console.error('Error: PROJECT_MODE not set. Cannot set up database. Did you activate the virtual environment in the Django project?');
-  process.exit(1);
+    console.error('Error: PROJECT_MODE not set. Cannot set up database. Did you activate the virtual environment in the Django project?');
+    process.exit(1);
 }
 
-// read/write access except delete for gmail, and read/write access to calendar
+// read/write access except delete for gmailAutho
 var SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
 var TOKEN_DIR = (process.env.HOME || process.env.HOMEPATH ||
         process.env.USERPROFILE) + '/.credentials/';
 var TOKEN_PATH = TOKEN_DIR + 'gmail-nodejs-foodmap.json';
 
-// Constants
-const DELETE = 0;
-const INSERT = 1;
 
-// For testing in Mocha
-module.exports.formatEmail = formatEmail;
-module.exports.getTimestampFromMime = getTimestampFromMime;
-module.exports.getTitleFromMime = getTitleFromMime;
-module.exports.getBodyFromMime = getBodyFromMime;
-module.exports.getImageFromMime = getImageFromMime;
-module.exports.getFood = getFood;
-module.exports.getLocation = getLocation;
-module.exports.getRequestType = getRequestType;
-module.exports.DELETE = DELETE;
-module.exports.INSERT = INSERT;
-
-// Data files
-var foods = fs.readFileSync(__dirname + '/data/foods.txt').toString().split('\n');
-var locations = fs.readFileSync(__dirname + '/data/locationMap.txt').toString().split('\n');
-var regexes = fs.readFileSync(__dirname + '/data/regexMap.txt').toString().split('\n');
-
-// Extract location map and alias
-var locationMap = {};
-var aliasList = [];
-for (location of locations) {
-    var tokens = location.split(',');
-    locationMap[tokens[0]] = tokens[1];
-    aliasList.push(tokens[0]);
+if(process.env.PROJECT_MODE === 'production') {
+    authorize(JSON.parse(process.env.client_secret), main);
 }
-
-var regexMap = {};
-var regexList = [];
-for (regex of regexes) {
-    var tokens = regex.split(',');
-    regexMap[tokens[0]] = tokens[1];
-    regexList.push(tokens[0]);
+else if(process.env.PROJECT_MODE === 'development') {
+    // Load client secrets from a local file.
+    fs.readFile(__dirname + '/client_secret.json', function processClientSecrets(err, content) {
+        if (err) {
+            console.log('Error loading client secret file: ' + err);
+            return;
+        }
+        // Authorize a client with the loaded credentials, then call the
+        // main program.
+        authorize(JSON.parse(content), main);
+    });
 }
-
-if(process.env.client_secret) { // FIXME: Better way to detect Heroku?
-    fs.writeFile(__dirname + '/client_secret.json', process.env.client_secret);
+else {
+    console.error('Error: PROJECT_MODE not set. Cannot set up database. Did you activate the virtual environment in the Django project?');
+    process.exit(1);
 }
-
-// Load client secrets from a local file.
-fs.readFile(__dirname + '/client_secret.json', function processClientSecrets(err, content) {
-    if (err) {
-        console.log('Error loading client secret file: ' + err);
-        return;
-    }
-    // Authorize a client with the loaded credentials, then call the
-    // main program.
-    authorize(JSON.parse(content), main);
-});
 
 /**
  * Create an OAuth2 client with the given credentials, and then execute the
@@ -97,8 +65,13 @@ function authorize(credentials, callback) {
     var auth = new googleAuth();
     var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
+    // Use JSON given from process environment
+    if (process.env.PROJECT_MODE === 'production') {
+        oauth2Client.credentials = JSON.parse(process.env.CREDENTIALS);
+        callback(oauth2Client);
+    }
     // Check if we have previously stored a token.
-    if (process.env.PROJECT_MODE === 'development') {
+    else if (process.env.PROJECT_MODE === 'development') {
         fs.readFile(TOKEN_PATH, function(err, token) {
             if (err) {
                 getNewToken(oauth2Client, callback);
@@ -108,14 +81,9 @@ function authorize(credentials, callback) {
             }
         });
     }
-    // Use JSON given from process environment
-    else if (process.env.PROJECT_MODE === 'production') {
-        oauth2Client.credentials = JSON.parse(process.env.CREDENTIALS);
-        callback(oauth2Client);        
-    } 
     else {
-      console.error('Error: PROJECT_MODE not set. Cannot authorize API');
-      process.exit(1);
+        console.error('Error: PROJECT_MODE not set. Cannot authorize API');
+        process.exit(1);
     }
 }
 
@@ -173,7 +141,7 @@ function storeToken(token) {
  *
  * @param {Object} auth Authorization credentials for Google APIs.
  */
-var main = function (auth) {
+function main (auth) {
 
     // set auth as a global default
     google.options({auth: auth});
@@ -216,16 +184,18 @@ function parseEmail(messageId, callback) {
             return;
         }
 
+        // Check if the sender is Free Food Listserv
         // if(result.payload.headers.find(x => x.name === "To") !== "freefood@princeton.edu")
         if (typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
         || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
             return;
         }
 
-        entry = formatEmail(result, messageId);
+        entry = scraper.formatEmail(result, messageId);
+        // saveImage(entry.image.id, messageId);
 
         // INSERT or DELETE entry
-        if(getRequestType(entry.title+entry.body) == INSERT) {
+        if(scraper.getRequestType(entry.title+entry.body) == scraper.INSERT) {
             db.insert(entry);
         }
         else {
@@ -255,233 +225,26 @@ function markAsRead(messageId) {
 }
 
 /**
- * Formats a MIME message from the API to fit the database specification.
+ * Save attached image to filesystem / database
  *
- * @param {Object} mimeMessage The MIME message to reformat.
+ * @param {Object} imageId The attachmentId of the image
+ * @param {Object} messageId The id of a message with the image
  */
-function formatEmail(mimeMessage, messageId) {
-    var timestamp = getTimestampFromMime(mimeMessage);
-    var title = getTitleFromMime(mimeMessage);
-    var body = getBodyFromMime(mimeMessage);
-    var image = getImageFromMime(mimeMessage);
-    var food = getFood(title+body);
-    var location = getLocation(title+body);
-    var threadId = mimeMessage.threadId;
-    var requestType = getRequestType(body);
+function saveImage(imageId, messageId) {
+   // FIXME: Divide by PROJECT_MODE
 
-    return {timestamp: timestamp, location: location, title: title, body: (title + '\n' + body), food: food, image: image, threadId: threadId, requestType: requestType};
-}
+    // FIXME: Check size?
+    // Get Attachment
+    google.gmail('v1').users.messages.attachments.get({
+        userId: 'me',
+        id: imageId,
+        messageId: messageId
+    }, function(err, result) {
+        var encodedImage = result.data;
+        imageData = Buffer.from(encodedImage, 'base64');
 
-/**
- * Get timestamp from a given MIME Message
- *
- * @param {Object} mimeMessage The MIME message to parse.
- */
-function getTimestampFromMime(mimeMessage) {
-    // FIXME: Exception for parseInt?
-    return new Date(parseInt(mimeMessage.internalDate)).toISOString().replace('T', ' ').split('.')[0];
-}
-
-/**
- * Get title (subject) from a given MIME Message
- *
- * @param {Object} mimeMessage The MIME message to parse.
- */
-function getTitleFromMime(mimeMessage) {
-    return mimeMessage.payload.headers.find(x => x.name === "Subject").value;
-}
-
-/**
- * Get body from a given MIME Message
- *
- * @param {Object} mimeMessage The MIME message to parse.
- */
-function getBodyFromMime(mimeMessage) {
-    // Following this documentation:
-    // https://msdn.microsoft.com/en-us/library/gg672007(v=exchg.80).aspx
-    // except for multipart/mixed
-    var body;
-
-    // Content-Type: text/plain
-    if(mimeMessage.payload.mimeType === 'text/plain') {
-        rawBody = mimeMessage.payload.body.data;
-        body = Buffer.from(rawBody, 'base64').toString("ascii");
-    }
-
-    // Content-Type: multipart/alternative
-    else if(mimeMessage.payload.mimeType === 'multipart/alternative') {
-        if(typeof mimeMessage.payload.parts.find(x => x.mimeType === "text/plain") === 'undefined') {
-            body = "";
-        }
-        else {
-            rawBody = mimeMessage.payload.parts.find(x => x.mimeType === "text/plain").body.data;
-            body = Buffer.from(rawBody, 'base64').toString("ascii");
-        }
-    }
-
-    // Content-Type: multipart/related
-    else if(mimeMessage.payload.mimeType === 'multipart/related') {
-        if(typeof mimeMessage.payload.parts.find(x => x.mimeType === "multipart/alternative") === 'undefined') {
-            body = "";
-        }
-        else {
-            if(typeof mimeMessage.payload.parts.find(x => x.mimeType === "multipart/alternative").parts.find(x => x.mimeType === "text/plain") === 'undefined') {
-                body = "";
-            }
-            else {
-                rawBody = mimeMessage.payload.parts.find(x => x.mimeType === "multipart/alternative").parts.find(x => x.mimeType === "text/plain").body.data;
-                body = Buffer.from(rawBody, 'base64').toString("ascii");
-            }
-        }
-    }
-
-    // Content-Type: multipart/mixed
-    else if(mimeMessage.payload.mimeType === 'multipart/mixed') {
-        if(typeof mimeMessage.payload.parts.find(x => x.mimeType === "multipart/alternative") === 'undefined') {
-            body = "";
-        }
-        else {
-            if(typeof mimeMessage.payload.parts.find(x => x.mimeType === "multipart/alternative").parts.find(x => x.mimeType === "text/plain") === 'undefined') {
-                body = "";
-            }
-            else {
-                rawBody = mimeMessage.payload.parts.find(x => x.mimeType === "multipart/alternative").parts.find(x => x.mimeType === "text/plain").body.data;
-                body = Buffer.from(rawBody, 'base64').toString("ascii");
-            }
-        }
-    }
-
-    else {
-        console.log("getBodyFromMime() unexpected case");
-        body = "";
-    }
-
-    /* Delete FreeFood footer */
-    body = body.replace('-----\r\nYou are receiving this email because you are subscribed to the Free Food mailing list, operated by the USG. If you have questions or are having difficulties with this listserv, please send an email to usg@princeton.edu.\r\n\r\nIn your message to the freefood listserv, please state what type of food it is, where it is, until when it will be available and how delicious it is.\r\n\r\nTo unsubscribe, please email listserv@princeton.edu the line UNSUBSRIBE FREEFOOD in the body of the message. Please be sure to remove your e-mail signature (if any) before you send that message.\r\n', '');
-
-    /* Delete null character 0x00 */
-    body = body.replace(/\0/g, '');
-
-    return body;
-}
-
-/**
- * Get image from a given MIME Message if there is an image, returns undefined if not.
- *
- * @param {Object} mimeMessage The MIME message to parse.
- */
-function getImageFromMime(mimeMessage) {
-    var imageName;
-    var imageData;
-
-    // FIXME: Other content types?
-    // Content-Type: multipart/mixed
-    if(mimeMessage.payload.mimeType === 'multipart/mixed') {
-        if(typeof mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/") === 'undefined') {
-            return undefined;
-        }
-        else {
-            imageName = mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/").filename;
-            var attachmentId = mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/").body.attachmentId;
-
-            // FIXME: Check size?
-            // Get Attachment
-            google.gmail('v1').users.messages.attachments.get({
-                userId: 'me',
-                id: attachmentId,
-                messageId: mimeMessage.id
-            }, function(err, result) {
-                var encodedImage = result.data;
-                imageData = Buffer.from(encodedImage, 'base64');
-
-                // Create file
-                // FIXME: Should use different file name in case of conflict!
-                // FIXME: Temporarily disable for speed
-                //fs.writeFile(__dirname + '/' + imageName, imageData, function(err) {});
-            });
-
-            return {name: imageName, data: imageData};
-        }
-    }
-    else {
-        return undefined;
-    }
-}
-
-/**
- * Get all foods that are in the text
- *
- * @param {Object} text The text to search for food
- */
-function getFood(text) {
-    var matches = [];
-
-    // FIXME: Better list of punctuations
-    text = text.toLowerCase().replace(/[.\/#!$%\^&\*;:{}=\-_`~()']/g,"");
-    for(food of foods) {
-        var index = text.indexOf(food.toLowerCase());
-        if(index > -1) { // Substring search
-            // make sure it's a word by checking the left and right is alphanumeric character
-            if ( (index == 0 || !/\w/.test(text[index-1]))
-             && (text.length <= index + food.length || // no more letter
-                !/\w/.test(text[index + food.length]) || // followed by word break
-                text[index + food.length] == 's') ) { // followed by 's' (plural)
-                food = food.charAt(0).toUpperCase() + food.slice(1);
-                matches.push(food);
-            }
-        }
-    }
-
-    return matches;
-}
-
-/**
- * Get all locations that are in the text
- *
- * @param {Object} text The text to search for locations
- */
-function getLocation(text) {
-    // FIXME: There should only be one location per email
-    var location = "";
-    var aliasLength = 0;
-
-    // FIXME: Better list of punctuations
-    text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
-    for(loc of aliasList) {
-        if(text.indexOf(loc.toLowerCase()) > - 1) { // Substring search
-            if(aliasLength < loc.length) { // For longest match
-                location = locationMap[loc];
-                aliasLength = loc.length;
-            }
-        }
-    }
-    for(regex of regexList) {
-        var regexp = new RegExp(regex, 'i');
-        var result = text.match(regexp);
-        if(result) {
-            if(aliasLength < regex.length) { // For longest match
-                location = regexMap[regex];
-                aliasLength = loc.length;
-            }
-        }
-    }
-
-    return location;
-}
-
-/**
- * Check type of request
- *
- * @param {Object} text The text to be inspected
- */
-function getRequestType(text) {
-    // FIXME: Better list of punctuations
-    text = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
-    var deleteRequests = ["all gone"];
-    for(req of deleteRequests) {
-        if(text.indexOf(req) > -1) {
-            return DELETE;
-        }
-    }
-    return INSERT;
+        // Create file
+        // FIXME: Should use different file name in case of conflict!
+        //fs.writeFile(__dirname + '/' + imageName, imageData, function(err) {});
+    });
 }
