@@ -84,6 +84,30 @@ describe('getFood()', function() {
         })
     });
 
+    describe('no duplicates', function() {
+        it('getFood(\"orange, orange, orange\") should equal [\"Orange\"]', function() {
+            assert.deepEqual(scraper.getFood("orange, orange, orange"), ["Orange"]);
+        }) 
+    });
+
+    describe('listCheck() works inside getFood', function() {
+        describe('AND separator', function(){
+            it('getFood(\"muffins and 123 and bagels\") should order-ignored equal [\"Muffins\", \"123\", \"Bagels\"]', function() {
+                assert.deepEqual(scraper.getFood("muffins and 123 and bagels").sort(), ["Muffins", "123", "Bagels"].sort());
+            })
+        });
+        describe('OR separator', function(){
+            it('getFood(\"froyo or something or sundae\") should order-ignored equal [\"Froyo\", \"Something\", \"Sundae\"]', function() {
+                assert.deepEqual(scraper.getFood("froyo or something or sundae").sort(), ["Froyo", "Something", "Sundae"].sort());
+            })
+        });
+        describe('comma separator', function(){
+            it('getFood(\"penne, lingueeni, spaghetti\") should order-ignored equal [\"Penne\", \"Lingueeni\", \"Spaghetti\"]', function() {
+                assert.deepEqual(scraper.getFood("penne, lingueeni, spaghetti").sort(), ["Penne", "Lingueeni", "Spaghetti"].sort());
+            })
+        });
+    });
+
     describe('biggest substring', function(){});
     describe('fuzzy matching', function(){});
 });

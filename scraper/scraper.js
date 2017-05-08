@@ -269,7 +269,12 @@ function getFood(text) {
             matches.push(capitalize(word));
         }
     }
-    return matches;
+
+    matches = matches.concat(listCheck(text));
+
+    // Delete duplicate entries
+    return matches.filter(function(item, pos) { return matches.indexOf(item) == pos; });
+
 }
 
 /**
@@ -329,6 +334,7 @@ function getRequestType(text) {
  */
 function listCheck(text) {
     var chunks = text.toLowerCase().split(/,| and | or /g);
+    chunks = chunks.filter(Boolean); // delete empty strings in chunks
     var canBeFood = Array(chunks.length).fill(true);
     var isFood = Array(chunks.length).fill(false);
 

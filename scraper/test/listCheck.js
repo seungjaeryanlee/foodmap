@@ -24,6 +24,11 @@ describe('listCheck', function() {
                 assert.deepEqual(scraper.listCheck("rice , beans").sort(), ["Rice", "Beans"].sort());
             })
         });
+        describe('mixed separators', function(){
+            it('listCheck(\"panera, olives, and princeton pi or mehek\") should order-ignored equal [\"Panera\", \"Olives\", \"Princeton pi\", \"Mehek\"]', function() {
+                assert.deepEqual(scraper.listCheck("panera, olives, and princeton pi or mehek").sort(), ["Panera", "Olives", "Princeton pi", "Mehek"].sort());
+            })
+        });
     });
     describe('some tokens between are not food', function() {
         describe('AND separator', function(){
@@ -39,6 +44,11 @@ describe('listCheck', function() {
         describe('comma separator', function(){
             it('listCheck(\"burger, fryes, hotdog\") should order-ignored equal [\"Burger\", \"Fryes\", \"Hotdog\"]', function() {
                 assert.deepEqual(scraper.listCheck("burger, fryes, hotdog").sort(), ["Burger", "Fryes", "Hotdog"].sort());
+            })
+        });
+        describe('mixed separators', function(){
+            it('listCheck(\"mango, peach, or ASDF and fruit\") should order-ignored equal [\"Mango\", \"Peach\", \"Asdf\", \"Fruit\"]', function() {
+                assert.deepEqual(scraper.listCheck("mango, peach, or asdf and fruit").sort(), ["Mango", "Peach", "Asdf", "Fruit"].sort());
             })
         });
     });
