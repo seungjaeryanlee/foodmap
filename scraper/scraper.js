@@ -13,6 +13,7 @@ var googleAuth = require('google-auth-library');
 // Constants
 const DELETE = 0;
 const INSERT = 1;
+const PUNCTUATIONS = ['[','.', ',', '\\', '/', '#', '!', '$', '%', '^', '&', '*', ';', ':', '{', '}', '=', '-', '_', '`', '~', '(', ')', ']', '\''];
 
 // For testing in Mocha
 module.exports.formatEmail = formatEmail;
@@ -23,6 +24,8 @@ module.exports.getBodyFromMime = getBodyFromMime;
 module.exports.getFood = getFood;
 module.exports.getLocation = getLocation;
 module.exports.getRequestType = getRequestType;
+module.exports.listCheck = listCheck;
+
 module.exports.DELETE = DELETE;
 module.exports.INSERT = INSERT;
 
@@ -317,4 +320,70 @@ function getRequestType(text) {
         }
     }
     return INSERT;
+}
+
+/**
+ * Checks if there is a list of food and returns foods in the list
+ *
+ * @param {Object} text The text to be inspected
+ */
+function listCheck(text) {
+    var chunks = text.toLowerCase().split(/,| and | or /g);
+    var canBeFood = Array(chunks.length).fill(true);
+    var isFood = Array(chunks.length).fill(false);
+
+    // Label chunks
+    for (i = 0; i < chunks.length; i++) {
+        chunks[i] = chunks[i].trim();
+
+        // if it has punctuation, ignore
+        for(punctuation of PUNCTUATIONS) {
+            if(chunks[i].indexOf(punctuation) != -1) {
+                canBeFood[i] = false;
+                break;
+            }
+        }
+
+        // find list with food
+        for (food of foods) {
+            if(isValidFood(chunks[i])) {
+                isFood[i] = true;
+                break;
+            }
+        }    
+    }
+
+    var matches = [];
+    var listStart = -1;
+    var listEnd = -1;
+
+    // Find list pattern by iterating through chunks
+    for (i = 0; i < chunks.length; i++) {
+        // FIXME: Change magic variables
+        if(listStart == -1 && isFood[i]) {
+            listStart = i;
+        }
+        if(listStart != -1 && !canBeFood[i]) {
+            listEnd = i;
+        }
+
+        // Found a complete list
+        if(listStart != -1 && listEnd != -1) {
+            for (j = listStart; j <= listEnd; j++) {
+                matches.push(capitalize(chunks[j]));
+            }
+            listStart = -1;
+            listEnd = -1;
+        }
+    }
+
+
+    // In case list ended with the end of string
+    if(listStart != -1) {
+        for (j = listStart; j < chunks.length; j++) {
+            matches.push(capitalize(chunks[j]));
+        }
+    }
+
+    return matches;
 }
