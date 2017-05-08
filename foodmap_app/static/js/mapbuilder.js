@@ -83,7 +83,7 @@
     var offerings = pullOfferings();
     // TODO: Make nicer looking alert messages built into the UI
     if (offerings.error) {
-        alert('Oops! We could not get the free food offerings!');
+        // alert('Oops! We could not get the free food offerings!');
     }
     if (offerings.features.length == 0) {
         //alert("There is currently no free food available. Sorry!");
