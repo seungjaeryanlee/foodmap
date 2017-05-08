@@ -27,29 +27,29 @@ describe('listCheck', function() {
     });
     describe('some tokens between are not food', function() {
         describe('AND separator', function(){
-            it('listCheck(\"veggie and hummus and bread\") should order-ignored equal [\"Veggie\", \"Hummus\", \"Bread\"]', function() {
-                assert.deepEqual(scraper.listCheck("veggie and hummus and bread").sort(), ["Veggie", "Hummus", "Bread"].sort());
+            it('listCheck(\"veggie and hommos and bread\") should order-ignored equal [\"Veggie\", \"Hommos\", \"Bread\"]', function() {
+                assert.deepEqual(scraper.listCheck("veggie and hommos and bread").sort(), ["Veggie", "Hommos", "Bread"].sort());
             })
         });
         describe('OR separator', function(){
-            it('listCheck(\"apple or orange or melon\") should order-ignored equal [\"Apple\", \"Orange\", \"Melon\"]', function() {
-                assert.deepEqual(scraper.listCheck("apple or orange or melon").sort(), ["Apple", "Orange", "Melon"].sort());
+            it('listCheck(\"apple or strawbarry or melon\") should order-ignored equal [\"Apple\", \"Strawbarry\", \"Melon\"]', function() {
+                assert.deepEqual(scraper.listCheck("apple or strawbarry or melon").sort(), ["Apple", "Strawbarry", "Melon"].sort());
             })
         });
         describe('comma separator', function(){
-            it('listCheck(\"burger, fries, hotdog\") should order-ignored equal [\"Burger\", \"Fries\", \"Hotdog\"]', function() {
-                assert.deepEqual(scraper.listCheck("burger, fries, hotdog").sort(), ["Burger", "Fries", "Hotdog"].sort());
+            it('listCheck(\"burger, fryes, hotdog\") should order-ignored equal [\"Burger\", \"Fryes\", \"Hotdog\"]', function() {
+                assert.deepEqual(scraper.listCheck("burger, fryes, hotdog").sort(), ["Burger", "Fryes", "Hotdog"].sort());
             })
         });
     });
     describe('plural foods should stay plural', function() {
         it('listCheck(\"melons\") should order-ignored equal [\"Melons\"]', function() {
-                assert.deepEqual(scraper.listCheck("melons").sort(), ["Melons"].sort());
+            assert.deepEqual(scraper.listCheck("melons").sort(), ["Melons"].sort());
         })
     });
     describe('AND or OR separator in the word should not be detected', function() {
         it('listCheck(\"sandwich and corn\") should order-ignored equal [\"Corn\", \"Sandwich\"]', function() {
-                assert.deepEqual(scraper.listCheck("sandwich and corn").sort(), ["Corn", "Sandwich"].sort());
+            assert.deepEqual(scraper.listCheck("sandwich and corn").sort(), ["Corn", "Sandwich"].sort());
         })
     });
 
