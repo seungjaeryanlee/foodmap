@@ -62,5 +62,19 @@ describe('listCheck', function() {
             assert.deepEqual(scraper.listCheck("sandwich and corn").sort(), ["Corn", "Sandwich"].sort());
         })
     });
-
+    describe('list ended with file', function() {
+        it('listCheck(\"Come and get corn, potato, random stuff\") should order-ignored equal [\"Corn\", \"Potato\"]', function() {
+            assert.deepEqual(scraper.listCheck("Come and get corn, potato, random stuff").sort(), ["Corn", "Potato"].sort());
+        })
+    });
+    describe('list inside a sentence', function() {
+        it('listCheck(\"Come and get rice, chicken, veggie at 1938 Hall!\") should order-ignored equal [\"Rice\", \"Chicken\", \"Veggie\"]', function() {
+            assert.deepEqual(scraper.listCheck("Come and get rice, chicken, veggie at 1938 Hall!").sort(), ["Rice", "Chicken", "Veggie"].sort());
+        })
+    });
+    describe('two lists inside a sentence', function() {
+        it('listCheck(\"We have apples, oranges, and carrots\\n Also we got some QDoba, Jules and Mamouns!\") should order-ignored equal [\"Apples\", \"Oranges\", \"Carrots\", \"Qdoba\", \"Jules\", \"Mamouns\"]', function() {
+            assert.deepEqual(scraper.listCheck("We have apples, oranges, and carrots\n Also we got some QDoba, Jules and Mamouns!").sort(), ["Apples", "Oranges", "Carrots", "Qdoba", "Jules", "Mamouns"].sort());
+        })
+    });
 });

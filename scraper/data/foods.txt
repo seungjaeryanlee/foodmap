@@ -31,6 +31,7 @@ candy
 cannoli
 cantaloupe
 caribbean
+carrot
 cereal
 chao mian
 cheese
@@ -110,6 +111,7 @@ honey dew
 honeydew
 hot chocolate
 hot wings
+hotdog
 house of cupcakes
 ice
 ice cream
@@ -166,6 +168,7 @@ on the border
 orange
 orange juice
 orzo
+pancake
 panera
 papa johns
 pasta
@@ -213,6 +216,7 @@ strawberries
 strawberry
 sub
 subway
+sundae
 sushi
 taco
 tea

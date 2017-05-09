@@ -13,7 +13,9 @@ var googleAuth = require('google-auth-library');
 // Constants
 const DELETE = 0;
 const INSERT = 1;
-const PUNCTUATIONS = ['[','.', ',', '\\', '/', '#', '!', '$', '%', '^', '&', '*', ';', ':', '{', '}', '=', '-', '_', '`', '~', '(', ')', ']', '\''];
+const PUNCTUATIONS = ['[','.', ',', '\\', '/', '#', '!', '$', '%', '^', '&', '*', ';', ':', '{', '}', '=', '-', '_', '`', '~', '(', ')', ']', '\'', '?', '<', '>','+', '='];
+const TOO_LONG_FOR_FOOD = 5; // No food with 5 or more words
+
 
 // For testing in Mocha
 module.exports.formatEmail = formatEmail;
@@ -349,6 +351,15 @@ function listCheck(text) {
                 break;
             }
         }
+        if(chunks[i].indexOf('\n') != -1) {
+            canBeFood[i] = false;
+        }
+
+        // if the chunk has too many words, it cannot be food
+        else if(chunks[i].split(/\s/).length >= TOO_LONG_FOR_FOOD) {
+            canBeFood[i] = false;
+        }
+
 
         // find list with food
         for (food of foods) {
@@ -358,7 +369,7 @@ function listCheck(text) {
             }
         }    
     }
-
+    
     var matches = [];
     var listStart = -1;
     var listEnd = -1;
@@ -373,21 +384,44 @@ function listCheck(text) {
             listEnd = i;
         }
 
-        // Found a complete list
+        // If the list ends with the text, make sure that list is parsed
+        if(listStart != -1 && i == chunks.length - 1) { listEnd = i; }
+
+        // Found a complete list 
         if(listStart != -1 && listEnd != -1) {
-            for (j = listStart; j <= listEnd; j++) {
+            // Inner elements can be added safely
+            for (j = listStart; j < listEnd; j++) {
                 matches.push(capitalize(chunks[j]));
             }
+
+            // Ending elements should be treated separately
+            // Start of list: food word/phrase should be at the end of chunk
+            if(listStart > 0) {
+                tokens = chunks[listStart-1].split(/\b/);
+                tokens = tokens.filter(function(val) { return /\S/.test(val); });
+                while(tokens.length > 0) {
+                    if(isValidFood(tokens.join(" "))) {
+                        matches.push(capitalize(tokens.join(" ")));
+                        break;
+                    }
+                    tokens.shift(); // delete first element
+                }    
+            }
+
+            // End of list: food word/phrase should be located in the beginning of chunk            
+            tokens = chunks[listEnd].split(/\b/);
+            tokens = tokens.filter(function(val) { return /\S/.test(val); });
+            while(tokens.length > 0) {
+                if(isValidFood(tokens.join(" "))) {
+                    matches.push(capitalize(tokens.join(" ")));
+                    break;
+                }
+                tokens.pop(); // delete last element
+            }
+
+            // Reset list
             listStart = -1;
             listEnd = -1;
-        }
-    }
-
-
-    // In case list ended with the end of string
-    if(listStart != -1) {
-        for (j = listStart; j < chunks.length; j++) {
-            matches.push(capitalize(chunks[j]));
         }
     }
 
