@@ -9,22 +9,22 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="shortcut icon" href="https://upload.wikimedia.org/wikipedia/en/thumb/7/71/Princeton_shield.svg/803px-Princeton_shield.svg.png">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
     <title>FoodMap</title>
-    <link href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" rel="stylesheet">
+
+    <link rel="shortcut icon" href="https://upload.wikimedia.org/wikipedia/en/thumb/7/71/Princeton_shield.svg/803px-Princeton_shield.svg.png">
+
     <!-- Bootstrap core CSS -->
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" />
+
+    <!-- Leaflet CSS -->
+    <link href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" rel="stylesheet">
 
     <!-- Sidebar CSS -->
     <link href="{% static 'css/L.Control.Sidebar.css' %}" rel="stylesheet">
 
     <!-- Geolocation button CSS -->
     <link rel="stylesheet" href="https://www.domoritz.de/leaflet-locatecontrol/dist/L.Control.Locate.min.css" />
-
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" />
 
     <!-- Custom styles for this template -->
     <link href="{% static 'css/styles.css' %}" rel="stylesheet">
@@ -36,7 +36,7 @@
     <nav class="navbar navbar-default navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
-          <a class="navbar-brand" href="#">FoodMap</a>
+          <a class="navbar-brand" href="/">FoodMap</a>
         </div>
         <div class="navbar-right">
             <ul class="nav navbar-nav">
@@ -73,7 +73,10 @@
       }
     </script>
 
-    <!-- jquery -->
+    <!-- Leaflet library -->
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+
+    <!-- jquery and sidebar scripts -->
     <script src="{% static 'js/L.Control.Sidebar.js' %}"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
@@ -85,9 +88,7 @@
     <script src="{% static 'js/L.Control.Locate.js' %}"> </script>
     <script src="https://www.domoritz.de/leaflet-locatecontrol/dist/L.Control.Locate.min.js" charset="utf-8"></script>
 
-    <!-- Map script -->
-    <script src="{% static 'js/mapbuilder.js' %}"></script>
-
+    <!-- Google Analytics script -->
     <script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -98,5 +99,8 @@
     ga('send', 'pageview');
 
     </script>
+
+    <!-- Map script -->
+    <script src="{% static 'js/mapbuilder.js' %}"></script>
   </body>
 </html>

@@ -236,7 +236,21 @@ span.fa.fa-map-marker:before {
 
 @media (max-width: 767px) {
   form {
-    padding-left: 50px;
+    padding-left: 10%;
+  }
+
+  #id_description {
+    width: 100% ;
+  }
+
+  #id_location {
+    width: 100%;
+  }
+}
+
+@media (max-width: 388px) {
+  form {
+    padding-left: 5%;
   }
 }
 
