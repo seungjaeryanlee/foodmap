@@ -39,21 +39,16 @@ $ python manage.py shell
 Here is the sample code for adding an entry in Frist Campus Center. Note that you need the official location name for this to work.
 
 ```
-# Some setup before we can interact with Django
->>> import django
->>> django.setup()
-
 >>> from foodmap_app.models import Offering, Location
 >>> from django.utils import timezone
 
-# Enter offering
 >>> frist = Location.objects.get(name='Frist Campus Center')
 >>> Offering(
->>>     timestamp=timezone.now(),
->>>     location=frist,
->>>     title='Food 1, Food 2, Food 3',
->>>     description='Sample description'
->>> ).save()
+...     timestamp=timezone.now(),
+...     location=frist,
+...     title='Food 1, Food 2, Food 3',
+...     description='Sample description'
+... ).save()
 ```
 
 ### Deleting Entry
