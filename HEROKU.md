@@ -23,45 +23,67 @@ First log in using the Heroku account.
 heroku login
 ```
 
-Then, go into bash with the following command:
+### Entering Bash
+
+Go into bash with the following command:
 ```
 heroku run bash --app foodmap333
 ```
 
-Now go into the Django shell with:
+### Inserting Entry
+Enter the Django shell with:
 ```
 $ python manage.py shell
 ```
 
-### Inserting Entry
 Here is the sample code for adding an entry in Frist Campus Center. Note that you need the official location name for this to work.
 
 ```
 # Some setup before we can interact with Django
-import django
-django.setup()
+>>> import django
+>>> django.setup()
 
-from foodmap_app.models import Offering, Location
-from django.utils import timezone
+>>> from foodmap_app.models import Offering, Location
+>>> from django.utils import timezone
 
 # Enter offering
-frist = Location.objects.get(name='Frist Campus Center')
-Offering(
-    timestamp=timezone.now(),
-    location=frist,
-    title='Food 1, Food 2, Food 3',
-    description='Sample description'
-).save()
+>>> frist = Location.objects.get(name='Frist Campus Center')
+>>> Offering(
+>>>     timestamp=timezone.now(),
+>>>     location=frist,
+>>>     title='Food 1, Food 2, Food 3',
+>>>     description='Sample description'
+>>> ).save()
 ```
 
 ### Deleting Entry
-Here is the sample code for deleting an entry in Campus Club. Note that you need the official location name for this to work.
+Enter Heroku bash and the Django shell. Here is the sample code for deleting an entry in Campus Club. Note that you need the official location name for this to work.
 
 ```
 >>> from foodmap_app.models import Offering, Location
 >>> campusclub = Location.objects.get(name='Campus Club')
 >>> old = Offering.objects.get(location=campusclub)
 >>> old.delete()
+```
+### Resetting Database
+Run the command below to drop all tables of the database.
+```
+heroku pg:reset --app foodmap333
+```
+We need to set up the database again to make the app work.
+```
+heroku run bash --app foodmap333
+$ python setup_database.py
+```
+
+### Viewing the Contents of the Database
+Run the command below to enter the PostgreSQL.
+```
+heroku pg:psql DATABASE_URL --app foodmap333
+```
+Now we can view the content using standard SQL. For example, to view the `foodmap_app_offering` table, write:
+```
+foodmap333::DATABASE=> SELECT * FROM foodmap_app_offering;
 ```
 
 ## Heroku Scheduler
