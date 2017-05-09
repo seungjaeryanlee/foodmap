@@ -471,6 +471,7 @@ fine tower,Fine Hall
 digital learning lab,Lewis Library
 mccosh health,McCosh Health Center
 CAF 1985 room,Fields Center
+CAF,Fields Center
 Frist MPR,Frist Campus Center
 Frist pool tables,Frist Campus Center
 Witherspoon,Witherspoon Hall
