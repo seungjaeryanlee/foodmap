@@ -41,6 +41,15 @@
             "error": false   // this is set to true to indicate a failure to retrieve offerings
         };
 
+        // Helper function: Returns HTML for a div.popup-content with the popup
+        // content for a given offering object in the format returned by url
+        // /offerings/.
+        function makePopupContent(offering) {
+            css_class = "popup-content";
+            minutes_string = (offering.minutes > 60? '1 hour, '+(offering.minutes-60): offering.minutes) + (offering.minutes%60 == 1? ' minute old': ' minutes old');
+            return '<div class="' + css_class + '"><p><b>' + offering.location.name + '</b><br><i>'+ offering.title + '</i><br>' + minutes_string + '</p><p>' + offering.description + '</p></div>';
+        }
+
         $.ajax({
             url: document.URL + 'offerings',
             async: false,
@@ -50,6 +59,8 @@
                 // and GPS coordinates
                 var response_offerings = JSON.parse(result);
                 for (i = 0; i < response_offerings.length; i++) {
+
+
                     // Each feature has mostly standard parameters. We set 'coordinates'
                     // (GPS coordinates), 'popupContent' (text that appears in a
                     // popup window), and 'id' (which just needs to be a unique integer).
@@ -64,8 +75,7 @@
                             ]
                         },
                         "properties": {
-                            "popupContent": "<b>" + response_offerings[i].location.name + "</b><br><i>"+ response_offerings[i].title + "</i><br>" + (parseFloat(response_offerings[i].minutes) > 60? "1 hour, "+(parseFloat(response_offerings[i].minutes)-60): response_offerings[i].minutes) + " minutes old",  // by default this is just location's name
-                            "extra": response_offerings[i].description
+                            "popupContent": makePopupContent(response_offerings[i])
                         },
                         "id": i
                     });
@@ -135,7 +145,7 @@
                 layer.on({
                     'mouseover': onSetHover,
                     'mouseout': onRemoveHover,
-                    'click': function() { sidebar.setContent(feature.properties.popupContent + '<br>' + feature.properties.extra); sidebar.show(); }
+                    'click': function() { sidebar.setContent(feature.properties.popupContent); sidebar.show(); }
                  });
             },
 

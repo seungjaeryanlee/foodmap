@@ -232,6 +232,10 @@ span.fa.fa-map-marker:before {
   z-index: 2000;
 }
 
+.popup-content {
+  margin-top: 15px;
+}
+
 /* Form */
 
 @media (max-width: 767px) {
@@ -240,17 +244,21 @@ span.fa.fa-map-marker:before {
   }
 
   #id_description {
-    width: 100% ;
-  }
-
-  #id_location {
-    width: 100%;
+    width: 90%;
   }
 }
 
 @media (max-width: 388px) {
   form {
-    padding-left: 5%;
+    padding-left: 0%;
+  }
+
+  #id_description {
+    width: 100%;
+  }
+
+  #id_location {
+    width: 100%;
   }
 }
 
