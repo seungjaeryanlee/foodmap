@@ -666,3 +666,4 @@ wallace,Wallace Hall
 wright,Wright Hall
 nassau,Nassau Hall
 md cafe,Dodge Hall
+marquand library,McCormick Hall
