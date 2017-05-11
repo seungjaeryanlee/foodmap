@@ -677,3 +677,4 @@ mudd manuscript library,Mudd Library
 plasma physics library,Furth Plasma Physics Library
 stokes library,Wallace Hall
 video library,Firestone Library
+ehub,34 Chambers Street
