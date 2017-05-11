@@ -1,16 +1,18 @@
 /******************************************************************************/
-/* main.js                                                                    */
+/* app.js                                                                     */
 /* Author: Seung Jae Lee                                                      */
 /* Parts of code from                                                         */
 /******************************************************************************/
 
 var fs = require('fs');
-var readline = require('readline');
 var google = require('googleapis');
-var googleAuth = require('google-auth-library');
+
 var db_module = require('./db');
 var scraper = require('./scraper');
 var oauth = require('./oauth');
+
+// Constants
+const REPEAT_INTERVAL_MS = 60000;
 
 // Pick database implementation (sqlite/postgres) based on environment variable
 // PROJECT_MODE
@@ -44,15 +46,19 @@ else {
     process.exit(1);
 }
 
+function main(auth) {
+    // set auth as a global default
+    google.options({auth: auth});
+
+    repeat(checkUnread, REPEAT_INTERVAL_MS);
+}
+
 /**
- * Parses events from all unread emails and prints them stdout
+ * Parses events from all unread emails
  *
  * @param {Object} auth Authorization credentials for Google APIs.
  */
-function main(auth) {
-
-    // set auth as a global default
-    google.options({auth: auth});
+function checkUnread() {
 
     google.gmail('v1').users.messages.list({ // Get unread message list
         userId: 'me',
@@ -155,4 +161,10 @@ function saveImage(imageId, messageId) {
         // FIXME: Should use different file name in case of conflict!
         //fs.writeFile(__dirname + '/' + imageName, imageData, function(err) {});
     });
+}
+
+function repeat(callback, milliseconds) {
+    // FIXME: vs setTimeout repeated
+    callback();
+    return setInterval(callback, milliseconds);
 }
