@@ -666,4 +666,14 @@ wallace,Wallace Hall
 wright,Wright Hall
 nassau,Nassau Hall
 md cafe,Dodge Hall
+architecture library,Architecture Building
+east asian library,Frist Campus Center
+Engineering Library,Friend Center
+lewis science library,Lewis Library
 marquand library,McCormick Hall
+marquand art library,McCormick Hall
+mendel music library,Woolworth Center
+mudd manuscript library,Mudd Library
+plasma physics library,Furth Plasma Physics Library
+stokes library,Wallace Hall
+video library,Firestone Library
