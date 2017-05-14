@@ -53,7 +53,6 @@ var db = {
          * @param {Object} entry The entry to be inserted to the database
          */
         insert: function(entry) {
-            // FIXME: Not run if no location found?
             sqlite3.serialize(function() {
                 sqlite3.each("SELECT " + LOCATIONS.COLUMNS.ID + " FROM " + LOCATIONS.NAME + " WHERE " + LOCATIONS.COLUMNS.NAME + " = ?",
                     [entry.location], function(err, row) {
@@ -97,8 +96,6 @@ var db = {
                 sqlite3.run("DELETE FROM " + OFFERINGS.NAME + " WHERE " + OFFERINGS.COLUMNS.THREAD_ID + "=(?)", entry.threadId);
             });
             console.log("Entry deleted from database.");
-
-            // FIXME: False positive?
         }
     },
 
@@ -120,8 +117,6 @@ var db = {
 
                     if (err) throw err;
 
-                    // console.log(entry.location);
-                    // console.log(result);
                     if(!result || !result.rows || !result.rows[0]) { return; }
                     var locationId = result.rows[0].id;
 
@@ -158,7 +153,6 @@ var db = {
                 client.query('DELETE FROM ' + OFFERINGS.NAME + ' WHERE ' + OFFERINGS.COLUMNS.THREAD_ID + '=($1)', [entry.threadId], function(c,e){ client.end(); });
                 console.log("Entry deleted from database.");
             });
-            // FIXME: False positive?
         }
     }
 };

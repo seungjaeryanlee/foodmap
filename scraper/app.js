@@ -12,6 +12,8 @@ var googleAuth = require('google-auth-library');
 var db_module = require('./db');
 var scraper = require('./scraper');
 
+const PROJECT_MODE_ERROR = 'Error: PROJECT_MODE not set. Cannot set up database. Did you activate the virtual environment in the Django project?';
+
 // Pick database implementation (sqlite/postgres) based on environment variable
 // PROJECT_MODE
 var db;
@@ -20,7 +22,7 @@ if (process.env.PROJECT_MODE === 'development') {
 } else if (process.env.PROJECT_MODE === 'production') {
     db = db_module.db.postgres;
 } else {
-    console.error('Error: PROJECT_MODE not set. Cannot set up database. Did you activate the virtual environment in the Django project?');
+    console.error(PROJECT_MODE_ERROR);
     process.exit(1);
 }
 
@@ -47,7 +49,7 @@ else if(process.env.PROJECT_MODE === 'development') {
     });
 }
 else {
-    console.error('Error: PROJECT_MODE not set. Cannot set up database. Did you activate the virtual environment in the Django project?');
+    console.error(PROJECT_MODE_ERROR);
     process.exit(1);
 }
 
@@ -82,7 +84,7 @@ function authorize(credentials, callback) {
         });
     }
     else {
-        console.error('Error: PROJECT_MODE not set. Cannot authorize API');
+        console.error(PROJECT_MODE_ERROR);
         process.exit(1);
     }
 }

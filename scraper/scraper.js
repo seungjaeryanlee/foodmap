@@ -1,8 +1,6 @@
 /******************************************************************************/
 /* scraper.js                                                                 */
 /* Author: Seung Jae Lee                                                      */
-/* Parts of code from                                                         */
-/* https://developers.google.com/google-apps/calendar/quickstart/node         */
 /******************************************************************************/
 
 var fs = require('fs');
@@ -13,9 +11,11 @@ var googleAuth = require('google-auth-library');
 // Constants
 const DELETE = 0;
 const INSERT = 1;
-const PUNCTUATIONS = ['[','.', ',', '\\', '/', '#', '!', '$', '%', '^', '&', '*', ';', ':', '{', '}', '=', '-', '_', '`', '~', '(', ')', ']', '\'', '?', '<', '>','+', '='];
+const PUNCTUATIONS = ['[','.', ',', '\\', '/', '#', '!', '$', '%', '^', '&',
+                      '*', ';', ':', '{', '}', '=', '-', '_', '`', '~', '(',
+                      ')', ']', '\'', '?', '<', '>','+', '='];
 const TOO_LONG_FOR_FOOD = 5; // No food with 5 or more words
-
+const FREEFOOD_FOOTER = '-----\r\nYou are receiving this email because you are subscribed to the Free Food mailing list, operated by the USG. If you have questions or are having difficulties with this listserv, please send an email to usg@princeton.edu.\r\n\r\nIn your message to the freefood listserv, please state what type of food it is, where it is, until when it will be available and how delicious it is.\r\n\r\nTo unsubscribe, please email listserv@princeton.edu the line UNSUBSRIBE FREEFOOD in the body of the message. Please be sure to remove your e-mail signature (if any) before you send that message.\r\n';
 
 // For testing in Mocha
 module.exports.formatEmail = formatEmail;
@@ -44,7 +44,6 @@ for (location of locations) {
     locationMap[tokens[0]] = tokens[1];
     aliasList.push(tokens[0]);
 }
-
 var regexMap = {};
 var regexList = [];
 for (regex of regexes) {
@@ -185,12 +184,11 @@ function getBodyFromMime(mimeMessage) {
     }
 
     else {
-        console.log("getBodyFromMime() unexpected case");
         body = "";
     }
 
     /* Delete FreeFood footer */
-    body = body.replace('-----\r\nYou are receiving this email because you are subscribed to the Free Food mailing list, operated by the USG. If you have questions or are having difficulties with this listserv, please send an email to usg@princeton.edu.\r\n\r\nIn your message to the freefood listserv, please state what type of food it is, where it is, until when it will be available and how delicious it is.\r\n\r\nTo unsubscribe, please email listserv@princeton.edu the line UNSUBSRIBE FREEFOOD in the body of the message. Please be sure to remove your e-mail signature (if any) before you send that message.\r\n', '');
+    body = body.replace(FREEFOOD_FOOTER, '');
 
     /* Delete null character 0x00 */
     body = body.replace(/\0/g, '');
@@ -245,7 +243,6 @@ function getFood(text) {
         // Check if the word is part of a phrase
         for(food of foods) {
             splitFood = food.split(" ");
-            // FIXME: Check for Plural?
             if(splitFood.length > 1 && splitFood.indexOf(word) > -1) {
                 // Check boundary
                 if(i + splitFood.length > words.length) { continue; }
@@ -285,11 +282,9 @@ function getFood(text) {
  * @param {Object} text The text to search for location
  */
 function getLocation(text) {
-    // FIXME: There should only be one location per email
     var location = "";
     var aliasLength = 0;
 
-    // FIXME: Better list of punctuations
     text = prepareText(text);
     for(loc of aliasList) {
         if(text.indexOf(loc.toLowerCase()) > - 1) { // Substring search

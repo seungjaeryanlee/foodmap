@@ -15,6 +15,5 @@ process.stdin.on('data', function(chunk) {
 })
 
 process.stdin.on('end', function() {
-    // stdout.write(JSON.stringify(scraper.getFood(text)));
     process.stdout.write(scraper.getFood(text).join(", "));
 })
