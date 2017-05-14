@@ -1,3 +1,10 @@
+/******************************************************************************/
+/* getLocation.js                                                             */
+/* Author: Seung Jae Lee                                                      */
+/*                                                                            */
+/* This is a mocha test file that tests getLocation() function in scraper.js. */
+/******************************************************************************/
+
 var assert = require("assert");
 var scraper = require('../scraper.js');
 

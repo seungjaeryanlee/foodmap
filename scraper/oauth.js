@@ -1,7 +1,10 @@
 /******************************************************************************/
 /* oauth.js                                                                   */
 /* Author: Seung Jae Lee                                                      */
-/* Parts of code from                                                         */
+/*                                                                            */
+/* This module authorizes the scraper to use Gmail API.                       */
+/*                                                                            */
+/* Parts of the code is from                                                  */
 /* https://developers.google.com/google-apps/calendar/quickstart/node         */
 /******************************************************************************/
 

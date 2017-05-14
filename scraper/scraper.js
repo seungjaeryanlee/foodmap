@@ -1,12 +1,12 @@
 /******************************************************************************/
 /* scraper.js                                                                 */
 /* Author: Seung Jae Lee                                                      */
+/*                                                                            */
+/* This module contains the functions that process the MIME-formatted emails  */
+/* from the Gmail API.                                                        */
 /******************************************************************************/
 
 var fs = require('fs');
-var readline = require('readline');
-var google = require('googleapis');
-var googleAuth = require('google-auth-library');
 
 // Constants
 const DELETE = 0;

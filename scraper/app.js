@@ -1,6 +1,9 @@
 /******************************************************************************/
 /* app.js                                                                     */
 /* Author: Seung Jae Lee                                                      */
+/*                                                                            */
+/* The main program that runs the scraper. It runs the email scraper, and if  */
+/* there are unread emails, processes them and alters the database.           */
 /******************************************************************************/
 
 var fs = require('fs');
