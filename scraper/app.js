@@ -67,8 +67,6 @@ function main (auth) {
                 (function(index) {
                     // Timeout to prevent making too many requests at once
                     setTimeout(parseEmail, 1000+(1000*index), res.messages[index].id, markAsRead);
-                    // replace with below for debugging:
-                    // setTimeout(parseEmail, 1000+(1000*index), res.messages[index].id, function(){})
                 })(i);
             }
         } else {
@@ -102,7 +100,7 @@ function parseEmail(messageId, callback) {
         }
 
         entry = scraper.formatEmail(result, messageId);
-        // saveImage(entry.image.id, messageId);
+        saveImage(entry.image, messageId);
 
         // INSERT or DELETE entry
         if(scraper.getRequestType(entry.title+entry.body) == scraper.INSERT) {
@@ -135,26 +133,31 @@ function markAsRead(messageId) {
 }
 
 /**
- * Save attached image to filesystem / database
+ * Save first attached image to filesystem / database
  *
- * @param {Object} imageId The attachmentId of the image
- * @param {Object} messageId The id of a message with the image
+ * @param {Object} image The image object containing name and ID of the image.
+ * @param {Object} messageId The id of a message with the image.
  */
-function saveImage(imageId, messageId) {
-    // FIXME: Divide by PROJECT_MODE
+function saveImage(image, messageId) {
 
-    // FIXME: Check size?
     // Get Attachment
     google.gmail('v1').users.messages.attachments.get({
         userId: 'me',
-        id: imageId,
+        id: image.id,
         messageId: messageId
     }, function(err, result) {
         var encodedImage = result.data;
         imageData = Buffer.from(encodedImage, 'base64');
 
-        // Create file
-        // FIXME: Should use different file name in case of conflict!
-        //fs.writeFile(__dirname + '/' + imageName, imageData, function(err) {});
+        // FIXME: Divide by PROJECT_MODE
+        if(PROJECT_MODE == 'development') {
+            // Give new name that won't conflict
+            imageExtension = image.name.split('.').pop();
+            imageName = messageId + imageExtension;
+
+            // Create file
+            // FIXME: Resize if too big
+            fs.writeFile(__dirname + '/' + imageName, imageData, function(err) {});    
+        }
     });
 }

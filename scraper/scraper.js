@@ -73,13 +73,12 @@ function formatEmail(mimeMessage, messageId) {
 }
 
 /**
- * Get image from a given MIME Message if there is an image, returns undefined if not.
+ * Get first image from a given MIME Message if there are images, returns undefined if not.
  *
  * @param {Object} mimeMessage The MIME message to parse.
- * @return {Object} The object containing the name and id of the image.
+ * @return {Object} The object containing the name and id of the first image.
  */
 function getImageFromMime(mimeMessage) {
-    // FIXME: Other content types?
     // Content-Type: multipart/mixed
     if(mimeMessage.payload.mimeType === 'multipart/mixed') {
         if(typeof mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/") === 'undefined') {
@@ -89,7 +88,6 @@ function getImageFromMime(mimeMessage) {
             var imageName = mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/").filename;
             var imageId = mimeMessage.payload.parts.find(x => x.mimeType.substring(0, 6) === "image/").body.attachmentId;
 
-            // FIXME: Name not needed?
             return {name: imageName, id: imageId};
         }
     }
