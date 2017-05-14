@@ -26,36 +26,8 @@ describe('getImageFromMime()', function() {
                             "value": "1.0"
                         },
                         {
-                            "name": "Received",
-                            "value": "by 10.140.83.176 with HTTP; Wed, 29 Mar 2017 01:12:25 -0700 (PDT)"
-                        },
-                        {
-                            "name": "Date",
-                            "value": "Wed, 29 Mar 2017 04:12:25 -0400"
-                        },
-                        {
-                            "name": "Delivered-To",
-                            "value": "foodmap333@gmail.com"
-                        },
-                        {
-                            "name": "Message-ID",
-                            "value": "<CAEhqU+FCGRygEArJH9Fv5GmOmdPxZ7xqJUK=-tQROvFiNxeRTg@mail.gmail.com>"
-                        },
-                        {
                             "name": "Subject",
                             "value": "No attachment"
-                        },
-                        {
-                            "name": "From",
-                            "value": "Ryan Lee <foodmap333@gmail.com>"
-                        },
-                        {
-                            "name": "To",
-                            "value": "Ryan Lee <foodmap333@gmail.com>"
-                        },
-                        {
-                            "name": "Content-Type",
-                            "value": "multipart/alternative; boundary=001a11c154b8f87508054bda22f7"
                         }
                     ],
                     "body": {
@@ -124,36 +96,8 @@ describe('getImageFromMime()', function() {
                             "value": "1.0"
                         },
                         {
-                            "name": "Received",
-                            "value": "by 10.140.83.176 with HTTP; Wed, 29 Mar 2017 01:09:44 -0700 (PDT)"
-                        },
-                        {
-                            "name": "Date",
-                            "value": "Wed, 29 Mar 2017 04:09:44 -0400"
-                        },
-                        {
-                            "name": "Delivered-To",
-                            "value": "foodmap333@gmail.com"
-                        },
-                        {
-                            "name": "Message-ID",
-                            "value": "<CAEhqU+F=eXR2RyFsNtOwM7C6iNF8SBQxj4rWAQPuOnx+oWenqw@mail.gmail.com>"
-                        },
-                        {
                             "name": "Subject",
                             "value": "Sample txt"
-                        },
-                        {
-                            "name": "From",
-                            "value": "Ryan Lee <foodmap333@gmail.com>"
-                        },
-                        {
-                            "name": "To",
-                            "value": "Ryan Lee <foodmap333@gmail.com>"
-                        },
-                        {
-                            "name": "Content-Type",
-                            "value": "multipart/mixed; boundary=001a11c13b605ffa41054bda19c5"
                         }
                     ],
                     "body": {
@@ -264,36 +208,8 @@ describe('getImageFromMime()', function() {
                             "value": "1.0"
                         },
                         {
-                            "name": "Received",
-                            "value": "by 10.140.83.176 with HTTP; Wed, 29 Mar 2017 01:08:44 -0700 (PDT)"
-                        },
-                        {
-                            "name": "Date",
-                            "value": "Wed, 29 Mar 2017 04:08:44 -0400"
-                        },
-                        {
-                            "name": "Delivered-To",
-                            "value": "foodmap333@gmail.com"
-                        },
-                        {
-                            "name": "Message-ID",
-                            "value": "<CAEhqU+FDNWx0u1dPqdQfPzXG75niubyLKevcgn_Lz6YsKWaNag@mail.gmail.com>"
-                        },
-                        {
                             "name": "Subject",
                             "value": "Sample jpg"
-                        },
-                        {
-                            "name": "From",
-                            "value": "Ryan Lee <foodmap333@gmail.com>"
-                        },
-                        {
-                            "name": "To",
-                            "value": "Ryan Lee <foodmap333@gmail.com>"
-                        },
-                        {
-                            "name": "Content-Type",
-                            "value": "multipart/mixed; boundary=001a11c1258ad076e2054bda157a"
                         }
                     ],
                     "body": {
@@ -404,36 +320,8 @@ describe('getImageFromMime()', function() {
                             "value": "1.0"
                         },
                         {
-                            "name": "Received",
-                            "value": "by 10.140.83.176 with HTTP; Wed, 29 Mar 2017 01:09:17 -0700 (PDT)"
-                        },
-                        {
-                            "name": "Date",
-                            "value": "Wed, 29 Mar 2017 04:09:17 -0400"
-                        },
-                        {
-                            "name": "Delivered-To",
-                            "value": "foodmap333@gmail.com"
-                        },
-                        {
-                            "name": "Message-ID",
-                            "value": "<CAEhqU+F+JPuBd0=7vBNjoQ5cdjTXO+KgX7u0-0UjTKEHQJg=bg@mail.gmail.com>"
-                        },
-                        {
                             "name": "Subject",
                             "value": "Sample gif"
-                        },
-                        {
-                            "name": "From",
-                            "value": "Ryan Lee <foodmap333@gmail.com>"
-                        },
-                        {
-                            "name": "To",
-                            "value": "Ryan Lee <foodmap333@gmail.com>"
-                        },
-                        {
-                            "name": "Content-Type",
-                            "value": "multipart/mixed; boundary=001a113a96ccc4a171054bda1741"
                         }
                     ],
                     "body": {
@@ -544,36 +432,8 @@ describe('getImageFromMime()', function() {
                             "value": "1.0"
                         },
                         {
-                            "name": "Received",
-                            "value": "by 10.140.83.176 with HTTP; Wed, 29 Mar 2017 01:09:16 -0700 (PDT)"
-                        },
-                        {
-                            "name": "Date",
-                            "value": "Wed, 29 Mar 2017 04:09:16 -0400"
-                        },
-                        {
-                            "name": "Delivered-To",
-                            "value": "foodmap333@gmail.com"
-                        },
-                        {
-                            "name": "Message-ID",
-                            "value": "<CAEhqU+Hzq8+9T4gk+zqay1_Kkp1iQL8qFD8qFLcpyVNDm-A3QQ@mail.gmail.com>"
-                        },
-                        {
                             "name": "Subject",
                             "value": "Sample png"
-                        },
-                        {
-                            "name": "From",
-                            "value": "Ryan Lee <foodmap333@gmail.com>"
-                        },
-                        {
-                            "name": "To",
-                            "value": "Ryan Lee <foodmap333@gmail.com>"
-                        },
-                        {
-                            "name": "Content-Type",
-                            "value": "multipart/mixed; boundary=001a11c11bfab7a174054bda1758"
                         }
                     ],
                     "body": {
@@ -684,36 +544,8 @@ describe('getImageFromMime()', function() {
                             "value": "1.0"
                         },
                         {
-                            "name": "Received",
-                            "value": "by 10.140.83.176 with HTTP; Wed, 29 Mar 2017 01:08:45 -0700 (PDT)"
-                        },
-                        {
-                            "name": "Date",
-                            "value": "Wed, 29 Mar 2017 04:08:45 -0400"
-                        },
-                        {
-                            "name": "Delivered-To",
-                            "value": "foodmap333@gmail.com"
-                        },
-                        {
-                            "name": "Message-ID",
-                            "value": "<CAEhqU+GB95DM4SyvBqf89xjn-Pv_rBGfR=73zAU=nrnQjrf-=w@mail.gmail.com>"
-                        },
-                        {
                             "name": "Subject",
                             "value": "Sample tif"
-                        },
-                        {
-                            "name": "From",
-                            "value": "Ryan Lee <foodmap333@gmail.com>"
-                        },
-                        {
-                            "name": "To",
-                            "value": "Ryan Lee <foodmap333@gmail.com>"
-                        },
-                        {
-                            "name": "Content-Type",
-                            "value": "multipart/mixed; boundary=001a11c0013ee54760054bda155a"
                         }
                     ],
                     "body": {
@@ -824,36 +656,8 @@ describe('getImageFromMime()', function() {
                             "value": "1.0"
                         },
                         {
-                            "name": "Received",
-                            "value": "by 10.140.83.176 with HTTP; Wed, 29 Mar 2017 01:08:45 -0700 (PDT)"
-                        },
-                        {
-                            "name": "Date",
-                            "value": "Wed, 29 Mar 2017 04:08:45 -0400"
-                        },
-                        {
-                            "name": "Delivered-To",
-                            "value": "foodmap333@gmail.com"
-                        },
-                        {
-                            "name": "Message-ID",
-                            "value": "<CAEhqU+E_nfg786RtUEq5258LXtOw1HhQby528g1CxbaffUgZWA@mail.gmail.com>"
-                        },
-                        {
                             "name": "Subject",
                             "value": "Sample bmp"
-                        },
-                        {
-                            "name": "From",
-                            "value": "Ryan Lee <foodmap333@gmail.com>"
-                        },
-                        {
-                            "name": "To",
-                            "value": "Ryan Lee <foodmap333@gmail.com>"
-                        },
-                        {
-                            "name": "Content-Type",
-                            "value": "multipart/mixed; boundary=001a1134e9b8db542c054bda1547"
                         }
                     ],
                     "body": {
