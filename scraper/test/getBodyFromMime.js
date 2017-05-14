@@ -481,12 +481,6 @@ describe('getBodyFromMime()', function() {
         })
     })
     describe('Content-Type: multipart/related', function() {
-        // FIXME: Check if this is possible or not
-        // it('getBodyFromMime() should return \"\\n\" if the email has only newline', function() {
-        //     var message = {};
-        //     var body = scraper.getBodyFromMime(message).replace(/\r\n/g, "\n");
-        //     assert.equal(body, "");
-        // })
         it('getBodyFromMime() should return the body if the email has a body', function() {
             var message = 
             {

@@ -16,6 +16,7 @@ const PUNCTUATIONS = ['[','.', ',', '\\', '/', '#', '!', '$', '%', '^', '&',
                       ')', ']', '\'', '?', '<', '>','+', '='];
 const TOO_LONG_FOR_FOOD = 5; // No food with 5 or more words
 const FREEFOOD_FOOTER = '-----\r\nYou are receiving this email because you are subscribed to the Free Food mailing list, operated by the USG. If you have questions or are having difficulties with this listserv, please send an email to usg@princeton.edu.\r\n\r\nIn your message to the freefood listserv, please state what type of food it is, where it is, until when it will be available and how delicious it is.\r\n\r\nTo unsubscribe, please email listserv@princeton.edu the line UNSUBSRIBE FREEFOOD in the body of the message. Please be sure to remove your e-mail signature (if any) before you send that message.\r\n';
+const NOT_FOUND = -1;
 
 // For testing in Mocha
 module.exports.formatEmail = formatEmail;
@@ -114,7 +115,6 @@ function prepareText(text) {
  * @return {string} date The ISO-format string of the time the message was sent.
  */
 function getTimestampFromMime(mimeMessage) {
-    // FIXME: Exception for parseInt?
     return new Date(parseInt(mimeMessage.internalDate)).toISOString().replace('T', ' ').split('.')[0];
 }
 
@@ -210,13 +210,11 @@ function getBodyFromMime(mimeMessage) {
  */
 function isValidFood(text) {
     // Exact Match
-    if(foods.indexOf(text) > -1) { return true; }
+    if(foods.indexOf(text) != NOT_FOUND) { return true; }
 
     // Plural Form
-    if(text.slice(-1) == 's' && foods.indexOf(text.slice(0, -1)) > -1) { return true; }
-    if(text.slice(-2) == 'es' && foods.indexOf(text.slice(0, -2)) > -1) { return true; }
-
-    // FIXME: Fuzzy Matching
+    if(text.slice(-1) == 's' && foods.indexOf(text.slice(0, -1)) != NOT_FOUND) { return true; }
+    if(text.slice(-2) == 'es' && foods.indexOf(text.slice(0, -2)) != NOT_FOUND) { return true; }
 
     return false;
 }
@@ -238,9 +236,7 @@ function capitalize(text) {
  */
 function getFood(text) {
     // Clean text and separate by whitespace
-    // FIXME: magic string should be avoided
-    text = text.toLowerCase().replace(/[.\/#!$%\^&\*;:{}=\-_`~()']/g,"");
-    words = text.split(/[\s,]+/g);
+    words = prepareText(text).split(/[\s,]+/g);
 
     var matches = [];
 
@@ -251,7 +247,7 @@ function getFood(text) {
         // Check if the word is part of a phrase
         for(food of foods) {
             splitFood = food.split(" ");
-            if(splitFood.length > 1 && splitFood.indexOf(word) > -1) {
+            if(splitFood.length > 1 && splitFood.indexOf(word) != NOT_FOUND) {
                 // Check boundary
                 if(i + splitFood.length > words.length) { continue; }
 
@@ -327,7 +323,7 @@ function getRequestType(text) {
     text = prepareText(text);
     var deleteRequests = ["all gone"];
     for(req of deleteRequests) {
-        if(text.indexOf(req) > -1) {
+        if(text.indexOf(req) != NOT_FOUND) {
             return DELETE;
         }
     }
@@ -352,12 +348,12 @@ function listCheck(text) {
 
         // if it has punctuation, ignore
         for(punctuation of PUNCTUATIONS) {
-            if(chunks[i].indexOf(punctuation) != -1) {
+            if(chunks[i].indexOf(punctuation) != NOT_FOUND) {
                 canBeFood[i] = false;
                 break;
             }
         }
-        if(chunks[i].indexOf('\n') != -1) {
+        if(chunks[i].indexOf('\n') != NOT_FOUND) {
             canBeFood[i] = false;
         }
 
@@ -377,24 +373,23 @@ function listCheck(text) {
     }
     
     var matches = [];
-    var listStart = -1;
-    var listEnd = -1;
+    var listStart = NOT_FOUND;
+    var listEnd = NOT_FOUND;
 
     // Find list pattern by iterating through chunks
     for (i = 0; i < chunks.length; i++) {
-        // FIXME: Change magic variables
-        if(listStart == -1 && isFood[i]) {
+        if(listStart == NOT_FOUND && isFood[i]) {
             listStart = i;
         }
-        if(listStart != -1 && !canBeFood[i]) {
+        if(listStart != NOT_FOUND && !canBeFood[i]) {
             listEnd = i;
         }
 
         // If the list ends with the text, make sure that list is parsed
-        if(listStart != -1 && i == chunks.length - 1) { listEnd = i; }
+        if(listStart != NOT_FOUND && i == chunks.length - 1) { listEnd = i; }
 
         // Found a complete list 
-        if(listStart != -1 && listEnd != -1) {
+        if(listStart != NOT_FOUND && listEnd != NOT_FOUND) {
             // Inner elements can be added safely
             for (j = listStart; j < listEnd; j++) {
                 matches.push(capitalize(chunks[j]));
@@ -426,8 +421,8 @@ function listCheck(text) {
             }
 
             // Reset list
-            listStart = -1;
-            listEnd = -1;
+            listStart = NOT_FOUND;
+            listEnd = NOT_FOUND;
         }
     }
 
