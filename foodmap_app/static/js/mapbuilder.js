@@ -47,7 +47,7 @@
         function makePopupContent(offering) {
             css_class = "popup-content";
             minutes_string = (offering.minutes > 60? '1 hour, '+(offering.minutes-60): offering.minutes) + (offering.minutes%60 == 1? ' minute old': ' minutes old');
-            return '<div class="' + css_class + '"><p><b>' + offering.location.name + '</b><br><i>'+ offering.title + '</i><br>' + minutes_string + '</p><p>' + offering.description + '</p></div>';
+            return '<div class="' + css_class + '"><p><b>' + offering.location.name + '</b><br><i>'+ offering.title + '</i><br>' + minutes_string + '</p></div>';
         }
 
         $.ajax({
@@ -75,7 +75,8 @@
                             ]
                         },
                         "properties": {
-                            "popupContent": makePopupContent(response_offerings[i])
+                            "popupContent": makePopupContent(response_offerings[i]),
+                            "extra": '<p>' + response_offerings[i].description + "</p>"
                         },
                         "id": i
                     });
@@ -145,7 +146,7 @@
                 layer.on({
                     'mouseover': onSetHover,
                     'mouseout': onRemoveHover,
-                    'click': function() { sidebar.setContent(feature.properties.popupContent); sidebar.show(); }
+                    'click': function() { sidebar.setContent(feature.properties.popupContent + feature.properties.extra); sidebar.show(); }
                  });
             },
 
