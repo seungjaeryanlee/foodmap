@@ -56,6 +56,7 @@ for (regex of regexes) {
  * Formats a MIME message from the API to fit the database specification.
  *
  * @param {Object} mimeMessage The MIME message to reformat.
+ * @return {Object} entry The object that contains parsed information.
  */
 function formatEmail(mimeMessage, messageId) {
     var timestamp = getTimestampFromMime(mimeMessage);
@@ -74,6 +75,7 @@ function formatEmail(mimeMessage, messageId) {
  * Get image from a given MIME Message if there is an image, returns undefined if not.
  *
  * @param {Object} mimeMessage The MIME message to parse.
+ * @return {Object} The object containing the name and id of the image.
  */
 function getImageFromMime(mimeMessage) {
     // FIXME: Other content types?
@@ -98,7 +100,8 @@ function getImageFromMime(mimeMessage) {
 /**
  * Prepares text to be parsed by lowercasing and deleting punctuations
  *
- * @param {Object} text The text to be cleaned
+ * @param {Object} text The text to be cleaned.
+ * @return {string} newText The text lowercased and stripped off of punctuations.
  */
 function prepareText(text) {
     return text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g,"");
@@ -108,6 +111,7 @@ function prepareText(text) {
  * Get timestamp from a given MIME Message
  *
  * @param {Object} mimeMessage The MIME message to parse.
+ * @return {string} date The ISO-format string of the time the message was sent.
  */
 function getTimestampFromMime(mimeMessage) {
     // FIXME: Exception for parseInt?
@@ -118,6 +122,7 @@ function getTimestampFromMime(mimeMessage) {
  * Get title (subject) from a given MIME Message
  *
  * @param {Object} mimeMessage The MIME message to parse.
+ * @return {string} title The title of the message.
  */
 function getTitleFromMime(mimeMessage) {
     return mimeMessage.payload.headers.find(x => x.name === "Subject").value;
@@ -127,6 +132,7 @@ function getTitleFromMime(mimeMessage) {
  * Get body from a given MIME Message
  *
  * @param {Object} mimeMessage The MIME message to parse.
+ * @return {string} body The body of the message.
  */
 function getBodyFromMime(mimeMessage) {
     // Following this documentation:
@@ -199,7 +205,8 @@ function getBodyFromMime(mimeMessage) {
 /**
  * Check if the given text is a valid food word/phrase
  *
- * @param {Object} text The text to be checked
+ * @param {Object} text The text to be checked.
+ * @return {Boolean} isValid Whether given text is valid.
  */
 function isValidFood(text) {
     // Exact Match
@@ -226,7 +233,8 @@ function capitalize(text) {
 /**
  * Get all foods that are in the text
  *
- * @param {Object} text The text to search for food
+ * @param {Object} text The text to search for food.
+ * @return {Array} foods Array of foods found in the text.
  */
 function getFood(text) {
     // Clean text and separate by whitespace
@@ -279,7 +287,8 @@ function getFood(text) {
 /**
  * Parse location from text and return official location name
  *
- * @param {Object} text The text to search for location
+ * @param {Object} text The text to search for location.
+ * @return {text} location The location found from the text.
  */
 function getLocation(text) {
     var location = "";
@@ -312,6 +321,7 @@ function getLocation(text) {
  * Check type of request
  *
  * @param {Object} text The text to be inspected
+ * @param {number} type The request type of the text. Should be INSERT or DELETE.
  */
 function getRequestType(text) {
     text = prepareText(text);
@@ -327,7 +337,8 @@ function getRequestType(text) {
 /**
  * Checks if there is a list of food and returns foods in the list
  *
- * @param {Object} text The text to be inspected
+ * @param {Object} text The text to be inspected.
+ * @return {Array} foods Array of foods found through checking lists in the text.
  */
 function listCheck(text) {
     var chunks = text.toLowerCase().split(/,| and | or /g);

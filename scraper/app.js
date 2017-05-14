@@ -9,7 +9,6 @@ var db_module = require('./db');
 var oauth = require('./oauth');
 var scraper = require('./scraper');
 
-
 const PROJECT_MODE_ERROR = 'Error: PROJECT_MODE not set. Cannot set up database. Did you activate the virtual environment in the Django project?';
 
 // Pick database implementation (sqlite/postgres) based on environment variable
@@ -139,7 +138,7 @@ function markAsRead(messageId) {
  * @param {Object} messageId The id of a message with the image
  */
 function saveImage(imageId, messageId) {
-   // FIXME: Divide by PROJECT_MODE
+    // FIXME: Divide by PROJECT_MODE
 
     // FIXME: Check size?
     // Get Attachment
