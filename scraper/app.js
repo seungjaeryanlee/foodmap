@@ -12,7 +12,8 @@ var db_module = require('./db');
 var oauth = require('./oauth');
 var scraper = require('./scraper');
 
-const PROJECT_MODE_ERROR = 'Error: PROJECT_MODE not set. Cannot set up database. Did you activate the virtual environment in the Django project?';
+const PROJECT_MODE_ERROR = 'Error: PROJECT_MODE not set. Cannot set up \
+database. Did you activate the virtual environment in the Django project?';
 
 // Pick database implementation (sqlite/postgres) based on environment variable
 // PROJECT_MODE
@@ -31,7 +32,7 @@ if(process.env.PROJECT_MODE === 'production') {
 }
 else if(process.env.PROJECT_MODE === 'development') {
     // Load client secrets from a local file.
-    fs.readFile(__dirname + '/client_secret.json', function processClientSecrets(err, content) {
+    fs.readFile(__dirname + '/client_secret.json', function(err, content) {
         if (err) {
             console.log('Error loading client secret file: ' + err);
             return;
@@ -66,7 +67,8 @@ function main (auth) {
             for(var i = 0; i < res.messages.length; i++) {
                 (function(index) {
                     // Timeout to prevent making too many requests at once
-                    setTimeout(parseEmail, 1000+(1000*index), res.messages[index].id, markAsRead);
+                    setTimeout(parseEmail, 1000+(1000*index)
+                        , res.messages[index].id, markAsRead);
                 })(i);
             }
         } else {
@@ -79,7 +81,8 @@ function main (auth) {
  * Parses email and inserts or deletes an entry to/from the database
  *
  * @param {Object} messageId The id of a message to be parsed
- * @param {Function} callback The markAsRead function to be called after parsing completes
+ * @param {Function} callback The markAsRead function to be called after parsing
+ *  completes
  */
 function parseEmail(messageId, callback) {
     google.gmail('v1').users.messages.get({
@@ -93,14 +96,14 @@ function parseEmail(messageId, callback) {
         }
 
         // Check if the sender is Free Food Listserv
-        // if(result.payload.headers.find(x => x.name === "To") !== "freefood@princeton.edu")
-        if (typeof result.payload.headers.find(x => x.name === "Sender") === "undefined"
-        || result.payload.headers.find(x => x.name === "Sender").value !== "Free Food <freefood@princeton.edu>") {
+        sender = result.payload.headers.find(x => x.name === "Sender");
+        if (typeof sender === "undefined"
+        || sender.value !== "Free Food <freefood@princeton.edu>") {
             return;
         }
 
         entry = scraper.formatEmail(result, messageId);
-        saveImage(entry.image, messageId);
+        // saveImage(entry.image, messageId);
 
         // INSERT or DELETE entry
         if(scraper.getRequestType(entry.title+entry.body) == scraper.INSERT) {
@@ -153,11 +156,13 @@ function saveImage(image, messageId) {
         if(PROJECT_MODE == 'development') {
             // Give new name that won't conflict
             imageExtension = image.name.split('.').pop();
-            imageName = messageId + imageExtension;
+            imageName = messageId + '.' + imageExtension;
 
             // Create file
             // FIXME: Resize if too big
-            fs.writeFile(__dirname + '/' + imageName, imageData, function(err) {});    
+            fs.writeFile(__dirname + '/' + imageName, imageData, function(err) {
+                console.log(err);
+            });    
         }
     });
 }
