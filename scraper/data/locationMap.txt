@@ -678,3 +678,4 @@ plasma physics library,Furth Plasma Physics Library
 stokes library,Wallace Hall
 video library,Firestone Library
 ehub,34 Chambers Street
+1903 kitchen, 1903 Hall
