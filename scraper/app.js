@@ -96,14 +96,21 @@ function parseEmail(messageId, callback) {
         }
 
         // Check if the sender is Free Food Listserv
-        sender = result.payload.headers.find(x => x.name === "Sender");
-        if (typeof sender === "undefined"
-        || sender.value !== "Free Food <freefood@princeton.edu>") {
+        sender = result.payload.headers.find(x => x.name === 'Sender');
+        if (typeof sender === 'undefined'
+        || sender.value !== 'Free Food <freefood@princeton.edu>') {
             return;
         }
 
         entry = scraper.formatEmail(result, messageId);
         // saveImage(entry.image, messageId);
+
+        // In case of failure to parse location, return without marking email
+        // as read
+        if(entry.location == '') {
+            console.log('Parsing failed - messageId: ' + messageId);
+            return;
+        }
 
         // INSERT or DELETE entry
         if(scraper.getRequestType(entry.title+entry.body) == scraper.INSERT) {
