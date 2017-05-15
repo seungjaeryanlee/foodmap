@@ -45,9 +45,25 @@
         // content for a given offering object in the format returned by url
         // /offerings/.
         function makePopupContent(offering) {
-            css_class = "popup-content";
-            minutes_string = (offering.minutes > 60? '1 hour, '+(offering.minutes-60): offering.minutes) + (offering.minutes%60 == 1? ' minute old': ' minutes old');
-            return '<div class="' + css_class + '"><p><b>' + offering.location.name + '</b><br><i>'+ offering.title + '</i><br>' + minutes_string + '</p></div>';
+            ret = '<div class="' + "popup-content" + '"><p><b>' + offering.location.name + '</b>';
+            var realret = [];
+            realret.push(ret);
+            for (i = 0; i < offering.offerings.length; i++) {
+                minutes_string = (offering.offerings[i].minutes > 60? '1 hour, '+(offering.offerings[i].minutes-60): offering.offerings[i].minutes) + (offering.offerings[i].minutes%60 == 1? ' minute old': ' minutes old');
+                realret.push('<br><i>' + offering.offerings[i].title + '</i><br>' + minutes_string + '<br>');
+                realret.push('<p>' + offering.offerings[i].description + '</p><hr>');
+            }
+            return  realret;
+        }
+
+        function makeExtraContent(offering) {
+            ret = '<div class="' + "popup-content" + '"><p><b>' + offering.location.name + '</b><br>';
+            for (i = 0; i < offering.offerings.length; i++) {
+                minutes_string = (offering.offerings[i].minutes > 60? '1 hour, '+(offering.offerings[i].minutes-60): offering.offerings[i].minutes) + (offering.offerings[i].minutes%60 == 1? ' minute old': ' minutes old');
+                ret += '<i>' + offering.offerings[i].title + '</i><br>' + minutes_string + '</p>'
+                ret += '<br><p>' + offering.offerings[i].description + '</p>'
+            }
+            return  ret + '</div>';
         }
 
         $.ajax({
@@ -76,7 +92,7 @@
                         },
                         "properties": {
                             "popupContent": makePopupContent(response_offerings[i]),
-                            "extra": '<p>' + response_offerings[i].description + "</p>"
+                            "extra": ""//makeExtraContent(response_offerings[i])
                         },
                         "id": i
                     });
@@ -141,12 +157,18 @@
                 // Adds mouse hover/click listeners and sets the marker's popup window
                 // content. The parameter 'feature' passed in is one of the feature
                 // objects in 'places', defined in the last section.
-                var popupContent = feature.properties.popupContent;
+                var popupContent = feature.properties.popupContent[0];
+                for (i = 1; i < feature.properties.popupContent.length; i = i + 2)
+                    popupContent += feature.properties.popupContent[i];
                 layer.bindPopup(popupContent, {closeButton: false, autoPan: false});
                 layer.on({
                     'mouseover': onSetHover,
                     'mouseout': onRemoveHover,
-                    'click': function() { sidebar.setContent(feature.properties.popupContent + feature.properties.extra); sidebar.show(); }
+                    'click': function() { 
+                        var sidebarContent = feature.properties.popupContent[0];
+                        for (i = 1; i < feature.properties.popupContent.length; i++)
+                            sidebarContent += feature.properties.popupContent[i];
+                        sidebar.setContent(sidebarContent); sidebar.show(); }
                  });
             },
 

@@ -129,8 +129,8 @@ class OfferingsViewTests(TestCase):
 
     def test_offerings_valid(self):
         '''
-        Requests all of the most recent offerings (from each location with
-        an offering), and checks that we get back correctly formatted JSON.
+        Requests all of the recent offerings (from each location with an
+        offering), and checks that we get back correctly formatted JSON.
         '''
         # Make the request
         response = self.client.get(reverse('foodmap_app:offerings'))
@@ -139,42 +139,74 @@ class OfferingsViewTests(TestCase):
         except:
             self.fail('JSON response could not be parsed')
 
-        # Verify the response is correct
-        test_offerings = parsed_response
-        actual_offerings = [self.offering1A, self.offering1B]  # only most recent offerings should be returned
-        self.assertEqual(len(test_offerings), len(actual_offerings))  # has correct number of offerings
+        # Verify the response is correct -- only most recent offerings should be returned
+        test_response = parsed_response
+        actual_response = [
+            {
+                'location': {'name': self.locationA.name, 'lat': str(self.locationA.lat), 'lng': str(self.locationA.lng)},
+                'offerings': [
+                    {'title': offering.title, 'description': offering.description, 'minutes': (timezone.now() - offering.timestamp).seconds/60, 'tags': ''}
+                    for offering in [self.offering1A, self.offering2A]
+                ]
+            },
+            {
+                'location': {'name': self.locationB.name, 'lat': str(self.locationB.lat), 'lng': str(self.locationB.lng)},
+                'offerings': [
+                    {'title': offering.title, 'description': offering.description, 'minutes': (timezone.now() - offering.timestamp).seconds/60, 'tags': ''}
+                    for offering in [self.offering1B, self.offering2B]
+                ]
+            }
+        ]
 
-        # Sort test and actual offerings so they can be compared side-by-side
-        for i in range(0, len(test_offerings)):
-            self.assertIn('location', test_offerings[i].keys())
-            self.assertIn('name', test_offerings[i]['location'].keys())
-        test_offerings = sorted(test_offerings, cmp=lambda x, y: cmp(x['location']['name'], y['location']['name']))
-        actual_offerings = sorted(actual_offerings, cmp=lambda x, y: cmp(x.location.name, y.location.name))
+        self.assertEqual(len(test_response), len(actual_response))  # has correct number of locations
 
-        # Compare test offerings vs actual offerings
-        for i in range(0, len(actual_offerings)):
+        # Sort test and actual response by location, and by title within each
+        # location so they can be compared side-by-side
+        for entry in test_response:
+            self.assertIn('location', entry.keys())
+            self.assertIn('name', entry['location'].keys())
+
+            self.assertIn('offerings', entry.keys())
+            for offering in entry['offerings']:
+                self.assertIn('title', offering)
+        test_response = sorted(test_response, cmp=lambda x, y: cmp(x['location']['name'], y['location']['name']))
+        actual_response = sorted(actual_response, cmp=lambda x, y: cmp(x['location']['name'], y['location']['name']))
+
+        for i in range(0, len(test_response)):
+            test_response[i]['offerings'] = sorted(test_response[i]['offerings'], cmp=lambda x, y: cmp(x['title'], y['title']))
+            actual_response[i]['offerings'] = sorted(actual_response[i]['offerings'], cmp=lambda x, y: cmp(x['title'], y['title']))
+
+        # Compare test_response vs actual_response
+        for i in range(0, len(test_response)):
             # Has correct attributes
-            self.assertEqual(sorted(test_offerings[i].keys()), ['description', 'location', 'minutes', 'tags', 'title'])
+            self.assertEqual(sorted(test_response[i].keys()), sorted(actual_response[i].keys()))
 
-            # Has correct title and description
-            self.assertEqual(test_offerings[i]['title'], actual_offerings[i].title)
-            self.assertEqual(test_offerings[i]['description'], actual_offerings[i].description)
+            # location: has correct name, lat, lng
+            test_location = test_response[i]['location']
+            actual_location = actual_response[i]['location']
+            self.assertEqual(sorted(test_location.keys()), sorted(actual_location.keys()))
+            self.assertEqual(test_location['name'], actual_location['name'])
+            self.assertEqual(float(test_location['lat']), float(actual_location['lat']))
+            self.assertEqual(float(test_location['lng']), float(actual_location['lng']))
 
-            # Has correct minutes
-            approx_seconds = (timezone.now() - actual_offerings[i].timestamp).seconds
-            test_seconds = test_offerings[i]['minutes'] * 60
-            self.assertAlmostEqual(test_seconds, approx_seconds, delta=5)  # seconds should be within a small delta
+            # offerings
+            self.assertEqual(len(test_response[i]['offerings']), len(actual_response[i]['offerings']))
+            for j in range(0, len(test_response[i]['offerings'])):
+                test_offering = test_response[i]['offerings'][j]
+                actual_offering = actual_response[i]['offerings'][j]
 
-            # Has correct location
-            test_location = test_offerings[i]['location']
-            actual_location = actual_offerings[i].location
-            self.assertEqual(sorted(test_location.keys()), ['lat', 'lng', 'name']) # has correct attributes
-            self.assertEqual(test_location['name'], actual_location.name)
-            self.assertEqual(float(test_location['lat']), actual_location.lat)
-            self.assertEqual(float(test_location['lng']), actual_location.lng)
+                # Has correct attributes
+                self.assertEqual(sorted(test_offering.keys()), sorted(actual_offering.keys()))
 
-            # Has correct tags (none)
-            self.assertEqual(test_offerings[i]['tags'], '')
+                # Has correct title and description
+                self.assertEqual(test_offering['title'], actual_offering['title'])
+                self.assertEqual(test_offering['description'], actual_offering['description'])
+
+                # Has correct minutes
+                self.assertAlmostEqual(test_offering['minutes'], actual_offering['minutes'], delta=1)  # should be within a small delta
+
+                # Has correct tags
+                self.assertEqual(test_offering['tags'], actual_offering['tags'])
 
 
     def test_offerings_with_tags(self):
@@ -186,8 +218,7 @@ class OfferingsViewTests(TestCase):
         '''
         # Add tags to each offering
         actual_tags = ['kosher', 'gluten-free', 'peanut-free']
-        actual_offerings = [self.offering1A, self.offering1B]
-        for offering in actual_offerings:
+        for offering in [self.offering1A, self.offering1B, self.offering2A, self.offering2B]:
             for tag in actual_tags:
                 create_offering_tag(offering=offering, tag=tag).save()
 
@@ -199,20 +230,54 @@ class OfferingsViewTests(TestCase):
             self.fail('JSON response could not be parsed')
 
         # Verify that response has exactly the same tags
-        test_offerings = parsed_response
-        test_offerings = sorted(test_offerings, cmp=lambda x, y: cmp(x['location']['name'], y['location']['name']))
-        actual_offerings = sorted(actual_offerings, cmp=lambda x, y: cmp(x.location.name, y.location.name))
-        for i in range(0, len(actual_offerings)):
-            test_tags = sorted(test_offerings[i]['tags'].split(','))
-            actual_tags = sorted(actual_tags)
-            self.assertEqual(test_tags, actual_tags)
+        test_response = parsed_response
+        actual_response = [
+            {
+                'location': {'name': self.locationA.name, 'lat': str(self.locationA.lat), 'lng': str(self.locationA.lng)},
+                'offerings': [
+                    {'title': offering.title, 'description': offering.description, 'minutes': (timezone.now() - offering.timestamp).seconds/60, 'tags': 'kosher,gluten-free,peanut-free'}
+                    for offering in [self.offering1A, self.offering2A]
+                ]
+            },
+            {
+                'location': {'name': self.locationB.name, 'lat': str(self.locationB.lat), 'lng': str(self.locationB.lng)},
+                'offerings': [
+                    {'title': offering.title, 'description': offering.description, 'minutes': (timezone.now() - offering.timestamp).seconds/60, 'tags': 'kosher,gluten-free,peanut-free'}
+                    for offering in [self.offering1B, self.offering2B]
+                ]
+            }
+        ]
 
+        # Sort test and actual response by location, and by title within each
+        # location so they can be compared side-by-side
+        for entry in test_response:
+            self.assertIn('location', entry.keys())
+            self.assertIn('name', entry['location'].keys())
+
+            self.assertIn('offerings', entry.keys())
+            for offering in entry['offerings']:
+                self.assertIn('title', offering)
+        test_response = sorted(test_response, cmp=lambda x, y: cmp(x['location']['name'], y['location']['name']))
+        actual_response = sorted(actual_response, cmp=lambda x, y: cmp(x['location']['name'], y['location']['name']))
+
+        for i in range(0, len(test_response)):
+            test_response[i]['offerings'] = sorted(test_response[i]['offerings'], cmp=lambda x, y: cmp(x['title'], y['title']))
+            actual_response[i]['offerings'] = sorted(actual_response[i]['offerings'], cmp=lambda x, y: cmp(x['title'], y['title']))
+
+        # Compare tags between test_response and actual_response
+        for i in range(0, len(actual_response)):
+            for j in range(0, len(actual_response[i]['offerings'])):
+                test_offering = test_response[i]['offerings'][j]
+                actual_offering = actual_response[i]['offerings'][j]
+
+                test_tags = sorted(test_offering['tags'].split(','))
+                actual_tags = sorted(actual_offering['tags'].split(','))
+                self.assertEqual(test_tags, actual_tags)
 
     def test_offerings_timestamp_constraints(self):
         '''
-        Requests the most recent offerings and checks that they meet the
-        time constraints we impose: (1) all offerings are from 2 hours ago to
-        now; (2) no more than 1 offering per location.
+        Requests the recent offerings and checks that they meet the time
+        constraint we impose: all offerings are from 2 hours ago to now
         '''
         # Set timestamps of the offerings to just before, just after 2-hours
         # mark, and in future
@@ -230,20 +295,14 @@ class OfferingsViewTests(TestCase):
 
         # Make the request
         response = self.client.get(reverse('foodmap_app:offerings'))
-        test_offerings = json.loads(response.content)  # array of JSON objects, as specified in views.py
+        test_response = json.loads(response.content)  # array of JSON objects, as specified in views.py
 
-        # Check that no offering outside time range (approximately)
+        # Check that no offering is outside time range (approximately)
         epsilon = 2  # some leeway in the timestamp to account for delay between request and response
-        for offering in test_offerings:
-            self.assertTrue(offering['minutes'] < 120 + epsilon)
-            self.assertTrue(offering['minutes'] >= 0)
-
-        # Check that no location has more than 1 offering
-        locations_with_offerings = []
-        for offering in test_offerings:
-            self.assertNotIn(offering['location'], locations_with_offerings)
-            locations_with_offerings.append(offering['location'])
-
+        for entry in test_response:
+            for offering in entry['offerings']:
+                self.assertTrue(offering['minutes'] < 120 + epsilon)
+                self.assertTrue(offering['minutes'] >= 0)
 
     def test_offerings_with_empty_database(self):
         '''
@@ -757,14 +816,6 @@ class OfferingFormTests(TestCase):
         form = OfferingForm(data)
 
         self.assertFalse(form.is_valid())
-
-    @skipIf(True, 'Test not yet implemented')
-    def test_offering_form_redirects_to_submitted_page(self):
-        '''
-        Fill out a form in the browser and check that submitting it sends you
-        to the /submitted/ page.
-        '''
-        pass
 
     def test_offering_form_cannot_reach_submitted_page_without_submitting_a_form(self):
         '''

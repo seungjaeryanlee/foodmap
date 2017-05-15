@@ -1,5 +1,6 @@
 import datetime
 import json
+from collections import defaultdict
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.utils import timezone
@@ -71,10 +72,10 @@ def offerings(request):
     [
         {
             "location": {"name": "Frist Campus Center", "lat": "12.3456789", "lng": "12.3456789"},
-            "title": "Pizza!",
-            "description": "Come eat!",
-            "minutes": 15,
-            "tags": "kosher,gluten-free,peanut-free"
+            "offerings": [
+                {"title": "Pizza!", "description": "Come eat!", "minutes": 15, "tags": "kosher,gluten-free"},
+                ...
+            ]
         },
         ...
     ]
@@ -86,32 +87,34 @@ def offerings(request):
     if len(offerings) == 0:
         return HttpResponse(json.dumps([]))
 
-    # If any location has more than one offering, filter out the older ones
-    most_recent_offerings = []
-    locations_with_offerings = []
+    # Accumulate list of offerings by location
+    offerings_by_location = defaultdict(lambda: []) # maps locations to a list of offerings there
     for offering in offerings:
-        if offering.location in locations_with_offerings:
-           continue  # newest offering is already in most_recent_offerings
-
         # Get this offering's tags, format into comma-separated list
         tags = OfferingTag.objects.filter(offering=offering)
         tags_str = ','.join([str(tag) for tag in tags])
 
-        most_recent_offerings.append({
-            'location': {
-                'name': offering.location.name,
-                'lat': str(offering.location.lat),
-                'lng': str(offering.location.lng)
-            },
+        offerings_by_location[offering.location].append({
             'title': offering.title,
             'description': offering.description,
             'minutes': int((now - offering.timestamp).seconds / 60),
             'tags': tags_str
         })
-        locations_with_offerings.append(offering.location)
+
+    # Attach other location information to each entry in the dict
+    response = []  # will contain final response as Python data type
+    for location, offerings in offerings_by_location.iteritems():
+        response.append({
+            'location': {
+                'name': location.name,
+                'lat': str(location.lat),
+                'lng': str(location.lng)
+            },
+            'offerings': offerings
+        })
 
     # Json-ify and return
-    return HttpResponse(json.dumps(most_recent_offerings))
+    return HttpResponse(json.dumps(response))
 
 
 def test(request):
