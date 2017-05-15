@@ -53,17 +53,7 @@
                 realret.push('<br><i>' + offering.offerings[i].title + '</i><br>' + minutes_string + '<br>');
                 realret.push('<p>' + offering.offerings[i].description + '</p><hr>');
             }
-            return  realret;
-        }
-
-        function makeExtraContent(offering) {
-            ret = '<div class="' + "popup-content" + '"><p><b>' + offering.location.name + '</b><br>';
-            for (i = 0; i < offering.offerings.length; i++) {
-                minutes_string = (offering.offerings[i].minutes > 60? '1 hour, '+(offering.offerings[i].minutes-60): offering.offerings[i].minutes) + (offering.offerings[i].minutes%60 == 1? ' minute old': ' minutes old');
-                ret += '<i>' + offering.offerings[i].title + '</i><br>' + minutes_string + '</p>'
-                ret += '<br><p>' + offering.offerings[i].description + '</p>'
-            }
-            return  ret + '</div>';
+            return realret;
         }
 
         $.ajax({
@@ -91,8 +81,7 @@
                             ]
                         },
                         "properties": {
-                            "popupContent": makePopupContent(response_offerings[i]),
-                            "extra": ""//makeExtraContent(response_offerings[i])
+                            "popupContent": makePopupContent(response_offerings[i])
                         },
                         "id": i
                     });
