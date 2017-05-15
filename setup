@@ -1,0 +1,124 @@
+#!/bin/bash
+#
+# setup
+# Author: Michael Friedman
+#
+# Sets up your environment with the necessary dependencies to work on this
+# project, and initializes the database. As more dependencies become required,
+# update this script to install them.
+#
+# Run setup with two arguments: one to specify which OS you're on
+# (mac/ubuntu require different commands to install some packages),
+# and one to specify which part of the setup process you want to
+# run:
+# os
+#   mac        install packages for mac
+#   ubuntu     install packages for ubuntu
+#
+# mode
+#   all        run everything
+#   python     only install Python packages
+#   node       only install Node JS packages
+#   db         only set up database
+
+# Check for help command
+usage="usage:
+./setup os mode
+./setup help"
+if [ $# -eq 1 ] && [ "$1" == "help" ]; then
+  echo "$usage"
+  echo
+  echo "Run setup with two arguments: one to specify which OS you're on
+(mac/ubuntu require different commands to install some packages),
+and one to specify which part of the setup process you want to
+run:
+os
+  mac        install packages for mac
+  ubuntu     install packages for ubuntu
+
+mode
+  all        run everything
+  python     only install Python packages
+  node       only install Node JS packages
+  db         only set up database"
+  exit
+fi
+
+# Validate usage
+if [ $# -ne 2 ]; then
+  echo "$usage"
+  exit
+elif [ "$1" != "mac" ] && [ "$1" != "ubuntu" ]; then
+  echo "$usage"
+  exit
+elif [ "$2" != "all" ] && [ "$2" != "python" ] && [ "$2" != "node" ] && [ "$2" != "db" ]; then
+  echo "$usage"
+  exit
+fi
+os=$1
+mode=$2
+
+#-------------------------------------------------------------------------------
+
+# Set up python virtual environment
+if [ ! -d "venv" ]; then
+  echo "Setting up Python virutal environment..."
+  virtualenv venv
+
+  # Arrange for 'activate' script in the virtual environment to also set
+  # DJANGO_SETTINGS_MODULE and PROJECT_MODE environment variables. These tell
+  # the Django project and the scraper whether to use development settings or
+  # production settings. *Set to development settings by default.*
+  cd venv/bin/
+  echo 'export DJANGO_SETTINGS_MODULE="foodmap_proj.settings.development"' >> activate
+  echo 'export PROJECT_MODE="development"' >> activate
+  cd ../..
+
+  echo "Done!"
+  echo
+fi
+source venv/bin/activate
+
+# Install dependencies
+if [ "$mode" == "all" ] || [ "$mode" == "node" ]; then
+  echo "Installing Node JS dependencies..."
+  if [ "$os" == "mac" ]; then
+    brew install node
+  else
+    echo "-----------------------------------------------------------------"
+    echo " The following commands require root. Please enter root password "
+    echo " to run them: "
+    echo "   curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -"
+    echo "   sudo apt-get install -y nodejs  "
+    echo "-----------------------------------------------------------------"
+    # Copy all commands requiring sudo into the message above as well.
+    curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+  fi
+  npm install --only=prod
+  npm install --only=dev
+  echo "Done!"
+  echo
+fi
+
+if [ "$mode" == "all" ] || [ "$mode" == "python" ]; then
+  echo "Installing Python dependencies..."
+  pip install Django==1.10.6
+  pip install Pillow==4.0.0
+  pip install selenium==3.3.1
+  echo "Done!"
+  echo
+fi
+
+# Set up database
+if [ "$mode" == "all" ] || [ "$mode" == "db" ]; then
+  echo "Setting up database..."
+  python setup_database.py
+  echo "Done!"
+  echo
+fi
+
+deactivate
+
+echo "Remember to activate the Python virtual environment by running 'source venv/bin/activate' to use the installed dependencies. Run 'deactivate' to disable the environment when finished working."
+

@@ -1,0 +1,3 @@
+Friend [0-9]+,Friend Center
+Lewis [0-9]+,Lewis Library
+Fine [0-9]+,Fine Hall
