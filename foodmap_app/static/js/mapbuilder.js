@@ -48,10 +48,10 @@
             ret = '<div class="' + "popup-content" + '"><p><b>' + offering.location.name + '</b>';
             var realret = [];
             realret.push(ret);
-            for (i = 0; i < offering.offerings.length; i++) {
-                minutes_string = (offering.offerings[i].minutes > 60? '1 hour, '+(offering.offerings[i].minutes-60): offering.offerings[i].minutes) + (offering.offerings[i].minutes%60 == 1? ' minute old': ' minutes old');
-                realret.push('<br><i>' + offering.offerings[i].title + '</i><br>' + minutes_string + '<br>');
-                realret.push('<p>' + offering.offerings[i].description + '</p><hr>');
+            for (var j = 0; j < offering.offerings.length; j++) {
+                minutes_string = (offering.offerings[j].minutes > 60? '1 hour, '+(offering.offerings[j].minutes-60): offering.offerings[j].minutes) + (offering.offerings[j].minutes%60 == 1? ' minute old': ' minutes old');
+                realret.push('<br><i>' + offering.offerings[j].title + '</i><br>' + minutes_string + '<br>');
+                realret.push('<p>' + offering.offerings[j].description + '</p><hr>');
             }
             return realret;
         }
