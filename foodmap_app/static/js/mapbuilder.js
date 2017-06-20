@@ -41,19 +41,31 @@
             "error": false   // this is set to true to indicate a failure to retrieve offerings
         };
 
-        // Helper function: Returns HTML for a div.popup-content with the popup
-        // content for a given offering object in the format returned by url
-        // /offerings/.
-        function makePopupContent(offering) {
-            ret = '<div class="' + "popup-content" + '"><p><b>' + offering.location.name + '</b>';
-            var realret = [];
-            realret.push(ret);
-            for (var j = 0; j < offering.offerings.length; j++) {
-                minutes_string = (offering.offerings[j].minutes > 60? '1 hour, '+(offering.offerings[j].minutes-60): offering.offerings[j].minutes) + (offering.offerings[j].minutes%60 == 1? ' minute old': ' minutes old');
-                realret.push('<br><i>' + offering.offerings[j].title + '</i><br>' + minutes_string + '<br>');
-                realret.push('<p>' + offering.offerings[j].description + '</p><hr>');
+        // Helper function: Returns HTML that formats the *popup* content for
+        // 'entry', where 'entry' is one of the objects returned by the
+        // /offerings/ url. Places this HTML inside a div.popup-content.
+        function makePopupContent(entry) {
+            popupContent = '<div class="popup-content"><b>' + entry.location.name + '</b>';
+            for (var i = 0; i < entry.offerings.length; i++) {
+                // Append a <p> for each offering. Only show minutes and title
+                minutes_string = (entry.offerings[i].minutes > 60? '1 hour, '+(entry.offerings[i].minutes-60): entry.offerings[i].minutes) + (entry.offerings[i].minutes%60 == 1? ' minute old': ' minutes old');
+                popupContent += '<p><i>' + entry.offerings[i].title + '</i><br>' + minutes_string + '</p>';
             }
-            return realret;
+            return popupContent;
+        }
+
+        // Helper function: Returns HTML that formats the *sidebar* content for
+        // 'entry', where 'entry' is one of the objects returned by the
+        // /offerings/ url. Places this HTML inside a div.sidebar-content.
+        function makeSidebarContent(entry) {
+            sidebarContent = '<div class="sidebar-content"><b>' + entry.location.name + '</b>';
+            for (var i = 0; i < entry.offerings.length; i++) {
+                // Append two <p>'s for each offering: one for minutes and title, one for description.
+                minutes_string = (entry.offerings[i].minutes > 60? '1 hour, '+(entry.offerings[i].minutes-60): entry.offerings[i].minutes) + (entry.offerings[i].minutes%60 == 1? ' minute old': ' minutes old');
+                sidebarContent += '<p><i>' + entry.offerings[i].title + '</i><br>' + minutes_string + '</p>';
+                sidebarContent += '<p>' + entry.offerings[i].description + '</p><hr>';
+            }
+            return sidebarContent;
         }
 
         $.ajax({
@@ -64,12 +76,13 @@
                 // Parse JSON response and fill in places.features with location names
                 // and GPS coordinates
                 var response_offerings = JSON.parse(result);
-                for (i = 0; i < response_offerings.length; i++) {
-
+                for (var i = 0; i < response_offerings.length; i++) {
+                    entry = response_offerings[i];
 
                     // Each feature has mostly standard parameters. We set 'coordinates'
                     // (GPS coordinates), 'popupContent' (text that appears in a
-                    // popup window), and 'id' (which just needs to be a unique integer).
+                    // popup window), 'sidebarContent' (text that appears in the
+                    // sidebar), and 'id' (which just needs to be a unique integer).
                     offerings.features.push({
                         "type": "Feature",
                         "geometry": {
@@ -77,11 +90,12 @@
                             "coordinates": [
                                 // NOTE: The format for the coordinates is LONGITUDE, LATITUDE
                                 // (backwards from the norm). This is DUMB! But ugh such is life.
-                                parseFloat(response_offerings[i].location.lng), parseFloat(response_offerings[i].location.lat)
+                                parseFloat(entry.location.lng), parseFloat(entry.location.lat)
                             ]
                         },
                         "properties": {
-                            "popupContent": makePopupContent(response_offerings[i])
+                            "popupContent": makePopupContent(entry),
+                            "sidebarContent": makeSidebarContent(entry)
                         },
                         "id": i
                     });
@@ -146,18 +160,16 @@
                 // Adds mouse hover/click listeners and sets the marker's popup window
                 // content. The parameter 'feature' passed in is one of the feature
                 // objects in 'places', defined in the last section.
-                var popupContent = feature.properties.popupContent[0];
-                for (i = 1; i < feature.properties.popupContent.length; i = i + 2)
-                    popupContent += feature.properties.popupContent[i];
+                var popupContent = feature.properties.popupContent;
                 layer.bindPopup(popupContent, {closeButton: false, autoPan: false});
                 layer.on({
                     'mouseover': onSetHover,
                     'mouseout': onRemoveHover,
-                    'click': function() { 
-                        var sidebarContent = feature.properties.popupContent[0];
-                        for (i = 1; i < feature.properties.popupContent.length; i++)
-                            sidebarContent += feature.properties.popupContent[i];
-                        sidebar.setContent(sidebarContent); sidebar.show(); }
+                    'click': function() {
+                        var sidebarContent = feature.properties.sidebarContent;
+                        sidebar.setContent(sidebarContent);
+                        sidebar.show();
+                    }
                  });
             },
 
